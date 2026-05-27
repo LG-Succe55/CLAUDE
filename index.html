@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Design Transformation — From Tools to an Intelligent Design Ecosystem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080a;
+  --bg-2:#0c0e12;
+  --ink:#eceae4;
+  --ink-dim:#8a8a86;
+  --ink-faint:#4a4a48;
+  --line:rgba(236,234,228,.08);
+  --line-2:rgba(236,234,228,.14);
+  --copper:#c79566;
+  --copper-2:#e8b988;
+  --steel:#5d8aa8;
+  --emerald:#6fae8e;
+  --amber:#e8a056;
+  --crimson:#b85c5c;
+  --shadow:0 30px 80px -20px rgba(0,0,0,.65);
+  --serif:"Instrument Serif", "Times New Roman", serif;
+  --sans:"Inter","Helvetica Neue",system-ui,sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--ink);
+  font-weight:300;
+  line-height:1.55;
+  letter-spacing:-.005em;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+::selection{background:var(--copper);color:#0a0a0a}
+
+/* ───────── Background layers ───────── */
+.grain{
+  position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.07;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+  mix-blend-mode:overlay;
+}
+.vignette{
+  position:fixed;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(120% 80% at 50% 0%, transparent 40%, rgba(0,0,0,.55) 100%);
+}
+
+/* ───────── Nav ───────── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 40px;
+  backdrop-filter:saturate(140%) blur(14px);
+  -webkit-backdrop-filter:saturate(140%) blur(14px);
+  background:linear-gradient(to bottom, rgba(7,8,10,.7), rgba(7,8,10,.0));
+  border-bottom:1px solid transparent;
+  transition:border-color .4s, background .4s;
+}
+.nav.scrolled{background:rgba(7,8,10,.78);border-bottom-color:var(--line)}
+.brand{display:flex;align-items:center;gap:12px;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim)}
+.brand b{color:var(--ink);font-weight:500}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--copper);box-shadow:0 0 14px var(--copper)}
+.nav-links{display:flex;gap:28px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim)}
+.nav-links a{color:inherit;text-decoration:none;transition:color .2s;position:relative}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a.active{color:var(--copper)}
+.nav-cta{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);padding:10px 18px;border:1px solid var(--line-2);border-radius:999px}
+
+/* progress bar */
+.scroll-bar{position:fixed;top:0;left:0;height:1px;background:linear-gradient(90deg,var(--copper),var(--copper-2));z-index:60;width:0%}
+
+/* ───────── Sections ───────── */
+section{position:relative;z-index:3;padding:160px 8vw;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+.section-label{
+  font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--copper);margin-bottom:28px;display:inline-flex;align-items:center;gap:14px;
+}
+.section-label::before{content:"";width:36px;height:1px;background:var(--copper);opacity:.7}
+.section-num{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.2em}
+
+h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:-.02em;line-height:1.02}
+h1{font-size:clamp(48px, 8vw, 128px)}
+h2{font-size:clamp(40px, 5.8vw, 88px)}
+h3{font-size:clamp(22px, 2.2vw, 32px)}
+.lede{font-size:clamp(16px,1.3vw,20px);max-width:62ch;color:var(--ink-dim);font-weight:300;line-height:1.6}
+em{font-style:italic;color:var(--copper-2)}
+
+/* Reveal animation */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal-stagger > *{opacity:0;transform:translateY(20px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal-stagger.in > *{opacity:1;transform:none}
+.reveal-stagger.in > *:nth-child(1){transition-delay:0s}
+.reveal-stagger.in > *:nth-child(2){transition-delay:.08s}
+.reveal-stagger.in > *:nth-child(3){transition-delay:.16s}
+.reveal-stagger.in > *:nth-child(4){transition-delay:.24s}
+.reveal-stagger.in > *:nth-child(5){transition-delay:.32s}
+.reveal-stagger.in > *:nth-child(6){transition-delay:.40s}
+
+/* ───────── 1. Hero ───────── */
+.hero{padding-top:200px}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(to right, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(80% 60% at 50% 40%, #000 30%, transparent 80%);
+  -webkit-mask-image:radial-gradient(80% 60% at 50% 40%, #000 30%, transparent 80%);
+  opacity:.55;z-index:0;
+}
+.hero-glow{
+  position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);
+  width:1100px;height:1100px;border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle, rgba(199,149,102,.18), rgba(199,149,102,0) 60%);
+  filter:blur(20px);
+  animation:pulseGlow 8s ease-in-out infinite;
+}
+@keyframes pulseGlow{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}}
+.hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;gap:38px}
+.hero-meta{display:flex;gap:40px;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-dim)}
+.hero-meta span b{color:var(--copper);font-weight:400}
+.hero h1 .line{display:block;overflow:hidden}
+.hero h1 .line span{display:inline-block;transform:translateY(105%);transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.hero.in h1 .line span{transform:none}
+.hero h1 .line:nth-child(2) span{transition-delay:.1s}
+.hero h1 .line:nth-child(3) span{transition-delay:.2s}
+.hero h1 em{display:inline-block}
+.hero-sub{display:flex;align-items:flex-end;justify-content:space-between;gap:60px;margin-top:30px}
+.hero-sub .lede{flex:1;max-width:48ch}
+.hero-cta{
+  display:inline-flex;align-items:center;gap:14px;
+  color:var(--ink);text-decoration:none;
+  border:1px solid var(--line-2);padding:18px 28px;border-radius:999px;
+  font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+  transition:border-color .3s, color .3s, background .3s;
+  white-space:nowrap;
+}
+.hero-cta:hover{border-color:var(--copper);color:var(--copper)}
+.hero-cta .arrow{transition:transform .3s}
+.hero-cta:hover .arrow{transform:translateX(6px)}
+.scroll-cue{
+  position:absolute;bottom:50px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-dim);
+  display:flex;flex-direction:column;align-items:center;gap:14px;z-index:5;
+}
+.scroll-cue::after{content:"";width:1px;height:40px;background:linear-gradient(to bottom, var(--copper), transparent);animation:scrollDown 2s ease-in-out infinite}
+@keyframes scrollDown{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ───────── 2. Not Waiting ───────── */
+.not-waiting-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-top:80px}
+.stat-card{
+  border:1px solid var(--line);border-radius:2px;padding:36px 32px;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  transition:border-color .4s, transform .4s;
+  position:relative;overflow:hidden;
+}
+.stat-card::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg, transparent 40%, rgba(199,149,102,.06) 50%, transparent 60%);transform:translateX(-100%);transition:transform .8s}
+.stat-card:hover{border-color:var(--copper);transform:translateY(-4px)}
+.stat-card:hover::before{transform:translateX(100%)}
+.stat-num{font-family:var(--serif);font-size:84px;line-height:1;color:var(--copper);font-weight:400}
+.stat-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-top:18px}
+.stat-desc{margin-top:14px;color:var(--ink);font-size:15px;max-width:34ch}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.tools-list{display:flex;flex-direction:column;gap:0}
+.tool-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 0;border-bottom:1px solid var(--line);
+  transition:padding .3s, border-color .3s;
+}
+.tool-row:hover{padding-left:18px;border-color:var(--copper)}
+.tool-name{font-size:16px;color:var(--ink)}
+.tool-tag{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);padding:6px 12px;border:1px solid var(--copper);border-radius:999px;opacity:.85}
+.tool-row .tool-meta{font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.1em}
+
+/* ───────── 3. Friction ───────── */
+.friction-bg{
+  position:absolute;inset:0;z-index:0;opacity:.4;pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 20% 30%, rgba(184,92,92,.12), transparent 60%),
+    radial-gradient(50% 40% at 80% 70%, rgba(199,149,102,.08), transparent 60%);
+}
+.friction-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:80px}
+.friction-card{
+  border:1px solid var(--line);padding:38px 32px;border-radius:2px;
+  background:rgba(12,14,18,.6);
+  position:relative;overflow:hidden;transition:border-color .4s, transform .4s;
+  min-height:280px;display:flex;flex-direction:column;
+}
+.friction-card:hover{border-color:var(--crimson);transform:translateY(-4px)}
+.friction-card .idx{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.2em;margin-bottom:24px}
+.friction-card h3{margin-bottom:18px}
+.friction-card p{color:var(--ink-dim);font-size:14px;line-height:1.7}
+.friction-card .pulse{
+  position:absolute;top:32px;right:32px;width:8px;height:8px;border-radius:50%;
+  background:var(--crimson);box-shadow:0 0 18px var(--crimson);
+  animation:pulseRed 2.4s ease-in-out infinite;
+}
+@keyframes pulseRed{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ───────── 4. AI-Assisted Workflow ───────── */
+.workflow-stage{display:flex;gap:8px;margin-top:80px;align-items:stretch;overflow:hidden;border-radius:2px;border:1px solid var(--line)}
+.stage{
+  flex:1;padding:36px 28px;background:rgba(12,14,18,.6);
+  cursor:pointer;transition:flex .6s cubic-bezier(.2,.7,.2,1), background .4s;
+  display:flex;flex-direction:column;gap:18px;position:relative;min-height:380px;
+  border-right:1px solid var(--line);
+}
+.stage:last-child{border-right:none}
+.stage:hover, .stage.active{flex:2.2;background:linear-gradient(180deg, rgba(199,149,102,.05), transparent)}
+.stage .step{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--copper);text-transform:uppercase}
+.stage h3{font-size:24px;color:var(--ink)}
+.stage .ai-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--copper-2);padding:5px 10px;border:1px solid var(--copper);border-radius:2px;
+  align-self:flex-start;opacity:.85;
+}
+.stage .ai-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);box-shadow:0 0 10px var(--copper)}
+.stage p{color:var(--ink-dim);font-size:13px;line-height:1.7;opacity:0;transition:opacity .4s .15s}
+.stage:hover p, .stage.active p{opacity:1}
+.stage .arrow{
+  margin-top:auto;font-family:var(--mono);font-size:11px;color:var(--ink-faint);
+  display:flex;justify-content:space-between;letter-spacing:.15em;
+}
+
+/* ───────── 5. 3D Future ───────── */
+.future-3d{display:grid;grid-template-columns:1.1fr 1fr;gap:80px;align-items:center;margin-top:80px}
+.cube-stage{
+  position:relative;height:520px;display:flex;align-items:center;justify-content:center;
+  perspective:1400px;
+}
+.cube{
+  width:280px;height:280px;position:relative;transform-style:preserve-3d;
+  animation:spinCube 24s linear infinite;
+}
+@keyframes spinCube{
+  from{transform:rotateX(-18deg) rotateY(0)}
+  to{transform:rotateX(-18deg) rotateY(360deg)}
+}
+.cube .face{
+  position:absolute;inset:0;border:1px solid var(--copper);
+  background:linear-gradient(135deg, rgba(199,149,102,.08), rgba(199,149,102,.02));
+  backdrop-filter:blur(2px);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-2);
+  box-shadow:inset 0 0 60px rgba(199,149,102,.12);
+}
+.cube .face.f{transform:translateZ(140px)}
+.cube .face.b{transform:rotateY(180deg) translateZ(140px)}
+.cube .face.l{transform:rotateY(-90deg) translateZ(140px)}
+.cube .face.r{transform:rotateY(90deg) translateZ(140px)}
+.cube .face.t{transform:rotateX(90deg) translateZ(140px)}
+.cube .face.bo{transform:rotateX(-90deg) translateZ(140px)}
+.cube-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.ring{
+  position:absolute;border:1px solid var(--line-2);border-radius:50%;
+  border-top-color:var(--copper);
+}
+.ring.r1{width:440px;height:440px;animation:rotateRing 14s linear infinite}
+.ring.r2{width:360px;height:360px;animation:rotateRing 9s linear infinite reverse;border-top-color:transparent;border-right-color:var(--copper)}
+.ring.r3{width:520px;height:520px;animation:rotateRing 22s linear infinite;border-top-color:transparent;border-left-color:var(--copper-2)}
+@keyframes rotateRing{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.cube-tags{position:absolute;inset:0;pointer-events:none}
+.cube-tag{
+  position:absolute;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink-dim);padding:6px 10px;border:1px solid var(--line-2);background:rgba(7,8,10,.7);border-radius:2px;
+}
+.cube-tag.t1{top:14%;left:6%}
+.cube-tag.t2{top:30%;right:4%;color:var(--copper)}
+.cube-tag.t3{bottom:24%;left:2%}
+.cube-tag.t4{bottom:10%;right:14%}
+
+.future-list{display:flex;flex-direction:column;gap:8px;margin-top:36px}
+.future-row{
+  display:grid;grid-template-columns:60px 1fr auto;align-items:center;gap:24px;
+  padding:22px 0;border-bottom:1px solid var(--line);transition:padding .3s, border-color .3s;
+}
+.future-row:hover{padding-left:14px;border-color:var(--copper)}
+.future-row .icon{
+  width:40px;height:40px;border:1px solid var(--copper);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:var(--copper);
+  font-family:var(--mono);font-size:13px;
+}
+.future-row h3{font-size:20px;color:var(--ink);font-family:var(--sans);font-weight:400;letter-spacing:-.01em}
+.future-row p{font-size:13px;color:var(--ink-dim);margin-top:4px}
+.future-row .stat{font-family:var(--mono);font-size:11px;color:var(--copper);letter-spacing:.15em}
+
+/* ───────── 6. Agentic Ecosystem ───────── */
+.ecosystem-wrap{margin-top:80px;display:grid;grid-template-columns:1fr;gap:40px}
+.node-canvas{
+  position:relative;width:100%;height:640px;
+  border:1px solid var(--line);border-radius:2px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(199,149,102,.05), transparent 60%),
+    linear-gradient(180deg, rgba(12,14,18,.8), rgba(7,8,10,.9));
+  overflow:hidden;
+}
+.node-canvas svg{position:absolute;inset:0;width:100%;height:100%}
+.node-legend{
+  display:flex;flex-wrap:wrap;gap:24px;font-family:var(--mono);font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);
+}
+.legend-item{display:flex;align-items:center;gap:10px}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* ───────── 7 & 8. Agent cards ───────── */
+.agent-section{display:grid;grid-template-columns:1.05fr 1fr;gap:80px;align-items:center;margin-top:60px}
+.agent-section.reverse{grid-template-columns:1fr 1.05fr}
+.agent-section.reverse .agent-visual{order:2}
+.agent-copy h2{margin-bottom:24px}
+.agent-copy .lede{margin-bottom:32px}
+.agent-attrs{display:flex;flex-direction:column;gap:14px}
+.attr{
+  display:grid;grid-template-columns:100px 1fr;gap:24px;align-items:start;
+  padding:18px 0;border-top:1px solid var(--line);
+}
+.attr:last-child{border-bottom:1px solid var(--line)}
+.attr-label{font-family:var(--mono);font-size:11px;color:var(--copper);letter-spacing:.2em;text-transform:uppercase;padding-top:2px}
+.attr-text{color:var(--ink);font-size:15px;line-height:1.65}
+.attr-text small{display:block;color:var(--ink-dim);font-size:13px;margin-top:4px}
+
+.agent-visual{
+  position:relative;height:520px;border:1px solid var(--line);border-radius:2px;
+  background:
+    radial-gradient(60% 50% at 50% 40%, rgba(199,149,102,.08), transparent 70%),
+    linear-gradient(180deg, rgba(12,14,18,.8), rgba(7,8,10,.95));
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.agent-orb{
+  position:relative;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(199,149,102,.4), rgba(199,149,102,.05) 60%);
+  box-shadow:0 0 80px rgba(199,149,102,.25), inset 0 0 60px rgba(199,149,102,.1);
+  animation:orbPulse 5s ease-in-out infinite;
+}
+@keyframes orbPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.agent-orb::before, .agent-orb::after{
+  content:"";position:absolute;inset:-30px;border-radius:50%;
+  border:1px solid var(--line-2);
+}
+.agent-orb::after{inset:-70px;border-color:rgba(199,149,102,.25);border-style:dashed;animation:rotateRing 30s linear infinite}
+.agent-data{
+  position:absolute;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-dim);padding:8px 12px;border:1px solid var(--line-2);background:rgba(7,8,10,.85);border-radius:2px;
+  white-space:nowrap;
+}
+.agent-data.d1{top:14%;left:8%}
+.agent-data.d2{top:22%;right:6%;color:var(--copper);border-color:var(--copper)}
+.agent-data.d3{bottom:18%;left:5%}
+.agent-data.d4{bottom:10%;right:12%}
+.agent-data.d5{top:50%;right:0;transform:translate(50%,-50%);color:var(--steel);border-color:rgba(93,138,168,.4)}
+
+/* business agent variant */
+.agent-section.business .agent-orb{
+  background:radial-gradient(circle at 30% 30%, rgba(93,138,168,.4), rgba(93,138,168,.05) 60%);
+  box-shadow:0 0 80px rgba(93,138,168,.25), inset 0 0 60px rgba(93,138,168,.1);
+}
+.agent-section.business .agent-orb::after{border-color:rgba(93,138,168,.25)}
+.agent-section.business .attr-label{color:var(--steel)}
+.agent-section.business .agent-data.d2{color:var(--steel);border-color:var(--steel)}
+
+/* ───────── 9. Future Org ───────── */
+.org-wrap{margin-top:80px;display:grid;grid-template-columns:repeat(4, 1fr);gap:18px}
+.org-col{
+  border:1px solid var(--line);padding:32px 24px;background:rgba(12,14,18,.6);
+  border-radius:2px;position:relative;overflow:hidden;
+  transition:border-color .4s, transform .4s;min-height:340px;display:flex;flex-direction:column;gap:18px;
+}
+.org-col:hover{border-color:var(--copper);transform:translateY(-4px)}
+.org-col .layer{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--copper)}
+.org-col h3{font-size:22px}
+.org-col ul{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.org-col li{font-size:13px;color:var(--ink-dim);padding-left:18px;position:relative;line-height:1.55}
+.org-col li::before{content:"";position:absolute;left:0;top:9px;width:8px;height:1px;background:var(--copper)}
+.org-col .count{
+  margin-top:auto;font-family:var(--serif);font-size:48px;color:var(--copper);line-height:1;
+}
+
+/* ───────── 10. Closing ───────── */
+.closing{text-align:center;align-items:center;padding:200px 8vw}
+.closing .lede{margin:40px auto 0;text-align:center}
+.closing-cta{margin-top:60px;display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+.closing-mark{
+  margin:0 auto 60px;width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle, rgba(199,149,102,.4), transparent 70%);
+  box-shadow:0 0 60px rgba(199,149,102,.3);
+  display:flex;align-items:center;justify-content:center;
+}
+.closing-mark::after{content:"";width:14px;height:14px;border-radius:50%;background:var(--copper);box-shadow:0 0 24px var(--copper)}
+
+/* ───────── Footer ───────── */
+footer{
+  position:relative;z-index:3;border-top:1px solid var(--line);
+  padding:40px 8vw;display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);
+}
+footer .brand{color:var(--ink-faint)}
+footer .brand b{color:var(--ink-dim)}
+
+/* ───────── Responsive ───────── */
+@media (max-width: 1024px){
+  .nav-links{display:none}
+  section{padding:120px 6vw}
+  .not-waiting-grid{grid-template-columns:1fr;gap:40px}
+  .friction-grid{grid-template-columns:1fr}
+  .workflow-stage{flex-direction:column}
+  .stage{min-height:auto}
+  .stage:hover, .stage.active{flex:1}
+  .stage p{opacity:1}
+  .future-3d{grid-template-columns:1fr;gap:40px}
+  .cube-stage{height:420px}
+  .agent-section, .agent-section.reverse{grid-template-columns:1fr;gap:40px}
+  .agent-section.reverse .agent-visual{order:0}
+  .org-wrap{grid-template-columns:1fr 1fr}
+  .hero-sub{flex-direction:column;align-items:flex-start}
+  .hero-meta{flex-wrap:wrap;gap:18px}
+  .node-canvas{height:480px}
+}
+@media (max-width: 640px){
+  .nav{padding:18px 24px}
+  .nav-cta{display:none}
+  section{padding:100px 6vw}
+  .org-wrap{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr}
+  .stat-num{font-size:64px}
+  .node-canvas{height:420px}
+  .cube{width:200px;height:200px}
+  .cube .face.f{transform:translateZ(100px)}
+  .cube .face.b{transform:rotateY(180deg) translateZ(100px)}
+  .cube .face.l{transform:rotateY(-90deg) translateZ(100px)}
+  .cube .face.r{transform:rotateY(90deg) translateZ(100px)}
+  .cube .face.t{transform:rotateX(90deg) translateZ(100px)}
+  .cube .face.bo{transform:rotateX(-90deg) translateZ(100px)}
+}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="vignette"></div>
+<div class="scroll-bar" id="bar"></div>
+
+<!-- ─── NAV ─── -->
+<nav class="nav" id="nav">
+  <div class="brand"><span class="brand-dot"></span><span>Product Design Office · <b>Transformation</b></span></div>
+  <div class="nav-links">
+    <a href="#hero" data-link="hero">Overview</a>
+    <a href="#workflow" data-link="workflow">Workflow</a>
+    <a href="#ecosystem" data-link="ecosystem">Ecosystem</a>
+    <a href="#agents" data-link="agents">Agents</a>
+    <a href="#org" data-link="org">Organization</a>
+  </div>
+  <a class="nav-cta" href="#closing">Begin</a>
+</nav>
+
+<!-- ─── 1. HERO ─── -->
+<section class="hero reveal" id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-meta">
+      <span>Volume <b>01</b> · Executive Briefing</span>
+      <span>Confidential · Senior Leadership</span>
+      <span>Quarter <b>Q2 / 2026</b></span>
+    </div>
+    <h1>
+      <span class="line"><span>Design</span></span>
+      <span class="line"><span>Transformation.</span></span>
+      <span class="line"><span><em>From tools to ecosystem.</em></span></span>
+    </h1>
+    <div class="hero-sub">
+      <p class="lede">Product Design is no longer asking <em>whether</em> to adopt AI. We are operating it. The opportunity now is to transform the model that surrounds it — and turn capability into compounding intelligence.</p>
+      <a class="hero-cta" href="#not-waiting">Enter Briefing <span class="arrow">→</span></a>
+    </div>
+  </div>
+  <div class="scroll-cue">Scroll</div>
+</section>
+
+<!-- ─── 2. NOT WAITING ─── -->
+<section id="not-waiting" class="reveal">
+  <span class="section-num">— 02</span>
+  <span class="section-label">Status</span>
+  <h2>Design is not <em>waiting</em><br>for AI.</h2>
+  <p class="lede" style="margin-top:32px;max-width:60ch">Across the studio, generative, immersive and reasoning tools are already in production. The substrate is live — what remains is integration into the operating model.</p>
+
+  <div class="not-waiting-grid reveal-stagger">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" data-target="14">0</div>
+        <div class="stat-label">AI Tools In Use</div>
+        <div class="stat-desc">Across ideation, generation, motion and review pipelines.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" data-target="62" data-suffix="%">0</div>
+        <div class="stat-label">Workflow Coverage</div>
+        <div class="stat-desc">Of design hours touched by AI-assisted steps weekly.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" data-target="3" data-suffix="×">0</div>
+        <div class="stat-label">Concept Velocity</div>
+        <div class="stat-desc">Iteration throughput vs. baseline workflow.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" data-target="9">0</div>
+        <div class="stat-label">Immersive Projects</div>
+        <div class="stat-desc">AR / VR / volumetric work shipped or in pilot.</div>
+      </div>
+    </div>
+
+    <div class="tools-list">
+      <div class="tool-row">
+        <span class="tool-name">Generative Imaging — Midjourney, Firefly, Flux</span>
+        <span class="tool-meta">Production</span>
+        <span class="tool-tag">Live</span>
+      </div>
+      <div class="tool-row">
+        <span class="tool-name">Vision Reasoning — Multimodal Claude, GPT-V</span>
+        <span class="tool-meta">Production</span>
+        <span class="tool-tag">Live</span>
+      </div>
+      <div class="tool-row">
+        <span class="tool-name">3D &amp; Volumetric — Gaussian Splatting, Spline</span>
+        <span class="tool-meta">Pilot</span>
+        <span class="tool-tag">Live</span>
+      </div>
+      <div class="tool-row">
+        <span class="tool-name">Immersive Review — Vision Pro, Quest, WebXR</span>
+        <span class="tool-meta">Pilot</span>
+        <span class="tool-tag">Live</span>
+      </div>
+      <div class="tool-row">
+        <span class="tool-name">Generative Video &amp; Motion — Runway, Veo, Sora</span>
+        <span class="tool-meta">Production</span>
+        <span class="tool-tag">Live</span>
+      </div>
+      <div class="tool-row">
+        <span class="tool-name">Agentic Research — Internal multi-agent stacks</span>
+        <span class="tool-meta">In Build</span>
+        <span class="tool-tag">Live</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 3. FRICTION ─── -->
+<section id="friction" class="reveal">
+  <div class="friction-bg"></div>
+  <span class="section-num">— 03</span>
+  <span class="section-label">Friction</span>
+  <h2>Capability is here.<br>The <em>operating model</em> isn't.</h2>
+  <p class="lede" style="margin-top:32px;max-width:60ch">Six structural frictions slow the translation of AI capability into business outcome. They are not technology problems — they are organizational ones.</p>
+
+  <div class="friction-grid reveal-stagger">
+    <div class="friction-card">
+      <div class="pulse"></div>
+      <div class="idx">01 / Knowledge</div>
+      <h3>Insight Fragmentation</h3>
+      <p>Customer evidence, qualitative interviews and quantitative signals live in disconnected systems. Synthesis is manual and repeated for every brief.</p>
+    </div>
+    <div class="friction-card">
+      <div class="pulse"></div>
+      <div class="idx">02 / Brief</div>
+      <h3>Slow Briefing Loop</h3>
+      <p>From request to aligned brief: still measured in days. The bottleneck is not creative — it is decision context and shared interpretation.</p>
+    </div>
+    <div class="friction-card">
+      <div class="pulse"></div>
+      <div class="idx">03 / Review</div>
+      <h3>Sequential Reviews</h3>
+      <p>Design, product, engineering, legal and brand reviews run as a stack, not a mesh. Each handoff loses fidelity and re-opens settled decisions.</p>
+    </div>
+    <div class="friction-card">
+      <div class="pulse"></div>
+      <div class="idx">04 / Tooling</div>
+      <h3>Tool Sprawl, No Memory</h3>
+      <p>Fourteen surfaces, zero shared state. Outputs accumulate; institutional memory does not. Every project starts close to zero.</p>
+    </div>
+    <div class="friction-card">
+      <div class="pulse"></div>
+      <div class="idx">05 / Evidence</div>
+      <h3>No Business Case Loop</h3>
+      <p>Design decisions are framed in qualitative language. The business case is reconstructed late, by other functions, often without design in the room.</p>
+    </div>
+    <div class="friction-card">
+      <div class="pulse"></div>
+      <div class="idx">06 / Scaling</div>
+      <h3>Talent Bottleneck</h3>
+      <p>The best designers are pulled into firefights. Senior judgement does not scale linearly — and today nothing scales it non-linearly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 4. WORKFLOW ─── -->
+<section id="workflow" class="reveal">
+  <span class="section-num">— 04</span>
+  <span class="section-label">Workflow · Today</span>
+  <h2>The AI-assisted<br>design <em>workflow</em>.</h2>
+  <p class="lede" style="margin-top:32px;max-width:62ch">Six stages, each with AI in the loop. Today's reality, not a roadmap. The next move is to connect these stages into a continuous, memory-bearing pipeline.</p>
+
+  <div class="workflow-stage reveal-stagger">
+    <div class="stage active">
+      <div class="step">Stage 01</div>
+      <div class="ai-tag">AI Co-Pilot</div>
+      <h3>Discover</h3>
+      <p>Multimodal agents surface customer signals, competitive moves and category shifts. Designers steer the inquiry; the agent does the breadth.</p>
+      <div class="arrow"><span>Signal</span><span>→</span></div>
+    </div>
+    <div class="stage">
+      <div class="step">Stage 02</div>
+      <div class="ai-tag">AI Co-Pilot</div>
+      <h3>Frame</h3>
+      <p>Briefs are drafted, contested and aligned in hours, not days. The agent holds prior context; the team supplies judgement.</p>
+      <div class="arrow"><span>Brief</span><span>→</span></div>
+    </div>
+    <div class="stage">
+      <div class="step">Stage 03</div>
+      <div class="ai-tag">AI Generation</div>
+      <h3>Generate</h3>
+      <p>Generative imaging, motion, 3D and copy create the option space at scale. Quality is curated; quantity is no longer rationed.</p>
+      <div class="arrow"><span>Options</span><span>→</span></div>
+    </div>
+    <div class="stage">
+      <div class="step">Stage 04</div>
+      <div class="ai-tag">AI Review</div>
+      <h3>Critique</h3>
+      <p>Vision-language models pre-review for brand, accessibility, clarity and tonal fit. Human review focuses on the calls that matter.</p>
+      <div class="arrow"><span>Signal</span><span>→</span></div>
+    </div>
+    <div class="stage">
+      <div class="step">Stage 05</div>
+      <div class="ai-tag">AI Build</div>
+      <h3>Prototype</h3>
+      <p>Code-aware agents translate concept into interactive surface — web, mobile, spatial — fast enough to test the idea, not the artefact.</p>
+      <div class="arrow"><span>Artefact</span><span>→</span></div>
+    </div>
+    <div class="stage">
+      <div class="step">Stage 06</div>
+      <div class="ai-tag">AI Telemetry</div>
+      <h3>Learn</h3>
+      <p>Outcomes — qualitative and quantitative — flow back into the system. Every project finishes by making the next one cheaper.</p>
+      <div class="arrow"><span>Memory</span><span>↺</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 5. 3D FUTURE ─── -->
+<section id="future-3d" class="reveal">
+  <span class="section-num">— 05</span>
+  <span class="section-label">Spatial</span>
+  <h2>The 3D <em>future</em>.</h2>
+  <p class="lede" style="margin-top:32px;max-width:62ch">Surfaces are becoming spatial. Design is moving from frames and pages into volumes, sites and worlds. We are already designing for it.</p>
+
+  <div class="future-3d">
+    <div class="cube-stage">
+      <div class="cube-rings">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+      </div>
+      <div class="cube">
+        <div class="face f">Spatial</div>
+        <div class="face b">Volumetric</div>
+        <div class="face l">Immersive</div>
+        <div class="face r">Generative</div>
+        <div class="face t">Real-Time</div>
+        <div class="face bo">Embodied</div>
+      </div>
+      <div class="cube-tags">
+        <div class="cube-tag t1">WebXR · Vision Pro</div>
+        <div class="cube-tag t2">Splat / NeRF</div>
+        <div class="cube-tag t3">Real-Time PBR</div>
+        <div class="cube-tag t4">Generative Worlds</div>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="font-family:var(--sans);font-weight:300;color:var(--ink);font-size:18px;letter-spacing:-.005em;max-width:38ch">Four shifts already touching the studio:</h3>
+      <div class="future-list">
+        <div class="future-row">
+          <div class="icon">01</div>
+          <div>
+            <h3>Volumetric Capture</h3>
+            <p>Real objects → real-time editable assets.</p>
+          </div>
+          <div class="stat">In Pilot</div>
+        </div>
+        <div class="future-row">
+          <div class="icon">02</div>
+          <div>
+            <h3>Immersive Review</h3>
+            <p>Stakeholders walk the design, not the deck.</p>
+          </div>
+          <div class="stat">Active</div>
+        </div>
+        <div class="future-row">
+          <div class="icon">03</div>
+          <div>
+            <h3>Spatial Prototyping</h3>
+            <p>Interactive worlds prototyped in hours.</p>
+          </div>
+          <div class="stat">Scaling</div>
+        </div>
+        <div class="future-row">
+          <div class="icon">04</div>
+          <div>
+            <h3>Generative Environments</h3>
+            <p>Scene, lighting, material — fully directable.</p>
+          </div>
+          <div class="stat">Production</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 6. ECOSYSTEM ─── -->
+<section id="ecosystem" class="reveal">
+  <span class="section-num">— 06</span>
+  <span class="section-label">Ecosystem</span>
+  <h2>The agentic<br>design <em>ecosystem</em>.</h2>
+  <p class="lede" style="margin-top:32px;max-width:62ch">A connected mesh of specialised agents, shared memory and human judgement at the nodes that matter. Continuous, contextual, and accountable.</p>
+
+  <div class="ecosystem-wrap reveal">
+    <div class="node-canvas" id="node-canvas"></div>
+    <div class="node-legend">
+      <div class="legend-item"><span class="legend-dot" style="background:var(--copper);box-shadow:0 0 14px var(--copper)"></span>Core Designer</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--steel);box-shadow:0 0 14px var(--steel)"></span>Intelligence Agent</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--emerald);box-shadow:0 0 14px var(--emerald)"></span>Generation Agent</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--amber);box-shadow:0 0 14px var(--amber)"></span>Review &amp; Quality</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--ink-dim)"></span>Shared Memory</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 7. CUSTOMER AGENT ─── -->
+<section id="agents" class="reveal">
+  <span class="section-num">— 07</span>
+  <span class="section-label">Agent · 01</span>
+  <h2>Customer<br>Intelligence <em>Agent</em>.</h2>
+  <div class="agent-section">
+    <div class="agent-copy">
+      <p class="lede">A persistent reasoning layer over the full customer evidence base — interviews, telemetry, support, social, in-product. It does not replace research; it makes research compound.</p>
+      <div class="agent-attrs reveal-stagger">
+        <div class="attr"><span class="attr-label">Reads</span><span class="attr-text">All customer evidence, continuously<small>Research, support, telemetry, store reviews, social.</small></span></div>
+        <div class="attr"><span class="attr-label">Surfaces</span><span class="attr-text">Latent themes &amp; emerging tensions<small>Before they appear in the metric.</small></span></div>
+        <div class="attr"><span class="attr-label">Briefs</span><span class="attr-text">Pre-loaded context for every brief<small>Designers start at the second mile, not the first.</small></span></div>
+        <div class="attr"><span class="attr-label">Listens</span><span class="attr-text">Post-launch outcome &amp; sentiment loop<small>Closes the feedback gap automatically.</small></span></div>
+      </div>
+    </div>
+    <div class="agent-visual">
+      <div class="agent-orb"></div>
+      <div class="agent-data d1">Interviews · 1,284</div>
+      <div class="agent-data d2">Live Signals · 24/7</div>
+      <div class="agent-data d3">Themes · Auto-Clustered</div>
+      <div class="agent-data d4">Sentiment · Live</div>
+      <div class="agent-data d5">Brief-Ready</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 8. BUSINESS CASE AGENT ─── -->
+<section id="business" class="reveal">
+  <span class="section-num">— 08</span>
+  <span class="section-label">Agent · 02</span>
+  <h2>Business Case<br>Intelligence <em>Agent</em>.</h2>
+  <div class="agent-section business reverse">
+    <div class="agent-visual">
+      <div class="agent-orb"></div>
+      <div class="agent-data d1">Forecast · Live</div>
+      <div class="agent-data d2">ROI Model · v3.2</div>
+      <div class="agent-data d3">Risk · Quantified</div>
+      <div class="agent-data d4">Scenarios · 12</div>
+      <div class="agent-data d5">Board-Ready</div>
+    </div>
+    <div class="agent-copy">
+      <p class="lede">Every design proposal arrives pre-instrumented with its commercial case. Forecasted impact, cost-to-build, risk surface, and option value — quantified, contestable, defensible.</p>
+      <div class="agent-attrs reveal-stagger">
+        <div class="attr"><span class="attr-label">Models</span><span class="attr-text">Forecast revenue, retention, conversion impact<small>Linked to comparable launches and live cohorts.</small></span></div>
+        <div class="attr"><span class="attr-label">Sizes</span><span class="attr-text">Cost-to-build &amp; opportunity-cost ranges<small>Engineering, design, marketing, ops effort.</small></span></div>
+        <div class="attr"><span class="attr-label">Stresses</span><span class="attr-text">Scenarios, sensitivities &amp; downside cases<small>The questions the CFO will ask, asked first.</small></span></div>
+        <div class="attr"><span class="attr-label">Defends</span><span class="attr-text">Board-ready narrative, on demand<small>The case writes itself; humans curate the argument.</small></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 9. FUTURE ORG ─── -->
+<section id="org" class="reveal">
+  <span class="section-num">— 09</span>
+  <span class="section-label">Operating Model</span>
+  <h2>The future <em>PDO</em>.</h2>
+  <p class="lede" style="margin-top:32px;max-width:62ch">Four interlocking layers. People at the strategic edges, agents in the connective tissue, evidence as a shared substrate. Same headcount, materially different output.</p>
+
+  <div class="org-wrap reveal-stagger">
+    <div class="org-col">
+      <div class="layer">Layer 01</div>
+      <h3>Strategic Design</h3>
+      <ul>
+        <li>Principal designers &amp; design directors</li>
+        <li>Set direction, judgement, taste</li>
+        <li>Own customer &amp; commercial outcome</li>
+        <li>Operate above the agent layer</li>
+      </ul>
+      <div class="count">18</div>
+    </div>
+    <div class="org-col">
+      <div class="layer">Layer 02</div>
+      <h3>Craft &amp; Specialism</h3>
+      <ul>
+        <li>Motion, 3D, brand, systems, research</li>
+        <li>Deep specialists, not generalists</li>
+        <li>Orchestrate generative pipelines</li>
+        <li>Set the bar agents are measured against</li>
+      </ul>
+      <div class="count">42</div>
+    </div>
+    <div class="org-col">
+      <div class="layer">Layer 03</div>
+      <h3>Agentic Mesh</h3>
+      <ul>
+        <li>Customer &amp; Business Case Agents</li>
+        <li>Generation, Critique, Telemetry Agents</li>
+        <li>Shared memory &amp; evidence graph</li>
+        <li>Always-on, accountable, audited</li>
+      </ul>
+      <div class="count">24</div>
+    </div>
+    <div class="org-col">
+      <div class="layer">Layer 04</div>
+      <h3>Studio Operations</h3>
+      <ul>
+        <li>Platform, ML-ops, governance</li>
+        <li>Procurement &amp; tooling discipline</li>
+        <li>Evaluation, safety &amp; brand guardrails</li>
+        <li>Capability scouting &amp; partnerships</li>
+      </ul>
+      <div class="count">12</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 10. CLOSING ─── -->
+<section id="closing" class="closing reveal">
+  <div class="closing-mark"></div>
+  <span class="section-label" style="justify-content:center">Closing</span>
+  <h2 style="text-align:center;max-width:18ch;margin:0 auto">From a design team to an <em>intelligent organization</em>.</h2>
+  <p class="lede">We have the tools. We have the talent. The next twelve months are about the connective tissue: shared memory, agentic mesh, evidence as substrate. Same people. A different operating model. A compounding one.</p>
+  <div class="closing-cta">
+    <a class="hero-cta" href="#hero">Return to Top <span class="arrow">↑</span></a>
+    <a class="hero-cta" href="#org" style="border-color:var(--copper);color:var(--copper)">Review Operating Model <span class="arrow">→</span></a>
+  </div>
+</section>
+
+<footer>
+  <div class="brand">Product Design Office · <b>Transformation Briefing</b></div>
+  <div>© Confidential · Senior Leadership</div>
+</footer>
+
+<script>
+/* ─── Scroll progress + nav state ─── */
+const bar = document.getElementById('bar');
+const nav = document.getElementById('nav');
+const links = document.querySelectorAll('.nav-links a');
+const sections = ['hero','workflow','ecosystem','agents','org'].map(id=>document.getElementById(id));
+
+function onScroll(){
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const p = (window.scrollY / h) * 100;
+  bar.style.width = p + '%';
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+
+  let current = sections[0]?.id;
+  for(const s of sections){ if(!s) continue;
+    const r = s.getBoundingClientRect();
+    if(r.top < window.innerHeight*0.4) current = s.id;
+  }
+  links.forEach(a => a.classList.toggle('active', a.dataset.link === current));
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+/* ─── Reveal observer ─── */
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }});
+},{threshold:.15});
+document.querySelectorAll('.reveal, .reveal-stagger').forEach(el=>io.observe(el));
+
+/* ─── Stat counters ─── */
+const statIO = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el = e.target;
+    const target = parseFloat(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    const dur = 1400; const start = performance.now();
+    function tick(t){
+      const k = Math.min(1,(t-start)/dur);
+      const eased = 1 - Math.pow(1-k, 3);
+      const val = target % 1 === 0 ? Math.round(target*eased) : (target*eased).toFixed(1);
+      el.textContent = val + suffix;
+      if(k<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    statIO.unobserve(el);
+  });
+},{threshold:.4});
+document.querySelectorAll('.stat-num').forEach(el=>statIO.observe(el));
+
+/* ─── Workflow stage interaction ─── */
+const stages = document.querySelectorAll('.stage');
+stages.forEach(st=>{
+  st.addEventListener('mouseenter', ()=>{
+    stages.forEach(s=>s.classList.remove('active'));
+    st.classList.add('active');
+  });
+});
+
+/* ─── Node ecosystem (animated SVG) ─── */
+(function buildNodes(){
+  const wrap = document.getElementById('node-canvas');
+  if(!wrap) return;
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+
+  const cx = W/2, cy = H/2;
+  const nodes = [
+    {id:'designer',  label:'Designer',           x:cx,             y:cy,             r:34, color:'#c79566', kind:'core'},
+    {id:'customer',  label:'Customer Intel',     x:cx-280, y:cy-150, r:22, color:'#5d8aa8', kind:'intel'},
+    {id:'business',  label:'Business Case',      x:cx+280, y:cy-150, r:22, color:'#5d8aa8', kind:'intel'},
+    {id:'memory',    label:'Shared Memory',      x:cx,             y:cy+220, r:26, color:'#8a8a86', kind:'mem'},
+    {id:'gen-img',   label:'Imagery',            x:cx-380, y:cy+60,  r:16, color:'#6fae8e', kind:'gen'},
+    {id:'gen-mot',   label:'Motion',             x:cx-300, y:cy+200, r:16, color:'#6fae8e', kind:'gen'},
+    {id:'gen-3d',    label:'3D / Spatial',       x:cx-140, y:cy-260, r:16, color:'#6fae8e', kind:'gen'},
+    {id:'gen-code',  label:'Code & Proto',       x:cx+140, y:cy-260, r:16, color:'#6fae8e', kind:'gen'},
+    {id:'gen-copy',  label:'Copy',               x:cx+300, y:cy+200, r:16, color:'#6fae8e', kind:'gen'},
+    {id:'review-br', label:'Brand Critic',       x:cx+380, y:cy+60,  r:16, color:'#e8a056', kind:'rev'},
+    {id:'review-a11y',label:'A11y Critic',       x:cx-200, y:cy-30,  r:14, color:'#e8a056', kind:'rev'},
+    {id:'review-tone',label:'Tone Critic',       x:cx+200, y:cy-30,  r:14, color:'#e8a056', kind:'rev'},
+  ];
+  const edges = [
+    ['designer','customer'],['designer','business'],['designer','memory'],
+    ['designer','gen-img'],['designer','gen-mot'],['designer','gen-3d'],['designer','gen-code'],['designer','gen-copy'],
+    ['designer','review-br'],['designer','review-a11y'],['designer','review-tone'],
+    ['customer','memory'],['business','memory'],
+    ['gen-img','review-br'],['gen-mot','review-br'],['gen-copy','review-tone'],
+    ['gen-3d','review-a11y'],['gen-code','review-a11y'],
+    ['customer','gen-img'],['business','gen-code'],
+    ['memory','customer'],['memory','business'],
+  ];
+  const lookup = Object.fromEntries(nodes.map(n=>[n.id,n]));
+
+  // defs: glow filter + gradient line
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML = `
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="edgeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c79566" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#c79566" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#c79566" stop-opacity="0"/>
+    </linearGradient>
+  `;
+  svg.appendChild(defs);
+
+  // base edges
+  edges.forEach(([a,b])=>{
+    const A=lookup[a], B=lookup[b];
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',A.x);line.setAttribute('y1',A.y);
+    line.setAttribute('x2',B.x);line.setAttribute('y2',B.y);
+    line.setAttribute('stroke','rgba(236,234,228,.08)');
+    line.setAttribute('stroke-width','1');
+    svg.appendChild(line);
+  });
+
+  // travelling pulses
+  edges.forEach(([a,b],i)=>{
+    const A=lookup[a], B=lookup[b];
+    const pulse=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    pulse.setAttribute('r','2.4');
+    pulse.setAttribute('fill','#c79566');
+    pulse.setAttribute('filter','url(#glow)');
+    const anim=document.createElementNS('http://www.w3.org/2000/svg','animateMotion');
+    anim.setAttribute('dur', (3 + (i%5)*0.6) + 's');
+    anim.setAttribute('repeatCount','indefinite');
+    anim.setAttribute('begin', (i*0.25) + 's');
+    anim.setAttribute('path', `M ${A.x} ${A.y} L ${B.x} ${B.y}`);
+    pulse.appendChild(anim);
+    svg.appendChild(pulse);
+  });
+
+  // nodes
+  nodes.forEach(n=>{
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('transform',`translate(${n.x} ${n.y})`);
+    // halo
+    const halo=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    halo.setAttribute('r', n.r+10);
+    halo.setAttribute('fill','none');
+    halo.setAttribute('stroke', n.color);
+    halo.setAttribute('stroke-opacity','.25');
+    halo.setAttribute('stroke-dasharray','2 4');
+    g.appendChild(halo);
+    // core circle
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('r', n.r);
+    c.setAttribute('fill','#0c0e12');
+    c.setAttribute('stroke', n.color);
+    c.setAttribute('stroke-width', n.kind==='core' ? 2 : 1.2);
+    c.setAttribute('filter','url(#glow)');
+    g.appendChild(c);
+    // inner dot
+    const d=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    d.setAttribute('r', n.kind==='core' ? 6 : 3);
+    d.setAttribute('fill', n.color);
+    d.setAttribute('filter','url(#glow)');
+    g.appendChild(d);
+    // label
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('y', n.r + 22);
+    t.setAttribute('text-anchor','middle');
+    t.setAttribute('fill', n.kind==='core' ? '#eceae4' : '#8a8a86');
+    t.setAttribute('font-family','JetBrains Mono, monospace');
+    t.setAttribute('font-size', n.kind==='core' ? 12 : 10);
+    t.setAttribute('letter-spacing','1.6');
+    t.textContent = n.label.toUpperCase();
+    g.appendChild(t);
+
+    // gentle drift
+    const drift = document.createElementNS('http://www.w3.org/2000/svg','animateTransform');
+    drift.setAttribute('attributeName','transform');
+    drift.setAttribute('type','translate');
+    const dx = (Math.random()*8 - 4).toFixed(1);
+    const dy = (Math.random()*8 - 4).toFixed(1);
+    drift.setAttribute('values',
+      `${n.x} ${n.y}; ${n.x+parseFloat(dx)} ${n.y+parseFloat(dy)}; ${n.x} ${n.y}`);
+    drift.setAttribute('dur', (5 + Math.random()*4).toFixed(1) + 's');
+    drift.setAttribute('repeatCount','indefinite');
+    g.appendChild(drift);
+
+    svg.appendChild(g);
+  });
+
+  wrap.appendChild(svg);
+
+  // redraw on resize (debounced)
+  let t;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(t);
+    t = setTimeout(()=>{ wrap.innerHTML=''; buildNodes(); }, 250);
+  }, {once:true});
+})();
+</script>
+</body>
+</html>
