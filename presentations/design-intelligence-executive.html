@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Intelligence — Executive Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0A0A0B;
+  --bg-2: #111114;
+  --surface: #16161B;
+  --line: rgba(255,255,255,0.08);
+  --line-strong: rgba(255,255,255,0.16);
+  --text: #F4F4F5;
+  --text-mid: #B4B4BB;
+  --text-dim: #6F6F7A;
+  --accent: #D94B2B;        /* signal ember */
+  --accent-2: #E8A87C;      /* warm platinum */
+  --accent-cool: #6FB3C2;   /* steel cool */
+  --gold: #C9A36B;
+  --grad: linear-gradient(135deg, #E8A87C 0%, #D94B2B 60%, #8E2D17 100%);
+  --grad-cool: linear-gradient(135deg, #B4B4BB 0%, #6FB3C2 100%);
+  --serif: 'Fraunces', 'Times New Roman', serif;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: var(--bg); color: var(--text); font-family: var(--sans); overflow: hidden; height: 100%; }
+
+.slide-deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+@media (min-width: 769px) {
+  .slide-deck {
+    max-width: calc(100vh * 16 / 9);
+    max-height: calc(100vw * 9 / 16);
+    margin: auto;
+    position: absolute;
+    inset: 0;
+  }
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: 56px 72px 88px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease;
+  background: var(--bg);
+  overflow: hidden;
+}
+.slide.active { opacity: 1; visibility: visible; }
+
+/* Slide chrome */
+.chrome {
+  position: absolute;
+  top: 28px;
+  left: 72px;
+  right: 72px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+  z-index: 5;
+}
+.chrome .brand { color: var(--text); font-weight: 600; letter-spacing: 0.28em; }
+.chrome .brand span { color: var(--accent); }
+.chrome .section { color: var(--text-mid); }
+
+/* Typography */
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+.title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(36px, 4.4vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.title em { font-style: italic; color: var(--accent-2); font-weight: 300; }
+.subtitle {
+  font-size: clamp(15px, 1.3vw, 19px);
+  line-height: 1.5;
+  color: var(--text-mid);
+  max-width: 760px;
+  font-weight: 400;
+}
+.kicker {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(20px, 1.8vw, 26px);
+  color: var(--accent-2);
+  margin-bottom: 12px;
+}
+
+/* Page numbers */
+.page-mark {
+  position: absolute;
+  bottom: 28px;
+  right: 72px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.page-mark .num { color: var(--text); font-family: var(--serif); font-size: 13px; }
+
+/* Hairline accents */
+.hairline {
+  display: inline-block;
+  width: 48px;
+  height: 1px;
+  background: var(--accent);
+  margin-right: 14px;
+  vertical-align: middle;
+}
+
+/* ============= COVER ============= */
+.cover {
+  background:
+    radial-gradient(ellipse at 80% 20%, rgba(217,75,43,0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 10% 90%, rgba(111,179,194,0.08) 0%, transparent 50%),
+    var(--bg);
+  justify-content: space-between;
+}
+.cover-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+}
+.cover-content { position: relative; z-index: 2; margin-top: auto; }
+.cover-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(48px, 6vw, 88px);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  margin-bottom: 28px;
+  max-width: 1100px;
+}
+.cover-title em {
+  font-style: italic;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 400;
+}
+.cover-meta {
+  display: flex;
+  gap: 56px;
+  margin-top: 56px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.cover-meta-block .label {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.cover-meta-block .value {
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 500;
+}
+.cover-tag {
+  position: absolute;
+  top: 56px;
+  right: 72px;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: right;
+  z-index: 2;
+}
+.cover-tag .org { display: block; color: var(--text); font-weight: 600; margin-bottom: 4px; }
+
+/* ============= GRIDS ============= */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 32px;
+  flex: 1;
+  min-height: 0;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 28px;
+}
+.four-col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.header-block { max-width: 880px; }
+.body-region { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 28px; }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 24px;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card .num {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--accent-2);
+  letter-spacing: -0.02em;
+}
+.card h3 {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.card p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-mid);
+}
+.card.accent { border-color: rgba(217,75,43,0.4); background: linear-gradient(180deg, rgba(217,75,43,0.06), transparent); }
+
+/* Stat tiles */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-top: 24px;
+}
+.stat {
+  background: var(--bg);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stat .stat-label {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.stat .stat-value {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.stat .stat-value .unit { font-size: 0.55em; color: var(--text-mid); font-weight: 400; margin-left: 4px; }
+.stat .stat-sub { font-size: 12px; color: var(--text-mid); line-height: 1.4; }
+.stat.highlight .stat-value { color: var(--accent-2); }
+
+/* Timeline */
+.timeline {
+  margin-top: 32px;
+  padding: 32px 0;
+  position: relative;
+}
+.timeline-track {
+  position: relative;
+  height: 2px;
+  background: var(--line-strong);
+  margin: 60px 0 40px;
+}
+.timeline-track.compressed { background: linear-gradient(90deg, var(--accent), var(--accent-2)); height: 3px; }
+.timeline-marker {
+  position: absolute;
+  top: -8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--line-strong);
+  transform: translateX(-50%);
+}
+.timeline-marker.active { border-color: var(--accent); background: var(--accent); }
+.timeline-label {
+  position: absolute;
+  top: -54px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  text-align: center;
+  color: var(--text-mid);
+  white-space: nowrap;
+  font-weight: 500;
+}
+.timeline-label .week { font-family: var(--serif); font-size: 14px; color: var(--text); display: block; margin-bottom: 2px; }
+.timeline-phase {
+  position: absolute;
+  top: 24px;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: center;
+  max-width: 130px;
+  line-height: 1.4;
+}
+
+/* Phase cards (traditional process) */
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-top: 28px;
+}
+.phase {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 20px 18px;
+  position: relative;
+}
+.phase .ph-num {
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.phase .ph-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.phase .ph-time {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--accent-2);
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+.phase .ph-desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-mid);
+}
+
+/* Comparison */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 28px;
+  flex: 1;
+}
+.compare-panel {
+  padding: 28px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.compare-panel.before { border-left: 3px solid var(--text-dim); }
+.compare-panel.after { border-left: 3px solid var(--accent); background: linear-gradient(180deg, rgba(217,75,43,0.05), var(--surface)); }
+.compare-panel .compare-label {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.compare-panel .compare-headline {
+  font-family: var(--serif);
+  font-size: 38px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.compare-panel.after .compare-headline { color: var(--accent-2); }
+.compare-panel .compare-sub { font-size: 13px; color: var(--text-mid); margin-bottom: 12px; }
+.compare-panel ul { list-style: none; padding: 0; }
+.compare-panel li {
+  font-size: 13px;
+  color: var(--text-mid);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 10px;
+}
+.compare-panel li:last-child { border-bottom: none; }
+.compare-panel li::before { content: '—'; color: var(--text-dim); }
+.compare-panel.after li::before { color: var(--accent); }
+
+/* Waves diagram */
+.wave-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 32px;
+  margin-top: 32px;
+  align-items: stretch;
+}
+.wave {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.wave.first { border-top: 3px solid var(--text-mid); }
+.wave.next { border-top: 3px solid var(--accent); background: linear-gradient(180deg, rgba(217,75,43,0.05), var(--surface)); }
+.wave-label { font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text-dim); }
+.wave-title { font-family: var(--serif); font-size: 26px; color: var(--text); line-height: 1.15; }
+.wave.next .wave-title { color: var(--accent-2); }
+.wave-list { list-style: none; padding: 0; margin-top: 8px; }
+.wave-list li { font-size: 13px; color: var(--text-mid); padding: 6px 0; line-height: 1.5; }
+.wave-arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 24px; }
+
+/* Quote / closing */
+.quote-slide {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.quote {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(32px, 4vw, 58px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  max-width: 1100px;
+}
+.quote em {
+  font-style: italic;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 400;
+}
+.quote-attr {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 40px;
+}
+
+/* Pillar grid (Design Intelligence) */
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-top: 32px;
+}
+.pillar {
+  background: var(--bg);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  position: relative;
+}
+.pillar .p-num {
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.18em;
+}
+.pillar .p-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+.pillar .p-desc { font-size: 11px; color: var(--text-mid); line-height: 1.5; }
+
+/* Tool grid for AI Tools */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 28px;
+}
+.tool {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tool .tool-cat {
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+}
+.tool .tool-name {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.tool .tool-tools {
+  font-size: 12px;
+  color: var(--text-mid);
+  font-weight: 500;
+}
+.tool .tool-outcome {
+  font-size: 12px;
+  color: var(--text-mid);
+  line-height: 1.55;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+/* Vision slide */
+.vision {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(217,75,43,0.14) 0%, transparent 60%),
+    var(--bg);
+}
+.vision-stack { display: flex; flex-direction: column; gap: 18px; margin-top: 36px; max-width: 880px; }
+.vision-line {
+  font-family: var(--serif);
+  font-size: clamp(20px, 1.9vw, 28px);
+  font-weight: 300;
+  line-height: 1.3;
+  color: var(--text-mid);
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+}
+.vision-line strong { color: var(--text); font-weight: 400; }
+.vision-line.peak { color: var(--accent-2); border-left-color: var(--accent); font-style: italic; }
+
+/* Progression bar */
+.progression {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-top: 40px;
+}
+.prog-step {
+  background: var(--bg);
+  padding: 24px 20px;
+  position: relative;
+}
+.prog-step .ps-stage {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.prog-step .ps-label {
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.prog-step .ps-desc { font-size: 12px; color: var(--text-mid); line-height: 1.5; }
+.prog-step.current { background: linear-gradient(180deg, rgba(217,75,43,0.08), var(--bg)); }
+.prog-step.current .ps-label { color: var(--accent-2); }
+.prog-step.future .ps-stage { color: var(--accent); }
+
+/* Chart wrapper */
+.chart-wrap {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 28px;
+  margin-top: 24px;
+  height: 320px;
+  position: relative;
+}
+.chart-wrap canvas { max-height: 264px !important; }
+
+/* Deployment status grid */
+.deploy-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  margin-top: 28px;
+  flex: 1;
+}
+.deploy-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); align-content: start; }
+.deploy-bullets { display: flex; flex-direction: column; gap: 16px; }
+.deploy-bullet {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.deploy-bullet:last-child { border-bottom: none; }
+.deploy-bullet .b-num {
+  font-family: var(--serif);
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 500;
+}
+.deploy-bullet .b-text { font-size: 13px; line-height: 1.55; color: var(--text-mid); }
+.deploy-bullet .b-text strong { color: var(--text); font-weight: 600; }
+
+/* Nav */
+.nav-controls {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 1000;
+  background: rgba(20,20,24,0.7);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.08); }
+.slide-counter { color: var(--text-mid); font-size: 11px; letter-spacing: 0.18em; font-weight: 500; }
+.slide-counter .cur { color: var(--text); }
+
+.progress-bar {
+  position: fixed; top: 0; left: 0;
+  height: 2px; background: var(--accent);
+  transition: width 0.3s ease;
+  z-index: 1001;
+}
+
+@media (max-width: 768px) {
+  .slide { padding: 32px 24px 72px; }
+  .chrome { left: 24px; right: 24px; top: 16px; font-size: 9px; }
+  .page-mark { right: 24px; bottom: 16px; }
+  .two-col, .compare, .deploy-grid { grid-template-columns: 1fr; gap: 20px; }
+  .three-col, .four-col, .tool-grid { grid-template-columns: 1fr 1fr; }
+  .phase-grid, .pillar-grid, .stat-row, .progression { grid-template-columns: 1fr 1fr; }
+  .wave-row { grid-template-columns: 1fr; }
+  .wave-arrow { transform: rotate(90deg); padding: 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="slide-deck">
+
+<!-- ============= 01 COVER ============= -->
+<div class="slide cover active">
+  <div class="cover-grid"></div>
+  <div class="cover-tag">
+    <span class="org">STELLANTIS DESIGN</span>
+    EXECUTIVE BRIEFING · 2026
+  </div>
+  <div class="cover-content">
+    <div class="eyebrow">DESIGN INTELLIGENCE</div>
+    <h1 class="cover-title">From experimentation to <em>operational capability</em>.</h1>
+    <p class="subtitle" style="max-width: 720px; font-size: 18px;">A status of what Design has built with AI today — and the operating model we are building for tomorrow.</p>
+    <div class="cover-meta">
+      <div class="cover-meta-block">
+        <div class="label">Prepared by</div>
+        <div class="value">Lou Gasevski</div>
+        <div class="value" style="color: var(--text-mid); font-weight: 400; font-size: 13px;">Director, Chrysler Design Exterior</div>
+      </div>
+      <div class="cover-meta-block">
+        <div class="label">For</div>
+        <div class="value">Design Leadership</div>
+        <div class="value" style="color: var(--text-mid); font-weight: 400; font-size: 13px;">Thiele · Gilles · Krugger · Jones · Zuehlke</div>
+      </div>
+      <div class="cover-meta-block">
+        <div class="label">Theme</div>
+        <div class="value">Tools → Workflows → Capabilities → Intelligence</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============= 02 WHY AI MATTERS ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">01 · The Strategic Context</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>WHY AI MATTERS NOW</div>
+    <h1 class="title">The advantage will not belong to the company with the most AI. It will belong to the company that <em>learns the fastest.</em></h1>
+  </div>
+  <div class="body-region">
+    <div class="three-col">
+      <div class="card">
+        <div class="num">01</div>
+        <h3>Complexity is Rising</h3>
+        <p>Product portfolios, regulation, electrification, software-defined experiences — every program now carries more decisions than the program before it.</p>
+      </div>
+      <div class="card">
+        <div class="num">02</div>
+        <h3>Cycle Time is Shrinking</h3>
+        <p>Competitors are compressing concept-to-market timelines. Speed of learning has become a structural advantage, not a project metric.</p>
+      </div>
+      <div class="card accent">
+        <div class="num">03</div>
+        <h3>Knowledge is Fragmented</h3>
+        <p>Decades of customer insight, design rationale, and engineering trade-offs sit across folders, decks, and individuals. We rebuild what we already know.</p>
+      </div>
+    </div>
+    <div style="margin-top: auto; padding-top: 32px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline;">
+      <div class="kicker">Our response cannot be a tool. It must be a capability.</div>
+      <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim);">Source · Design Intelligence Vision</div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">02</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 03 TRADITIONAL VEHICLE DEV PROCESS ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">02 · How Vehicle Design Works Today</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>THE TRADITIONAL PROCESS</div>
+    <h1 class="title">Five sequential phases. Roughly <em>58 weeks</em> from first sketch to a model a customer can experience.</h1>
+    <p class="subtitle">Every concept passes through ideation, surfacing, clay, fiberglass, and transport — each phase physical, each phase additive in cost and time.</p>
+  </div>
+  <div class="phase-grid">
+    <div class="phase">
+      <div class="ph-num">PHASE 01</div>
+      <div class="ph-title">Ideation + Selection</div>
+      <div class="ph-time">6 wks</div>
+      <div class="ph-desc">Designers create loose sketch concepts. Leadership selects directions to develop.</div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 02</div>
+      <div class="ph-title">Concept Surfacing</div>
+      <div class="ph-time">4 wks</div>
+      <div class="ph-desc">Specialists translate 2D into 3D digital surface. $30K–$60K per concept. Guesswork drives rework.</div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 03</div>
+      <div class="ph-title">Clay Modeling</div>
+      <div class="ph-time">10+ wks</div>
+      <div class="ph-desc">~1,200 lbs of clay sculpted and refined. $90K materials and labor per concept.</div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 04</div>
+      <div class="ph-title">Fiberglass I/O Model</div>
+      <div class="ph-time">18 wks</div>
+      <div class="ph-desc">Supplier builds a full-size fiberglass model. $500K–$1M per build.</div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 05</div>
+      <div class="ph-title">Research + Transport</div>
+      <div class="ph-time">2 wks</div>
+      <div class="ph-desc">Ship to consumer research hubs. $50K–$200K per move, plus risk of damage.</div>
+    </div>
+  </div>
+  <div style="margin-top: 28px; padding: 18px 24px; background: var(--surface); border-left: 3px solid var(--accent); display: flex; justify-content: space-between; align-items: center;">
+    <div style="font-size: 13px; color: var(--text-mid);">Total program cost per concept exploration</div>
+    <div style="font-family: var(--serif); font-size: 28px; color: var(--accent-2);">$1.5M – $3M</div>
+    <div style="font-size: 13px; color: var(--text-mid);">Cycle time, sketch to market test</div>
+    <div style="font-family: var(--serif); font-size: 28px; color: var(--accent-2);">~58 weeks</div>
+  </div>
+  <div class="page-mark"><span class="num">03</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 04 AI ACCELERATED WORKFLOW ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">03 · The Accelerated Workflow</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>AI + AR ACCELERATED WORKFLOW</div>
+    <h1 class="title">The same five-phase outcome — delivered in <em>roughly six weeks</em>, digital-first.</h1>
+    <p class="subtitle">AI compresses sketch-to-render. AR replaces physical models with full-size virtual review. Teams stay in exploration longer and commit to physical builds only when truly required.</p>
+  </div>
+  <div class="compare">
+    <div class="compare-panel before">
+      <div class="compare-label">CURRENT REALITY</div>
+      <div class="compare-headline">58 weeks</div>
+      <div class="compare-sub">$1.5M – $3M per concept exploration</div>
+      <ul>
+        <li>Sequential phases, each gating the next</li>
+        <li>Physical clay, fiberglass, transport between sites</li>
+        <li>Interpretation gaps between sketch and surface</li>
+        <li>Limited parallel concept exploration</li>
+        <li>Carbon-intensive: clay heating, milling, shipping</li>
+      </ul>
+    </div>
+    <div class="compare-panel after">
+      <div class="compare-label">DIGITAL-FIRST WORKFLOW</div>
+      <div class="compare-headline">~6 weeks</div>
+      <div class="compare-sub">Fraction of cost · zero transport · near-zero waste</div>
+      <ul>
+        <li>Sketch to photoreal render in seconds (Vizcom, Optic)</li>
+        <li>Full-size theme review in AR (Gravity Sketch)</li>
+        <li>Real-time global collaboration across NA, EU, LATAM, China</li>
+        <li>Multiple themes developed in parallel</li>
+        <li>Physical models built only when strictly necessary</li>
+      </ul>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">04</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 05 VIZCOM DEPLOYMENT ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">04 · Operational Today</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>VIZCOM — IN PRODUCTION DEPLOYMENT</div>
+    <h1 class="title">No longer a pilot. Vizcom is integrated into the daily workflow of <em>advanced and production studios.</em></h1>
+  </div>
+  <div class="deploy-grid">
+    <div class="deploy-bullets">
+      <div class="deploy-bullet">
+        <div class="b-num">01</div>
+        <div class="b-text"><strong>Tool testing complete.</strong> Vizcom, Optic AI, Ansys AI, and Gravity Sketch AR evaluated across real program work — not isolated experiments.</div>
+      </div>
+      <div class="deploy-bullet">
+        <div class="b-num">02</div>
+        <div class="b-text"><strong>Workflow integration.</strong> AI now sits inside early sketch, rendering, and aero workflows — connected to how designers actually work.</div>
+      </div>
+      <div class="deploy-bullet">
+        <div class="b-num">03</div>
+        <div class="b-text"><strong>Time savings, measured.</strong> Designer sketch → AI refine → photoreal render compresses days of work into a single session.</div>
+      </div>
+      <div class="deploy-bullet">
+        <div class="b-num">04</div>
+        <div class="b-text"><strong>Self-sufficient teams.</strong> Designers are now self-sufficient for a majority of the rendering process, reducing dependency on other disciplines.</div>
+      </div>
+      <div class="deploy-bullet">
+        <div class="b-num">05</div>
+        <div class="b-text"><strong>Trained at scale.</strong> Training sessions delivered across Exteriors, Interiors, and Advanced teams.</div>
+      </div>
+    </div>
+    <div class="deploy-stats">
+      <div class="stat highlight">
+        <div class="stat-label">Status</div>
+        <div class="stat-value">Live</div>
+        <div class="stat-sub">Across advanced + production studios</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Stages Touched</div>
+        <div class="stat-value">3<span class="unit">of 5</span></div>
+        <div class="stat-sub">Sketch · Rendering · Aero</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Teams Trained</div>
+        <div class="stat-value">3<span class="unit">disciplines</span></div>
+        <div class="stat-sub">Exteriors · Interiors · Advanced</div>
+      </div>
+      <div class="stat highlight">
+        <div class="stat-label">Time, Idea → Render</div>
+        <div class="stat-value">Hours</div>
+        <div class="stat-sub">Previously days to weeks</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">05</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 06 GRAVITY SKETCH + AR ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">05 · Spatial Design + Review</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>GRAVITY SKETCH + AR</div>
+    <h1 class="title">Designers, leadership, and global studios are reviewing themes at <em>full scale</em> — without a single physical model.</h1>
+    <p class="subtitle">Pass-through AR replaces armature, foam, and fiberglass for early review. Themes are evaluated against benchmarks in the same physical room, on the same day.</p>
+  </div>
+  <div class="body-region">
+    <div class="four-col">
+      <div class="card">
+        <h3 style="color: var(--accent-2);">FULL-SIZE REVIEW</h3>
+        <p>Walk around a full-size virtual model. Eliminate the cost and lead time of a physical theme model for early decisions.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-2);">COMPETITIVE BENCHMARKING</h3>
+        <p>Compare directly against benchmark vehicles in AR — without shipping, without printing, without poster rework.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-2);">GLOBAL COLLABORATION</h3>
+        <p>NA, EU, LATAM, and China studios iterate on shared 3D data in real time. Less interpretation drift, fewer miscommunications.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-2);">PARALLEL EXPLORATION</h3>
+        <p>Multiple themes developed in parallel in AR. Physical models are built only when truly required to move forward.</p>
+      </div>
+    </div>
+    <div style="margin-top: auto; padding-top: 28px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+      <div>
+        <div style="font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;">PHYSICAL MODEL COST AVOIDED</div>
+        <div style="font-family: var(--serif); font-size: 32px; color: var(--text);">$500K – $1M</div>
+        <div style="font-size: 12px; color: var(--text-mid);">per fiberglass build</div>
+      </div>
+      <div>
+        <div style="font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;">TRANSPORT COST AVOIDED</div>
+        <div style="font-family: var(--serif); font-size: 32px; color: var(--text);">$50K – $200K</div>
+        <div style="font-size: 12px; color: var(--text-mid);">per move between sites</div>
+      </div>
+      <div>
+        <div style="font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;">CLAY MATERIAL AVOIDED</div>
+        <div style="font-family: var(--serif); font-size: 32px; color: var(--text);">~1,200 lbs</div>
+        <div style="font-size: 12px; color: var(--text-mid);">per full-size buck</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">06</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 07 AI VIDEO STORYTELLING ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">06 · Storytelling at Studio Speed</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>AI VIDEO + NARRATIVE</div>
+    <h1 class="title">Design intent is now delivered as <em>cinematic story</em>, not static rendering.</h1>
+    <p class="subtitle">A still render asks leadership to imagine. A motion sequence shows them how the vehicle lives in the world — accelerating alignment in a single review.</p>
+  </div>
+  <div class="tool-grid">
+    <div class="tool">
+      <div class="tool-cat">VISUALIZATION + RENDERING</div>
+      <div class="tool-name">Vizcom · Optic · Firefly</div>
+      <div class="tool-tools">Exterior ideation · color + trim · branded visuals</div>
+      <div class="tool-outcome">Idea-to-image collapses from days to minutes. Designers retain authorship throughout.</div>
+    </div>
+    <div class="tool">
+      <div class="tool-cat">MOTION + VIDEO</div>
+      <div class="tool-name">Runway · Veo · Kling</div>
+      <div class="tool-tools">Concept trailers · launch films · dynamic storytelling</div>
+      <div class="tool-outcome">Vehicles shown in motion, in context, in tone — before a single physical asset exists.</div>
+    </div>
+    <div class="tool">
+      <div class="tool-cat">CHARACTER + CONSISTENCY</div>
+      <div class="tool-name">Higgsfield · Nano Banana</div>
+      <div class="tool-tools">Lifestyle imagery · mixed-reality · human interaction</div>
+      <div class="tool-outcome">Consistent characters and scenes across an entire narrative arc.</div>
+    </div>
+  </div>
+  <div style="margin-top: 28px; padding: 20px 24px; background: var(--surface); border-left: 3px solid var(--accent-cool); display: flex; gap: 24px; align-items: center;">
+    <div style="font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--accent-2); flex: 1;">"Prompt for stories that communicate design intent, proportion, and emotion."</div>
+    <div style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); border-left: 1px solid var(--line); padding-left: 24px;">C.A.S.T. Framework<br><span style="color: var(--text-mid); letter-spacing: 0.1em;">Composition · Action · Setting · Tone</span></div>
+  </div>
+  <div class="page-mark"><span class="num">07</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 08 BUSINESS IMPACT ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">07 · Business Impact</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>WHAT THE WORKFLOW HAS DELIVERED</div>
+    <h1 class="title">The first wave is paying back in <em>time, cost, and capacity</em> — measured against the traditional baseline.</h1>
+  </div>
+  <div class="stat-row">
+    <div class="stat highlight">
+      <div class="stat-label">Cycle Time</div>
+      <div class="stat-value">58 → 6<span class="unit">wks</span></div>
+      <div class="stat-sub">~90% compression on the early-phase workflow</div>
+    </div>
+    <div class="stat highlight">
+      <div class="stat-label">Per-Concept Cost</div>
+      <div class="stat-value">Fraction</div>
+      <div class="stat-sub">vs. $1.5M – $3M traditional baseline</div>
+    </div>
+    <div class="stat highlight">
+      <div class="stat-label">Transport</div>
+      <div class="stat-value">Zero</div>
+      <div class="stat-sub">No model movement between sites for early review</div>
+    </div>
+    <div class="stat highlight">
+      <div class="stat-label">Carbon Footprint</div>
+      <div class="stat-value">Near Zero</div>
+      <div class="stat-sub">Clay, heating, milling, transport — eliminated</div>
+    </div>
+  </div>
+  <div class="body-region">
+    <div class="three-col" style="margin-top: 32px;">
+      <div class="card">
+        <h3>CAPACITY UNLOCKED</h3>
+        <p>Designers and CDD spend less time on rework. The same headcount can pursue more concepts in parallel — more shots on goal per program.</p>
+      </div>
+      <div class="card">
+        <h3>DECISIONS, ACCELERATED</h3>
+        <p>Full-size AR reviews compress the path from sketch to leadership alignment. Themes that used to require months now resolve in weeks.</p>
+      </div>
+      <div class="card">
+        <h3>GLOBAL COLLABORATION</h3>
+        <p>NA, EU, LATAM, China studios share live 3D data. The studio is no longer bounded by geography or shipping windows.</p>
+      </div>
+    </div>
+    <div style="margin-top: auto; padding-top: 24px; font-size: 12px; color: var(--text-dim); text-align: right; letter-spacing: 0.18em; text-transform: uppercase;">Baseline source · Design Amplified 2.0 program data</div>
+  </div>
+  <div class="page-mark"><span class="num">08</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 09 TWO WAVES ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">08 · Where We Go Next</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>THE STRATEGIC INFLECTION</div>
+    <h1 class="title">The first wave was about <em>making content</em>. The next wave is about <em>building capability.</em></h1>
+    <p class="subtitle">Generation tools accelerated individual tasks. The next horizon connects those tasks into systems — automated, intelligent, and institutionally owned.</p>
+  </div>
+  <div class="wave-row">
+    <div class="wave first">
+      <div class="wave-label">WAVE 01 · 2024 – 2025</div>
+      <div class="wave-title">Content Generation</div>
+      <ul class="wave-list">
+        <li>— Sketch-to-render acceleration</li>
+        <li>— AI imagery and motion storytelling</li>
+        <li>— AR review and global collaboration</li>
+        <li>— Individual designer productivity</li>
+        <li>— Tools deployed to studios</li>
+      </ul>
+    </div>
+    <div class="wave-arrow">→</div>
+    <div class="wave next">
+      <div class="wave-label">WAVE 02 · 2026 – ONWARD</div>
+      <div class="wave-title">Automation · Knowledge · Agency</div>
+      <ul class="wave-list">
+        <li>— Workflow automation across disciplines</li>
+        <li>— Connected knowledge across programs</li>
+        <li>— Agentic co-creators inside the studio</li>
+        <li>— Organizational capability, not tools</li>
+        <li>— Capability that compounds year over year</li>
+      </ul>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">09</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 10 EMERGING CAPABILITY AREAS ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">09 · Emerging Capability Areas</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>THREE CAPABILITY AREAS UNDER DEVELOPMENT</div>
+    <h1 class="title">Three capability areas now in active build — distinct from tools, owned by Design.</h1>
+  </div>
+  <div class="body-region">
+    <div class="three-col">
+      <div class="card accent">
+        <div class="num">A</div>
+        <h3>AUTOMATION</h3>
+        <p>Repetitive studio operations — reformatting, exports, asset preparation, package compliance checks — moved off designers and into reliable systems.</p>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim);">Returns hours to creative work</div>
+      </div>
+      <div class="card accent">
+        <div class="num">B</div>
+        <h3>AGENTIC AI</h3>
+        <p>AI co-creators that analyze design data, propose refinements, and build 3D iterations alongside the designer — amplifying judgement, not replacing it.</p>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim);">Multiplies designer reach</div>
+      </div>
+      <div class="card accent">
+        <div class="num">C</div>
+        <h3>KNOWLEDGE SYSTEMS</h3>
+        <p>Customer insight, design rationale, engineering trade-offs, and review history captured as connected, queryable institutional memory.</p>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim);">Preserves institutional capability</div>
+      </div>
+    </div>
+    <div style="margin-top: auto; padding-top: 32px; border-top: 1px solid var(--line);">
+      <div class="kicker" style="margin-bottom: 0;">Together, these turn AI from an individual productivity layer into an organizational operating layer.</div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">10</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 11 AUTOMATION ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">10 · Automation</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>AUTOMATION IN DESIGN OPERATIONS</div>
+    <h1 class="title">Remove the friction that pulls designers <em>away from designing.</em></h1>
+    <p class="subtitle">Most studio time is not spent creating. It is spent reformatting, transferring, validating, and chasing. Automation reclaims that time, predictably and at scale.</p>
+  </div>
+  <div class="body-region">
+    <div class="two-col">
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px; font-weight: 600;">WHAT GETS AUTOMATED</div>
+        <ul style="list-style: none; padding: 0;">
+          <li style="padding: 14px 0; border-bottom: 1px solid var(--line); display: flex; gap: 14px; align-items: baseline;"><span style="color: var(--accent); font-family: var(--serif);">01</span><span style="color: var(--text-mid); font-size: 14px; line-height: 1.5;"><strong style="color: var(--text);">Asset preparation</strong> — export pipelines, format conversion, naming, versioning.</span></li>
+          <li style="padding: 14px 0; border-bottom: 1px solid var(--line); display: flex; gap: 14px; align-items: baseline;"><span style="color: var(--accent); font-family: var(--serif);">02</span><span style="color: var(--text-mid); font-size: 14px; line-height: 1.5;"><strong style="color: var(--text);">Review preparation</strong> — automated deck assembly, comparison views, package overlays.</span></li>
+          <li style="padding: 14px 0; border-bottom: 1px solid var(--line); display: flex; gap: 14px; align-items: baseline;"><span style="color: var(--accent); font-family: var(--serif);">03</span><span style="color: var(--text-mid); font-size: 14px; line-height: 1.5;"><strong style="color: var(--text);">Compliance + package checks</strong> — early validation against engineering and regulatory constraints.</span></li>
+          <li style="padding: 14px 0; display: flex; gap: 14px; align-items: baseline;"><span style="color: var(--accent); font-family: var(--serif);">04</span><span style="color: var(--text-mid); font-size: 14px; line-height: 1.5;"><strong style="color: var(--text);">Routine documentation</strong> — design rationale capture, review minutes, decision logs.</span></li>
+        </ul>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="card" style="background: linear-gradient(180deg, rgba(217,75,43,0.08), transparent); border-color: rgba(217,75,43,0.3);">
+          <div style="font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--accent); font-weight: 600;">THE PRINCIPLE</div>
+          <div style="font-family: var(--serif); font-size: 24px; line-height: 1.25; color: var(--text); margin-top: 6px;">A designer's most valuable hour is the one spent in creative judgement.</div>
+          <p style="margin-top: 8px;">Automation is not a cost-cutting strategy. It is a creative-capacity strategy.</p>
+        </div>
+        <div class="card">
+          <div style="font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text-dim); font-weight: 600;">EXPECTED OUTCOME</div>
+          <div style="font-family: var(--serif); font-size: 22px; line-height: 1.25; color: var(--accent-2); margin-top: 6px;">More concepts explored. Fewer late surprises. Predictable studio operations.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">11</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 12 AGENTIC AI ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">11 · Agentic AI</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>AGENTIC AI · CO-CREATORS, NOT REPLACEMENTS</div>
+    <h1 class="title">The next leap is <em>intelligent co-creators</em> — partners that work alongside designers in real time.</h1>
+    <p class="subtitle">Agents analyze, suggest, iterate, and handle routine work. The designer stays in authorship. The studio operates with leverage it has never had.</p>
+  </div>
+  <div class="body-region">
+    <div class="four-col">
+      <div class="card">
+        <h3 style="color: var(--accent-2);">DESIGN ANALYSIS</h3>
+        <p>Agents review large bodies of design data and surface intelligent suggestions on proportion, surfacing, and aesthetic intent.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-2);">REAL-TIME 3D ITERATION</h3>
+        <p>Co-creators rapidly build and modify 3D iterations while the designer concentrates on the concept that matters.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-2);">DELEGATED WORK</h3>
+        <p>Each designer's agent handles routine handoffs and coordination with other agents, freeing humans for high-judgement work.</p>
+      </div>
+      <div class="card">
+        <h3 style="color: var(--accent-2);">AMPLIFIED REACH</h3>
+        <p>Agents multiply what each designer can explore — letting the studio pursue creative directions that were previously out of reach.</p>
+      </div>
+    </div>
+    <div style="margin-top: auto; padding-top: 32px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 32px;">
+      <div class="kicker" style="margin-bottom: 0;">Our mission is not to replace designers. Our mission is to empower designers.</div>
+      <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap;">Design Intelligence Mission</div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">12</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 13 DESIGN INTELLIGENCE ============= -->
+<div class="slide">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">12 · Design Intelligence</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>DESIGN INTELLIGENCE — THE CONNECTED SYSTEM</div>
+    <h1 class="title">A connected intelligence network across <em>five domains</em> — where knowledge compounds with every project.</h1>
+    <p class="subtitle">Today, customer research, design reviews, package studies, and engineering trade-offs live in folders, decks, and individual memory. Design Intelligence connects them — so every program makes the next program smarter.</p>
+  </div>
+  <div class="pillar-grid">
+    <div class="pillar">
+      <div class="p-num">01</div>
+      <div class="p-title">Customer Intelligence</div>
+      <div class="p-desc">Research, segmentation, voice-of-customer, ethnography — connected and queryable.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">02</div>
+      <div class="p-title">Planning Intelligence</div>
+      <div class="p-desc">Portfolio strategy, segment opportunities, competitive landscape, timing.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">03</div>
+      <div class="p-title">Design Intelligence</div>
+      <div class="p-desc">Theme decisions, review rationale, surfacing libraries, brand DNA.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">04</div>
+      <div class="p-title">Engineering Intelligence</div>
+      <div class="p-desc">Package constraints, manufacturing trade-offs, lessons learned.</div>
+    </div>
+    <div class="pillar">
+      <div class="p-num">05</div>
+      <div class="p-title">Manufacturing Intelligence</div>
+      <div class="p-desc">Producibility insight, supplier capability, launch realities.</div>
+    </div>
+  </div>
+  <div style="margin-top: 32px; padding: 22px 28px; background: linear-gradient(135deg, rgba(217,75,43,0.10), rgba(217,75,43,0.02)); border-left: 3px solid var(--accent); display: flex; gap: 32px; align-items: center;">
+    <div style="font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--text); line-height: 1.3; flex: 1;">Reduce the distance between insight and action. Transform information into understanding. Transform understanding into better products.</div>
+  </div>
+  <div class="page-mark"><span class="num">13</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 14 FUTURE VISION ============= -->
+<div class="slide vision">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">13 · Future Vision</div>
+  </div>
+  <div class="header-block">
+    <div class="eyebrow"><span class="hairline"></span>THE LONG-TERM VISION</div>
+    <h1 class="title">To create the world's most intelligent <em>automotive design organization.</em></h1>
+  </div>
+  <div class="body-region">
+    <div class="vision-stack">
+      <div class="vision-line">Where every designer has <strong>immediate access to decades of accumulated knowledge.</strong></div>
+      <div class="vision-line">Where every project contributes to a <strong>continuously growing intelligence system.</strong></div>
+      <div class="vision-line">Where customer insight, design intent, engineering constraints, and manufacturing reality are <strong>connected from the start.</strong></div>
+      <div class="vision-line">Where leadership decisions are <strong>informed by richer context, deeper understanding.</strong></div>
+      <div class="vision-line peak">Where every completed project makes the next project better.</div>
+    </div>
+    <div style="margin-top: auto; padding-top: 32px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;">
+      <div>
+        <div style="font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;">PHASE 01</div>
+        <div style="font-family: var(--serif); font-size: 18px; color: var(--text);">Understand</div>
+        <div style="font-size: 12px; color: var(--text-mid); margin-top: 4px;">Where knowledge is trapped. Where time is lost.</div>
+      </div>
+      <div>
+        <div style="font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;">PHASE 02</div>
+        <div style="font-family: var(--serif); font-size: 18px; color: var(--text);">Connect</div>
+        <div style="font-size: 12px; color: var(--text-mid); margin-top: 4px;">People · knowledge · data · capability.</div>
+      </div>
+      <div>
+        <div style="font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;">PHASE 03</div>
+        <div style="font-family: var(--serif); font-size: 18px; color: var(--text);">Transform</div>
+        <div style="font-size: 12px; color: var(--text-mid); margin-top: 4px;">Learn, create, and decide in new ways.</div>
+      </div>
+      <div>
+        <div style="font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px;">OUTCOME</div>
+        <div style="font-family: var(--serif); font-size: 18px; color: var(--accent-2);">Compound</div>
+        <div style="font-size: 12px; color: var(--text-mid); margin-top: 4px;">Intelligence that grows year over year.</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="num">14</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+<!-- ============= 15 CLOSING ============= -->
+<div class="slide quote-slide vision">
+  <div class="chrome">
+    <div class="brand">DESIGN<span>.</span>INTELLIGENCE</div>
+    <div class="section">14 · The Operating Model</div>
+  </div>
+  <div style="max-width: 1100px; text-align: center;">
+    <div class="eyebrow" style="text-align: center;">THE STRATEGIC MESSAGE</div>
+    <div class="quote">Design is not <em>adopting</em> AI tools.<br>Design is <em>building</em> a new operating model.</div>
+    <div style="margin-top: 48px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; max-width: 900px; margin-left: auto; margin-right: auto; background: var(--line); border: 1px solid var(--line);">
+      <div style="background: var(--bg); padding: 18px 12px;">
+        <div style="font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text-dim);">From</div>
+        <div style="font-family: var(--serif); font-size: 18px; color: var(--text-mid); margin-top: 6px;">Tools</div>
+      </div>
+      <div style="background: var(--bg); padding: 18px 12px;">
+        <div style="font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text-dim);">Through</div>
+        <div style="font-family: var(--serif); font-size: 18px; color: var(--text); margin-top: 6px;">Workflows</div>
+      </div>
+      <div style="background: var(--bg); padding: 18px 12px;">
+        <div style="font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--text-dim);">Into</div>
+        <div style="font-family: var(--serif); font-size: 18px; color: var(--text); margin-top: 6px;">Capabilities</div>
+      </div>
+      <div style="background: linear-gradient(180deg, rgba(217,75,43,0.12), var(--bg)); padding: 18px 12px;">
+        <div style="font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--accent);">Toward</div>
+        <div style="font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--accent-2); margin-top: 6px;">Intelligence</div>
+      </div>
+    </div>
+    <div class="quote-attr">Lou Gasevski · Chrysler Design Exterior · 2026</div>
+  </div>
+  <div class="page-mark"><span class="num">15</span> &nbsp;/&nbsp; 15</div>
+</div>
+
+</div><!-- /.slide-deck -->
+
+<div class="nav-controls">
+  <button class="nav-btn" onclick="prevSlide()">←</button>
+  <span class="slide-counter"><span class="cur" id="current">01</span> &nbsp;·&nbsp; <span id="total">15</span></span>
+  <button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+
+<script>
+let current = 1;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+document.getElementById('total').textContent = String(total).padStart(2, '0');
+
+function showSlide(n) {
+  if (n < 1) n = 1;
+  if (n > total) n = total;
+  current = n;
+  slides.forEach((s, i) => s.classList.toggle('active', i === n - 1));
+  document.getElementById('current').textContent = String(n).padStart(2, '0');
+  document.getElementById('progressBar').style.width = (n / total * 100) + '%';
+}
+function nextSlide() { showSlide(current + 1); }
+function prevSlide() { showSlide(current - 1); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  if (e.key === 'Home') { e.preventDefault(); showSlide(1); }
+  if (e.key === 'End') { e.preventDefault(); showSlide(total); }
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.nav-controls') && !e.target.closest('button')) nextSlide();
+});
+
+showSlide(1);
+</script>
+</body>
+</html>
