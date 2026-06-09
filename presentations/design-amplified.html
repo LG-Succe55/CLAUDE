@@ -1340,14 +1340,14 @@ html, body {
 <!-- ====================================================== -->
 <!-- 05 — GLOBAL MOMENTUM -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="5" data-graph="global-constellation" data-notes="AI is no longer a local initiative. Regions illuminate one at a time — North America, then Germany, France, Italy, Brazil, China. Momentum is building.">
+<section class="slide" data-slide="5" data-graph="global-constellation" data-notes="Six Stellantis design studios illuminate one at a time across the world map: Detroit, Vélizy, Rüsselsheim, Turin, Belo Horizonte, Shanghai. AI is becoming a global design capability.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-corner">
       <div class="corner-anchor bottom-left reveal r5">
         <div class="label">CHAPTER ONE · GLOBAL MOMENTUM</div>
         <div class="h">Global<br><em>momentum.</em></div>
-        <div class="sub">North America · Germany · France · Italy · Brazil · China — AI is becoming a global design capability.</div>
+        <div class="sub">Detroit · Vélizy · Rüsselsheim · Turin · Belo Horizonte · Shanghai — six studios, one capability.</div>
       </div>
     </div>
   </div>
@@ -2025,51 +2025,160 @@ class NodeGraph {
     }
   }
 
-  // ===== S05: Global constellation — 6 regional hubs illuminate in sequence =====
+  // ===== S05: World map dot-matrix with 6 Stellantis design city hubs =====
   _buildGlobalConstellation() {
-    // Regions positioned approximating a world layout — visual constellation, not geographically accurate
-    const regions = [
-      { lab: 'North America', x: 0.22, y: 0.36, delay: 400 },
-      { lab: 'Germany',       x: 0.50, y: 0.28, delay: 900 },
-      { lab: 'France',        x: 0.46, y: 0.34, delay: 1400 },
-      { lab: 'Italy',         x: 0.52, y: 0.38, delay: 1900 },
-      { lab: 'Brazil',        x: 0.34, y: 0.62, delay: 2400 },
-      { lab: 'China',         x: 0.74, y: 0.40, delay: 2900 }
+    // Map area: upper-right portion, leaving room for text in bottom-left
+    const mapX = this.w * 0.30;
+    const mapY = this.h * 0.06;
+    const mapW = this.w * 0.66;
+    const mapH = this.h * 0.62;
+
+    // Equirectangular projection bounds
+    const lngMin = -170, lngMax = 180;
+    const latMin = -55, latMax = 75;
+    const geo = (lat, lng) => [
+      mapX + ((lng - lngMin) / (lngMax - lngMin)) * mapW,
+      mapY + ((latMax - lat) / (latMax - latMin)) * mapH
     ];
-    const start = this.nodes.length;
-    regions.forEach((r) => {
+
+    // Continent land mask — approximate but recognizable
+    const isLand = (lat, lng) => {
+      // North America mainland
+      if (lat >= 25 && lat <= 72 && lng >= -140 && lng <= -52) {
+        if (lng < -128 && lat < 49) return false;
+        if (lng > -82 && lat < 30) return false;
+        if (lng > -68 && lat > 50) return false;
+        if (lat > 65 && lng > -95) return false;
+        if (lat > 70 && lng < -125) return false;
+        return true;
+      }
+      // Alaska
+      if (lat >= 56 && lat <= 71 && lng >= -168 && lng <= -141) return true;
+      // Mexico / Central America
+      if (lat >= 8 && lat <= 32 && lng >= -118 && lng <= -82) {
+        if (lat < 17 && lng < -100) return false;
+        if (lat < 12 && lng > -85) return false;
+        return true;
+      }
+      // Greenland
+      if (lat >= 60 && lat <= 75 && lng >= -55 && lng <= -20) return true;
+      // South America
+      if (lat >= -55 && lat <= 12 && lng >= -82 && lng <= -34) {
+        if (lat < -25 && lng < -72) return false;
+        if (lat < -20 && lng > -45) return false;
+        if (lat > 5 && lng < -75) return false;
+        if (lat < -38 && lng > -65) return false;
+        return true;
+      }
+      // Europe
+      if (lat >= 36 && lat <= 71 && lng >= -10 && lng <= 50) {
+        if (lat > 60 && lng > 30) return false;
+        if (lat < 40 && lng > 28) return false;
+        return true;
+      }
+      // British Isles
+      if (lat >= 50 && lat <= 60 && lng >= -10 && lng <= 2) return true;
+      // Scandinavia
+      if (lat >= 55 && lat <= 71 && lng >= 5 && lng <= 30) return true;
+      // Africa
+      if (lat >= -35 && lat <= 37 && lng >= -18 && lng <= 52) {
+        if (lat < -10 && lng > 40) return false;
+        if (lat > 20 && lng < -10) return false;
+        if (lat > 30 && lng > 30) return false;
+        return true;
+      }
+      // Asia main
+      if (lat >= 8 && lat <= 78 && lng >= 30 && lng <= 145) {
+        if (lat < 18 && lng > 105) return false;
+        if (lat > 70 && lng < 60) return false;
+        return true;
+      }
+      // Eastern Russia
+      if (lat >= 50 && lat <= 75 && lng >= 100 && lng <= 180) return true;
+      // Kamchatka
+      if (lat >= 52 && lat <= 62 && lng >= 155 && lng <= 165) return true;
+      // Japan
+      if (lat >= 30 && lat <= 46 && lng >= 130 && lng <= 146) return true;
+      // SE Asia / Indonesia / Philippines
+      if (lat >= -10 && lat <= 8 && lng >= 95 && lng <= 142) return true;
+      if (lat >= 5 && lat <= 20 && lng >= 117 && lng <= 127) return true;
+      // Australia
+      if (lat >= -40 && lat <= -10 && lng >= 112 && lng <= 154) return true;
+      // New Zealand
+      if (lat >= -47 && lat <= -34 && lng >= 165 && lng <= 178) return true;
+      return false;
+    };
+
+    // Generate dot-matrix grid for landmasses
+    const latStep = 2.4;
+    const lngStep = 3.0;
+    for (let lat = latMin; lat <= latMax; lat += latStep) {
+      for (let lng = lngMin; lng <= lngMax; lng += lngStep) {
+        if (isLand(lat, lng)) {
+          const [x, y] = geo(lat, lng);
+          this.nodes.push({
+            x, y,
+            r: 0.95,
+            a: 0.24,
+            mapDot: true,
+            phase: Math.random() * Math.PI * 2,
+            appearDelay: 200 + Math.random() * 600
+          });
+        }
+      }
+    }
+
+    // Six Stellantis design city hubs — geographically accurate
+    const cities = [
+      { lab: 'Detroit',           sub: 'USA',     lat: 42.33,  lng: -83.05,  delay: 900 },
+      { lab: 'Vélizy',            sub: 'France',  lat: 48.78,  lng: 2.20,    delay: 1500 },
+      { lab: 'Rüsselsheim',       sub: 'Germany', lat: 49.99,  lng: 8.42,    delay: 2000 },
+      { lab: 'Turin',             sub: 'Italy',   lat: 45.07,  lng: 7.69,    delay: 2500 },
+      { lab: 'Belo Horizonte',    sub: 'Brazil',  lat: -19.92, lng: -43.94,  delay: 3100 },
+      { lab: 'Shanghai',          sub: 'China',   lat: 31.23,  lng: 121.47,  delay: 3700 }
+    ];
+
+    const cityStart = this.nodes.length;
+    cities.forEach((c) => {
+      const [x, y] = geo(c.lat, c.lng);
       this.nodes.push({
-        x: r.x * this.w, y: r.y * this.h,
-        r: 6, a: 0.95,
+        x, y,
+        r: 6.5, a: 1,
         glow: true,
-        label: r.lab,
-        labelAbove: true,
+        color: '#C8FF1F',
+        cityLabel: c.lab,
+        citySub: c.sub,
+        labelOffsetY: c.lab === 'Detroit' || c.lab === 'Shanghai' || c.lab === 'Belo Horizonte' ? 18 : -10,
+        labelOffsetX: c.lab === 'Vélizy' ? -8 : (c.lab === 'Rüsselsheim' || c.lab === 'Turin' ? 14 : 0),
+        labelAlign: c.lab === 'Vélizy' ? 'right' : (c.lab === 'Rüsselsheim' || c.lab === 'Turin' ? 'left' : 'center'),
         phase: Math.random() * Math.PI * 2,
-        appearDelay: r.delay
+        appearDelay: c.delay
       });
     });
-    // Connections between all regions — appear after all nodes have ignited
-    for (let i = 0; i < regions.length; i++) {
-      for (let j = i + 1; j < regions.length; j++) {
+
+    // Inter-city connections (great-circle-ish straight lines) with subtle pulses
+    for (let i = 0; i < cities.length; i++) {
+      for (let j = i + 1; j < cities.length; j++) {
         this.edges.push({
-          a: start + i, b: start + j,
-          alpha: 0.12 + Math.random() * 0.08,
-          appearDelay: 3400 + Math.random() * 800,
-          pulse: Math.random() < 0.4,
+          a: cityStart + i, b: cityStart + j,
+          alpha: 0.13 + Math.random() * 0.07,
+          appearDelay: 4400 + Math.random() * 1000,
+          pulse: Math.random() < 0.55,
           pulseOffset: Math.random() * 2400,
-          pulsePeriod: 3200 + Math.random() * 1200
+          pulsePeriod: 3000 + Math.random() * 1400
         });
       }
     }
-    // Atmospheric backdrop
-    for (let i = 0; i < 90; i++) {
+
+    // Atmospheric backdrop — sparse, outside the map area mostly
+    for (let i = 0; i < 60; i++) {
       this.nodes.push({
         x: Math.random() * this.w,
         y: Math.random() * this.h,
-        vx: (Math.random() - 0.5) * 0.025,
-        vy: (Math.random() - 0.5) * 0.025,
-        r: 0.5 + Math.random() * 1,
-        a: 0.08, ambient: true,
+        vx: (Math.random() - 0.5) * 0.02,
+        vy: (Math.random() - 0.5) * 0.02,
+        r: 0.4 + Math.random() * 0.8,
+        a: 0.05, ambient: true,
         phase: Math.random() * Math.PI * 2
       });
     }
@@ -2276,6 +2385,32 @@ class NodeGraph {
       }
       ctx.fill();
       ctx.shadowBlur = 0;
+
+      // City labels — rendered on canvas next to the dot
+      if (n.cityLabel && t > 0.6) {
+        const lt = Math.min(1, (t - 0.6) / 0.4);
+        const oy = n.labelOffsetY || -10;
+        const ox = n.labelOffsetX || 0;
+        const align = n.labelAlign || 'center';
+        ctx.textAlign = align;
+        ctx.textBaseline = oy < 0 ? 'bottom' : 'top';
+        // City name
+        ctx.font = '600 13px "Inter", sans-serif';
+        ctx.fillStyle = this._rgba('#F4F1E8', lt);
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(n.cityLabel, n.x + ox, n.y + oy);
+        // Country / sub label
+        if (n.citySub) {
+          ctx.font = '500 9px "JetBrains Mono", monospace';
+          ctx.fillStyle = this._rgba('#C8FF1F', lt * 0.85);
+          const subOY = oy < 0 ? oy - 16 : oy + 16;
+          ctx.fillText(n.citySub.toUpperCase(), n.x + ox, n.y + subOY);
+        }
+        ctx.shadowBlur = 0;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+      }
     }
   }
 
