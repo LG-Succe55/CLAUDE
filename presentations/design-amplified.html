@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Amplified</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000;
+  --text: #F4F1E8;          /* soft warm white */
+  --text-mid: #6B6B72;       /* graphite */
+  --text-dim: #34343A;
+  --text-faint: #1A1A1F;
+  --acid: #C8FF1F;           /* acid green — sparingly */
+  --acid-soft: rgba(200, 255, 31, 0.18);
+  --acid-glow: rgba(200, 255, 31, 0.55);
+  --serif: 'Space Grotesk', system-ui, sans-serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-slow: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 400;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  cursor: default;
+}
+
+/* ===== STAGE — 16:9 letterboxed ===== */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  overflow: hidden;
+}
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  max-width: calc(100vh * 16 / 9);
+  max-height: calc(100vw * 9 / 16);
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ===== SLIDE ===== */
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.4s var(--ease-cinematic), visibility 0s 1.4s;
+  background: var(--bg);
+  overflow: hidden;
+}
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1.4s var(--ease-cinematic), visibility 0s 0s;
+}
+.slide-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.slide-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+/* ===== TYPOGRAPHY — large, confident, minimal ===== */
+.mega {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(72px, 12vw, 220px);
+  line-height: 0.86;
+  letter-spacing: -0.045em;
+  color: var(--text);
+}
+.mega em {
+  font-style: italic;
+  color: var(--acid);
+  font-weight: 400;
+}
+
+.big {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(40px, 6vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+.big em { font-style: italic; color: var(--acid); font-weight: 400; }
+
+.medium {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(28px, 4vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.medium em { font-style: italic; color: var(--acid); font-weight: 400; }
+
+.statement {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(24px, 3vw, 48px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-mid);
+}
+.statement em { color: var(--acid); font-style: italic; }
+.statement .strong { color: var(--text); font-style: normal; font-weight: 400; }
+
+.label {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.label.acid { color: var(--acid); }
+
+.signature {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+/* ===== REVEAL ANIMATIONS ===== */
+.slide.active .reveal {
+  animation: reveal 1.6s var(--ease-cinematic) forwards;
+}
+.reveal { opacity: 0; transform: translateY(28px); }
+@keyframes reveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide.active .r1 { animation-delay: 0.0s; }
+.slide.active .r2 { animation-delay: 0.4s; }
+.slide.active .r3 { animation-delay: 0.9s; }
+.slide.active .r4 { animation-delay: 1.5s; }
+.slide.active .r5 { animation-delay: 2.2s; }
+
+.slide.active .fade {
+  animation: fade 2s var(--ease-cinematic) forwards;
+}
+.fade { opacity: 0; }
+@keyframes fade { to { opacity: 1; } }
+.slide.active .fade-2 { animation-delay: 0.4s; }
+.slide.active .fade-3 { animation-delay: 0.9s; }
+.slide.active .fade-4 { animation-delay: 1.6s; }
+
+/* ===== SLIDE 1 — TITLE ===== */
+.s-title {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 0 8vw;
+}
+.s-title .super {
+  margin-bottom: clamp(40px, 5vw, 64px);
+}
+.s-title .h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(64px, 13vw, 240px);
+  line-height: 0.88;
+  letter-spacing: -0.05em;
+  margin-bottom: clamp(36px, 4vw, 56px);
+}
+.s-title .sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(20px, 2.4vw, 36px);
+  color: var(--text-mid);
+  letter-spacing: -0.015em;
+  margin-bottom: clamp(56px, 8vw, 96px);
+}
+.s-title .sub em { color: var(--acid); font-style: italic; }
+.s-title .credit {
+  font-family: var(--sans);
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  font-weight: 500;
+}
+
+/* ===== TYPE-ONLY SLIDES — centered statement ===== */
+.s-statement {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 0 10vw;
+}
+.s-statement .line1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(36px, 6vw, 88px);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  color: var(--text);
+}
+.s-statement .line2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(36px, 6vw, 88px);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  color: var(--acid);
+  font-style: italic;
+  margin-top: clamp(20px, 3vw, 36px);
+}
+
+/* ===== SLIDE 4 — Sketch wall (drifting type fragments) ===== */
+.s-wall {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.wall-anchor {
+  position: absolute;
+  bottom: 8vh;
+  left: 8vw;
+  z-index: 5;
+}
+.wall-anchor .label { margin-bottom: 1vh; }
+.wall-anchor .h {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(32px, 4.4vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  max-width: 18ch;
+}
+.wall-anchor .h em { font-style: italic; color: var(--acid); }
+.wall-fragments {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.wall-frag {
+  position: absolute;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  color: var(--text-mid);
+  letter-spacing: -0.005em;
+  opacity: 0;
+  animation: drift 8s var(--ease-cinematic) forwards;
+}
+.slide.active .wall-frag { animation-play-state: running; }
+.slide:not(.active) .wall-frag { animation-play-state: paused; opacity: 0; }
+@keyframes drift {
+  0% { opacity: 0; transform: translateY(20px); }
+  20% { opacity: 0.6; transform: translateY(0); }
+  80% { opacity: 0.4; transform: translateY(-12px); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+
+/* ===== SLIDE 5 — Challenge corner anchor ===== */
+.s-corner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.corner-anchor {
+  position: absolute;
+  top: 10vh;
+  right: 8vw;
+  max-width: 30ch;
+  z-index: 5;
+  text-align: right;
+}
+.corner-anchor.bottom-left {
+  top: auto; right: auto;
+  bottom: 10vh; left: 8vw;
+  text-align: left;
+}
+.corner-anchor .label { margin-bottom: 1.5vh; }
+.corner-anchor .h {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(32px, 4.4vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+  color: var(--text);
+}
+.corner-anchor .h em { font-style: italic; color: var(--acid); }
+.corner-anchor .sub {
+  margin-top: 2vh;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(16px, 1.8vw, 24px);
+  color: var(--text-mid);
+  line-height: 1.3;
+}
+
+/* ===== SLIDE 6 — The Moonshot ===== */
+.s-moonshot {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 0 10vw;
+}
+.s-moonshot .pre {
+  margin-bottom: clamp(40px, 6vw, 80px);
+}
+.s-moonshot .line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(40px, 7vw, 128px);
+  line-height: 1.0;
+  letter-spacing: -0.035em;
+  color: var(--acid);
+}
+
+/* ===== SLIDE 8 — Horizon ===== */
+.s-horizon {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.horizon-anchor {
+  position: absolute;
+  top: 9vh;
+  left: 8vw;
+  z-index: 5;
+}
+.horizon-line-wrap {
+  position: absolute;
+  top: 56%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 2;
+}
+.horizon-line {
+  position: absolute;
+  top: 0; left: 8vw; right: 8vw;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(244, 241, 232, 0.1) 8%,
+    rgba(244, 241, 232, 0.2) 50%,
+    rgba(244, 241, 232, 0.1) 92%,
+    transparent 100%
+  );
+}
+.horizon-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 1px;
+  width: 0%;
+  background: linear-gradient(90deg, transparent, var(--acid));
+  box-shadow: 0 0 14px var(--acid-glow);
+  transition: width 3.6s var(--ease-cinematic) 0.8s;
+}
+.slide.active .horizon-line::after { width: 100%; }
+.horizon-stops {
+  position: absolute;
+  top: 56%;
+  left: 8vw;
+  right: 8vw;
+  height: 0;
+  display: flex;
+  justify-content: space-between;
+  z-index: 3;
+}
+.horizon-stop {
+  position: relative;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.horizon-stop .stop-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--text-dim);
+  transition: all 1s var(--ease-cinematic);
+}
+.horizon-stop.lit .stop-dot {
+  background: var(--acid);
+  border-color: var(--acid);
+  box-shadow: 0 0 24px var(--acid-glow);
+}
+.horizon-stop .stop-when {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.9vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-top: clamp(24px, 3vw, 36px);
+  margin-bottom: clamp(8px, 1vw, 14px);
+  transition: color 1s var(--ease-cinematic);
+}
+.horizon-stop.lit .stop-when { color: var(--acid); }
+.horizon-stop .stop-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(18px, 2vw, 30px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--text-mid);
+  max-width: 18ch;
+  transition: color 1s var(--ease-cinematic);
+}
+.horizon-stop.lit .stop-title { color: var(--text); }
+.slide.active .horizon-stop[data-step="0"] { transition-delay: 0.4s; }
+.slide.active .horizon-stop[data-step="1"] { transition-delay: 1.2s; }
+.slide.active .horizon-stop[data-step="2"] { transition-delay: 2.0s; }
+.slide.active .horizon-stop[data-step="3"] { transition-delay: 2.8s; }
+
+/* ===== YEAR SLIDES (9, 10, 11) ===== */
+.s-year {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.year-mark {
+  position: absolute;
+  top: 8vh;
+  left: 8vw;
+  z-index: 5;
+}
+.year-mark .yr-label {
+  margin-bottom: 2vh;
+}
+.year-mark .yr-num {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(120px, 18vw, 320px);
+  line-height: 0.85;
+  letter-spacing: -0.055em;
+  color: var(--text);
+}
+.year-mark .yr-num em { font-style: italic; color: var(--acid); }
+.year-title-block {
+  position: absolute;
+  bottom: 10vh;
+  left: 8vw;
+  z-index: 5;
+  max-width: 60ch;
+}
+.year-title-block .yr-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(28px, 4vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.022em;
+  color: var(--text);
+  margin-bottom: 2vh;
+}
+.year-title-block .yr-title em { font-style: italic; color: var(--acid); }
+.year-title-block .yr-line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(16px, 1.8vw, 24px);
+  color: var(--text-mid);
+  letter-spacing: -0.005em;
+}
+
+/* ===== SLIDE 12 — Collective Intelligence hero ===== */
+.s-hero {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.hero-anchor {
+  position: absolute;
+  bottom: 10vh;
+  left: 8vw;
+  z-index: 5;
+}
+.hero-anchor .label { margin-bottom: 1.5vh; }
+.hero-anchor .hero-h {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(48px, 7vw, 120px);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  color: var(--text);
+}
+.hero-anchor .hero-h em { font-style: italic; color: var(--acid); }
+.hero-anchor .hero-sub {
+  margin-top: 2.5vh;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(18px, 2vw, 28px);
+  color: var(--text-mid);
+  letter-spacing: -0.005em;
+}
+
+/* ===== SLIDE 13/14 — Day in life ===== */
+.s-day {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 10vh 8vw 8vh;
+  display: flex;
+  flex-direction: column;
+}
+.day-header {
+  margin-bottom: clamp(40px, 5vw, 72px);
+}
+.day-header .label { margin-bottom: 2vh; }
+.day-header .h {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(32px, 4.4vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+.day-header .h em { font-style: italic; color: var(--acid); }
+.day-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.5vh, 18px);
+  flex: 1;
+  position: relative;
+}
+.day-list.flow::before {
+  /* a thin connecting light line on the future variant */
+  content: '';
+  position: absolute;
+  left: 36px;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--acid-soft) 20%, var(--acid-soft) 80%, transparent);
+}
+.day-line {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: clamp(28px, 3vw, 48px);
+  align-items: baseline;
+  padding: clamp(4px, 0.6vw, 8px) 0;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 1.0s var(--ease-cinematic), transform 1.0s var(--ease-cinematic);
+}
+.slide.active .day-line { opacity: 1; transform: translateY(0); }
+.slide.active .day-line:nth-of-type(1) { transition-delay: 0.4s; }
+.slide.active .day-line:nth-of-type(2) { transition-delay: 0.7s; }
+.slide.active .day-line:nth-of-type(3) { transition-delay: 1.0s; }
+.slide.active .day-line:nth-of-type(4) { transition-delay: 1.3s; }
+.slide.active .day-line:nth-of-type(5) { transition-delay: 1.6s; }
+.day-line .time {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(13px, 1.2vw, 18px);
+  color: var(--text-mid);
+  letter-spacing: 0.06em;
+}
+.day-line.flow .time { color: var(--acid); }
+.day-line .scene {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(22px, 2.6vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.day-line.dim .scene { color: var(--text-mid); }
+.day-footer {
+  margin-top: clamp(32px, 4vw, 56px);
+}
+.day-footer .quote {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(18px, 1.9vw, 26px);
+  color: var(--text-mid);
+  letter-spacing: -0.005em;
+  max-width: 60ch;
+}
+.day-footer .quote em { color: var(--acid); font-style: italic; }
+
+/* ===== SLIDE 15 — Design Review Future ===== */
+.s-review {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 0 8vw;
+}
+.review-tape {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--acid-soft) 30%, var(--acid-soft) 70%, transparent);
+}
+.review-tape.left { left: 16vw; }
+.review-tape.right { right: 16vw; }
+.s-review .review-label {
+  position: absolute;
+  top: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.s-review .review-q {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  max-width: 70vw;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(40px, 6vw, 96px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  color: var(--acid);
+}
+.s-review .review-trace {
+  position: absolute;
+  bottom: 24vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: clamp(20px, 3vw, 48px);
+  flex-wrap: wrap;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(11px, 1vw, 14px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.s-review .review-trace span:not(:first-child)::before {
+  content: '· ';
+  color: var(--text-dim);
+  margin-right: clamp(20px, 3vw, 48px);
+  margin-left: 0;
+}
+.s-review .review-foot {
+  position: absolute;
+  bottom: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(16px, 1.8vw, 24px);
+  color: var(--text-mid);
+  letter-spacing: -0.005em;
+  text-align: center;
+  max-width: 60ch;
+}
+.s-review .review-foot em { color: var(--acid); font-style: italic; }
+
+/* ===== SLIDE 16 — Success type-only two-column ===== */
+.s-success {
+  width: 100%;
+  height: 100%;
+  padding: 12vh 8vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.success-head {
+  margin-bottom: clamp(40px, 6vw, 80px);
+}
+.success-head .label { margin-bottom: 2vh; }
+.success-head .h {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(36px, 5vw, 72px);
+  line-height: 1.02;
+  letter-spacing: -0.028em;
+  color: var(--text);
+}
+.success-head .h em { font-style: italic; color: var(--acid); }
+.success-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 8vw, 128px);
+  flex: 1;
+}
+.success-col .col-label {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(11px, 1vw, 14px);
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  margin-bottom: clamp(28px, 4vw, 48px);
+}
+.success-col.today .col-label { color: var(--text-mid); }
+.success-col.future .col-label { color: var(--acid); }
+.success-col ul {
+  list-style: none;
+}
+.success-col li {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(20px, 2.4vw, 36px);
+  line-height: 1.5;
+  letter-spacing: -0.015em;
+  padding: clamp(8px, 1.2vw, 14px) 0;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.9s var(--ease-cinematic), transform 0.9s var(--ease-cinematic);
+}
+.success-col.today li { color: var(--text-mid); }
+.success-col.future li { color: var(--text); }
+.slide.active .success-col li { opacity: 1; transform: translateY(0); }
+.slide.active .success-col li:nth-child(1) { transition-delay: 0.4s; }
+.slide.active .success-col li:nth-child(2) { transition-delay: 0.55s; }
+.slide.active .success-col li:nth-child(3) { transition-delay: 0.7s; }
+.slide.active .success-col li:nth-child(4) { transition-delay: 0.85s; }
+.slide.active .success-col li:nth-child(5) { transition-delay: 1.0s; }
+
+/* ===== SLIDE 17 — CLOSING ===== */
+.s-close {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 0 10vw;
+}
+.s-close .line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(36px, 6vw, 104px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--text);
+}
+.s-close .line em {
+  font-style: italic;
+  color: var(--acid);
+  font-weight: 400;
+}
+
+/* ===== CHROME — autohide, film-like ===== */
+.chrome-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-cinematic);
+}
+.chrome-wrap.visible {
+  opacity: 1;
+}
+.chrome-wrap.visible > * { pointer-events: auto; }
+
+.nav-bar {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 8px 18px;
+  background: rgba(8, 8, 10, 0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 999px;
+  border: 1px solid rgba(244, 241, 232, 0.06);
+}
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-family: var(--mono);
+}
+.nav-btn:hover { background: rgba(244, 241, 232, 0.1); color: var(--acid); }
+.nav-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-mid);
+}
+.nav-count .cur { color: var(--text); }
+.kbd-hint {
+  position: absolute;
+  bottom: 28px;
+  right: 28px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: flex;
+  gap: 18px;
+}
+.kbd-hint kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid rgba(244, 241, 232, 0.1);
+  border-radius: 3px;
+  margin-right: 4px;
+  color: var(--text-mid);
+  font-family: var(--mono);
+}
+
+/* Edge-progress hairline */
+.edge-progress {
+  position: fixed;
+  bottom: 0; left: 0;
+  height: 1px;
+  background: var(--acid);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.6s var(--ease-cinematic);
+  z-index: 99;
+  box-shadow: 0 0 8px var(--acid-glow);
+  opacity: 0.5;
+}
+
+/* Notes panel */
+.notes-panel {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(6, 6, 8, 0.96);
+  backdrop-filter: blur(28px);
+  border-top: 1px solid var(--acid-soft);
+  padding: 24px 8vw 28px;
+  transform: translateY(100%);
+  transition: transform 0.5s var(--ease-cinematic);
+  z-index: 110;
+}
+.notes-panel.open { transform: translateY(0); }
+.notes-panel .nlabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.notes-panel .ncontent {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(16px, 1.4vw, 22px);
+  color: var(--text);
+  line-height: 1.5;
+  max-width: 80%;
+}
+
+@media (max-width: 768px) {
+  .success-cols { grid-template-columns: 1fr; gap: 40px; }
+  .nav-bar { bottom: 12px; }
+  .kbd-hint { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="edge-progress" id="edgeProgress"></div>
+
+<div class="stage">
+<div class="deck" id="deck">
+
+<!-- ====================================================== -->
+<!-- 01 — TITLE -->
+<!-- ====================================================== -->
+<section class="slide active" data-slide="1" data-graph="dense-atmospheric" data-notes="The future advantage of Design will not be AI itself. It will be the ability to capture, preserve, connect, and scale organizational judgment.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-title">
+      <div class="super reveal r1"><span class="signature">STELLANTIS · PRODUCT DESIGN OFFICE</span></div>
+      <h1 class="h1 reveal r2">Design<br>Amplified</h1>
+      <div class="sub reveal r3">From Individual Expertise<br>to <em>Organizational Intelligence</em></div>
+      <div class="credit reveal r4">A Vision · 2026 — 2032</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 02 — THE THESIS -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="2" data-graph="ambient-sparse" data-notes="Set the frame. The conversation is not about AI. It is about what Design becomes if it learns.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-statement">
+      <div class="line1 reveal r1">The future advantage of Design</div>
+      <div class="line1 reveal r2">will not be Artificial Intelligence.</div>
+      <div class="line2 reveal r3">It will be what we do with what we know.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 03 — THE PREMISE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="3" data-graph="ambient-sparse" data-notes="The shift is from technology to organization. Design must evolve as an organism, not adopt a tool.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-statement">
+      <div class="line1 reveal r1">Design is not a technology problem.</div>
+      <div class="line2 reveal r3">Design is an organizational one.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 04 — TODAY'S REALITY (sketch wall) -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="4" data-graph="ambient-very-faint" data-notes="The sketch wall is full. Every program produces brilliance — most of it lives in the people who made it.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-wall">
+      <div class="wall-fragments" id="wallFragments"></div>
+      <div class="wall-anchor reveal r5">
+        <div class="label">TODAY</div>
+        <div class="h">Expertise lives in<br><em>individuals.</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 05 — THE CHALLENGE — knowledge trapped -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="5" data-graph="escape-clusters" data-notes="Watch the motion. Knowledge tries to move between clusters. Most never arrives. The audience should feel the inefficiency.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-corner">
+      <div class="corner-anchor bottom-left reveal r5">
+        <div class="label">THE CHALLENGE</div>
+        <div class="h">Valuable knowledge<br>created every day.<br><em>Rarely reused.</em></div>
+        <div class="sub">Theme reviews. Customer clinics. Engineering tradeoffs. Lessons. — held inside the rooms that made them.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 06 — THE MOONSHOT -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="6" data-graph="silent" data-notes="Allow silence. This is the emotional anchor of the deck. Land it slowly. Hold the pause.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-moonshot">
+      <div class="pre reveal r1"><span class="label acid">THE MOONSHOT</span></div>
+      <div class="line reveal r3">Design becomes<br>a learning organization.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 07 — THE PATH (bridge to roadmap) -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="7" data-graph="ambient-sparse" data-notes="Setup for the roadmap. The shift is named.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-statement">
+      <div class="line1 reveal r1">From individual brilliance</div>
+      <div class="line2 reveal r3">to collective intelligence.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 08 — TRANSFORMATION ROADMAP — horizon -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="8" data-graph="ambient-faint-far" data-notes="A horizon — not a roadmap. The journey of capability across years.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-horizon">
+      <div class="horizon-anchor reveal r1">
+        <div class="label" style="margin-bottom: 2vh">THE PATH</div>
+        <div class="medium">A horizon, not a roadmap.</div>
+      </div>
+      <div class="horizon-line-wrap">
+        <div class="horizon-line"></div>
+      </div>
+      <div class="horizon-stops">
+        <div class="horizon-stop lit" data-step="0">
+          <div class="stop-dot"></div>
+          <div class="stop-when">Today</div>
+          <div class="stop-title">Information</div>
+        </div>
+        <div class="horizon-stop lit" data-step="1">
+          <div class="stop-dot"></div>
+          <div class="stop-when">Year 1</div>
+          <div class="stop-title">Individual<br>intelligence amplified</div>
+        </div>
+        <div class="horizon-stop lit" data-step="2">
+          <div class="stop-dot"></div>
+          <div class="stop-when">Year 3</div>
+          <div class="stop-title">Collective design<br>intelligence</div>
+        </div>
+        <div class="horizon-stop lit" data-step="3">
+          <div class="stop-dot"></div>
+          <div class="stop-when">Year 6</div>
+          <div class="stop-title">Learning design<br>organization</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 09 — YEAR 1 — Individual Intelligence Amplified -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="9" data-graph="designer-orbit" data-notes="The designer remains central. AI surrounds and supports — never substitutes. The work of judgment stays human.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-year">
+      <div class="year-mark reveal r1">
+        <div class="yr-label"><span class="label">YEAR 01 · 2026</span></div>
+        <div class="yr-num"><em>01</em></div>
+      </div>
+      <div class="year-title-block reveal r3">
+        <div class="yr-title">Individual intelligence<br><em>amplified.</em></div>
+        <div class="yr-line">The designer stays central. Intelligence surrounds and supports.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 10 — YEAR 3 — Collective Design Intelligence -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="10" data-graph="collective-network" data-notes="Knowledge moves between people, teams, regions. A pulse leaves one node and arrives at many. Learning becomes shared.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-year">
+      <div class="year-mark reveal r1">
+        <div class="yr-label"><span class="label">YEAR 03 · 2028</span></div>
+        <div class="yr-num"><em>03</em></div>
+      </div>
+      <div class="year-title-block reveal r3">
+        <div class="yr-title">Collective design<br><em>intelligence.</em></div>
+        <div class="yr-line">Knowledge moves between people, teams, and regions. Learning becomes shared.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 11 — YEAR 6 — Learning Design Organization -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="11" data-graph="growing-organism" data-notes="The network visibly grows. Every program adds a node. Every decision leaves a trace. The organism becomes smarter.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-year">
+      <div class="year-mark reveal r1">
+        <div class="yr-label"><span class="label">YEAR 06 · 2031</span></div>
+        <div class="yr-num"><em>06</em></div>
+      </div>
+      <div class="year-title-block reveal r3">
+        <div class="yr-title">A learning design<br><em>organization.</em></div>
+        <div class="yr-line">Every decision leaves a trace. Every program makes the next program better.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 12 — COLLECTIVE INTELLIGENCE — hero, full bleed -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="12" data-graph="dense-graph-hero" data-notes="The hero. Full bleed knowledge graph. The organization remembers. This should land emotionally — not technically.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-hero">
+      <div class="hero-anchor reveal r4">
+        <div class="label">COLLECTIVE INTELLIGENCE</div>
+        <div class="hero-h">The organization<br><em>remembers.</em></div>
+        <div class="hero-sub">Every project. Every review. Every decision. Connected.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 13 — DAY IN THE LIFE — TODAY -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="13" data-graph="ambient-very-faint" data-notes="Friction. Searching. Waiting. Disconnected information. The audience should feel the weight of the day.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-day">
+      <div class="day-header reveal r1">
+        <div class="label">A DAY IN THE LIFE — TODAY</div>
+        <div class="h">Friction.</div>
+      </div>
+      <div class="day-list">
+        <div class="day-line dim"><div class="time">09:00</div><div class="scene">Searching for prior research</div></div>
+        <div class="day-line dim"><div class="time">10:30</div><div class="scene">Rebuilding context from a deck written by someone who left</div></div>
+        <div class="day-line dim"><div class="time">12:00</div><div class="scene">Asking three teams the same question</div></div>
+        <div class="day-line dim"><div class="time">14:00</div><div class="scene">Waiting for an answer that exists somewhere</div></div>
+        <div class="day-line dim"><div class="time">16:30</div><div class="scene">Repeating a review the previous program already had</div></div>
+      </div>
+      <div class="day-footer reveal r5">
+        <div class="quote">Knowledge exists. <em>Access does not.</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 14 — DAY IN THE LIFE — FUTURE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="14" data-graph="ambient-faint" data-notes="Flow. Context. Confidence. The contrast with the prior slide should be obvious without saying so.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-day">
+      <div class="day-header reveal r1">
+        <div class="label acid">A DAY IN THE LIFE — 2032</div>
+        <div class="h">Flow.</div>
+      </div>
+      <div class="day-list flow">
+        <div class="day-line flow"><div class="time">08:00</div><div class="scene">A briefing assembles itself — the program's overnight signal</div></div>
+        <div class="day-line flow"><div class="time">10:00</div><div class="scene">A sketch lands · the package agent answers before the question is asked</div></div>
+        <div class="day-line flow"><div class="time">12:00</div><div class="scene">A breakthrough in another studio arrives, framed in context</div></div>
+        <div class="day-line flow"><div class="time">14:00</div><div class="scene">A review with humans and agents — discussion is judgment, not lookup</div></div>
+        <div class="day-line flow"><div class="time">16:00</div><div class="scene">Every decision today becomes tomorrow's starting point</div></div>
+      </div>
+      <div class="day-footer reveal r5">
+        <div class="quote">The organization brings <em>context to the designer.</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 15 — DESIGN REVIEW IN 2032 -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="15" data-graph="ambient-very-faint" data-notes="The room is familiar. Information already present. The conversation is judgment, taste, vision.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-review">
+      <div class="review-tape left"></div>
+      <div class="review-tape right"></div>
+      <div class="review-label reveal r1"><span class="label">A DESIGN REVIEW · 2032</span></div>
+      <div class="review-q reveal r3">"Have we solved this<br>before?"</div>
+      <div class="review-trace reveal r4">
+        <span>Decision</span>
+        <span>Rationale</span>
+        <span>Tradeoffs</span>
+        <span>Outcome</span>
+        <span>Authority</span>
+      </div>
+      <div class="review-foot reveal r5">
+        Information is already in the room.<br>
+        The conversation becomes <em>judgment, taste, and vision.</em>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 16 — WHAT SUCCESS LOOKS LIKE — type-only -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="16" data-graph="ambient-very-faint" data-notes="The picture of success. Not measured in software deployed. Measured in how the organization thinks.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-success">
+      <div class="success-head reveal r1">
+        <div class="label">WHAT SUCCESS LOOKS LIKE</div>
+        <div class="h">A <em>smarter</em> organization.</div>
+      </div>
+      <div class="success-cols">
+        <div class="success-col today">
+          <div class="col-label">TODAY</div>
+          <ul>
+            <li>Repeated work</li>
+            <li>Lost rationale</li>
+            <li>Siloed expertise</li>
+            <li>Delayed decisions</li>
+            <li>Manual reporting</li>
+          </ul>
+        </div>
+        <div class="success-col future">
+          <div class="col-label">FUTURE</div>
+          <ul>
+            <li>Reusable judgment</li>
+            <li>Connected expertise</li>
+            <li>Faster exploration</li>
+            <li>Earlier risk visibility</li>
+            <li>Better decisions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 17 — CLOSING -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="17" data-graph="dense-atmospheric-quiet" data-notes="Quiet. Confident. Allow black space. Leave the room with one thought.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-close">
+      <div class="line reveal r3">Design becomes<br>an <em>organization that learns.</em></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<!-- Chrome (autohide / keypress) -->
+<div class="chrome-wrap" id="chromeWrap">
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="prevSlide()" aria-label="Previous">‹</button>
+    <span class="nav-count"><span class="cur" id="currentMark">01</span> · <span id="totalMark">17</span></span>
+    <button class="nav-btn" onclick="nextSlide()" aria-label="Next">›</button>
+  </div>
+  <div class="kbd-hint">
+    <span><kbd>← →</kbd>Navigate</span>
+    <span><kbd>H</kbd>UI</span>
+    <span><kbd>N</kbd>Notes</span>
+    <span><kbd>F</kbd>Fullscreen</span>
+  </div>
+</div>
+
+<div class="notes-panel" id="notesPanel">
+  <div class="nlabel">SPEAKER NOTES</div>
+  <div class="ncontent" id="notesContent"></div>
+</div>
+
+<script>
+// ============================================================
+// NETWORK ENGINE — narrative motion
+// ============================================================
+class NodeGraph {
+  constructor(canvas, config) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.config = config;
+    this.nodes = [];
+    this.edges = [];
+    this.t = 0;
+    this.started = false;
+    this.rafId = null;
+    this.resize();
+    this._build();
+  }
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.w = rect.width;
+    this.h = rect.height;
+  }
+
+  _build() {
+    const t = this.config.type;
+    switch (t) {
+      case 'dense-atmospheric': this._ambient(320, 0.55); break;
+      case 'dense-atmospheric-quiet': this._ambient(280, 0.45); break;
+      case 'ambient-sparse': this._ambient(60, 0.16); break;
+      case 'ambient-very-faint': this._ambient(40, 0.10); break;
+      case 'ambient-faint': this._ambient(80, 0.20); break;
+      case 'ambient-faint-far': this._ambient(120, 0.18); break;
+      case 'silent': this._ambient(20, 0.08); break;
+      case 'escape-clusters': this._buildEscapeClusters(); break;
+      case 'designer-orbit': this._buildDesignerOrbit(); break;
+      case 'collective-network': this._buildCollectiveNetwork(); break;
+      case 'growing-organism': this._buildGrowingOrganism(); break;
+      case 'dense-graph-hero': this._buildDenseHero(); break;
+      default: this._ambient(60, 0.18);
+    }
+  }
+
+  _ambient(count, alphaScale) {
+    for (let i = 0; i < count; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.05,
+        vy: (Math.random() - 0.5) * 0.05,
+        r: 0.6 + Math.random() * 1.6,
+        a: 0.08 + Math.random() * alphaScale,
+        glow: Math.random() < 0.04,
+        phase: Math.random() * Math.PI * 2,
+        ambient: true
+      });
+    }
+    // very sparse edges
+    for (let i = 0; i < this.nodes.length; i++) {
+      for (let j = i + 1; j < this.nodes.length; j++) {
+        const d = Math.hypot(this.nodes[i].x - this.nodes[j].x, this.nodes[i].y - this.nodes[j].y);
+        if (d < 90 && Math.random() < 0.012) {
+          this.edges.push({ a: i, b: j, alpha: 0.04, ambient: true });
+        }
+      }
+    }
+  }
+
+  // ===== S5: Three clusters with knowledge that escapes and fades =====
+  _buildEscapeClusters() {
+    const clusters = [
+      { x: this.w * 0.22, y: this.h * 0.55, label: 'Design Review' },
+      { x: this.w * 0.5, y: this.h * 0.45, label: 'Customer Clinic' },
+      { x: this.w * 0.78, y: this.h * 0.55, label: 'Engineering Review' }
+    ];
+    clusters.forEach((c, ci) => {
+      // Central node
+      this.nodes.push({
+        x: c.x, y: c.y, r: 5, a: 0.95,
+        glow: true, centerNode: true,
+        label: c.label,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: ci * 350,
+        cluster: ci
+      });
+      const cIdx = this.nodes.length - 1;
+      // 10 particles around each that constantly spawn/escape
+      for (let i = 0; i < 10; i++) {
+        const angle = (i / 10) * Math.PI * 2;
+        const r = 28 + Math.random() * 20;
+        this.nodes.push({
+          x: c.x + Math.cos(angle) * r,
+          y: c.y + Math.sin(angle) * r,
+          baseX: c.x, baseY: c.y,
+          escapeAngle: angle + (Math.random() - 0.5) * 0.4,
+          escapeRadius: 0,
+          escapeMax: 60 + Math.random() * 80,
+          escapeSpeed: 0.0003 + Math.random() * 0.0004,
+          escapePhaseOffset: Math.random() * 4000,
+          r: 1.4 + Math.random() * 1,
+          a: 0.5,
+          phase: Math.random() * Math.PI * 2,
+          appearDelay: ci * 350 + i * 60,
+          escape: true,
+          cluster: ci
+        });
+        this.edges.push({
+          a: cIdx, b: this.nodes.length - 1,
+          alpha: 0.14, ambient: true,
+          appearDelay: ci * 350 + 200
+        });
+      }
+    });
+    // Ambient backdrop
+    const ambientStart = this.nodes.length;
+    for (let i = 0; i < 50; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.03,
+        vy: (Math.random() - 0.5) * 0.03,
+        r: 0.6 + Math.random() * 1.2,
+        a: 0.12,
+        ambient: true,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  // ===== S9: Single designer at center, intelligence orbits =====
+  _buildDesignerOrbit() {
+    const cx = this.w * 0.62;  // shifted right for type on left
+    const cy = this.h * 0.5;
+    // Central — soft warm white designer node
+    this.nodes.push({
+      x: cx, y: cy, r: 10, a: 1,
+      centerNode: true, designer: true,
+      color: '#F4F1E8', glow: true,
+      phase: 0
+    });
+    const dIdx = this.nodes.length - 1;
+    // Three orbiting rings of intelligence particles
+    const rings = [
+      { count: 8, radius: this.h * 0.18, speed: 0.0002, alpha: 0.45 },
+      { count: 14, radius: this.h * 0.28, speed: 0.00012, alpha: 0.32 },
+      { count: 22, radius: this.h * 0.38, speed: 0.00008, alpha: 0.22 }
+    ];
+    rings.forEach((ring, ri) => {
+      for (let i = 0; i < ring.count; i++) {
+        const a0 = (i / ring.count) * Math.PI * 2;
+        this.nodes.push({
+          x: cx + Math.cos(a0) * ring.radius,
+          y: cy + Math.sin(a0) * ring.radius,
+          orbitCx: cx, orbitCy: cy,
+          orbitR: ring.radius,
+          orbitA: a0,
+          orbitSpeed: ring.speed,
+          r: 1.6 + Math.random() * 1.4,
+          a: ring.alpha,
+          glow: Math.random() < 0.15,
+          phase: Math.random() * Math.PI * 2,
+          appearDelay: ri * 250 + i * 30,
+          orbit: true
+        });
+        if (ri === 0 && Math.random() < 0.4) {
+          this.edges.push({
+            a: dIdx, b: this.nodes.length - 1,
+            alpha: 0.18, ambient: true,
+            appearDelay: ri * 250 + 200
+          });
+        }
+      }
+    });
+    // Sparse ambient
+    for (let i = 0; i < 40; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.03,
+        vy: (Math.random() - 0.5) * 0.03,
+        r: 0.6 + Math.random() * 1,
+        a: 0.1, ambient: true,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  // ===== S10: Several connected nodes with pulses traveling =====
+  _buildCollectiveNetwork() {
+    // 7 nodes representing people/teams/regions — generous spacing
+    const positions = [
+      { x: 0.58, y: 0.32 },
+      { x: 0.78, y: 0.42 },
+      { x: 0.86, y: 0.62 },
+      { x: 0.72, y: 0.78 },
+      { x: 0.5, y: 0.7 },
+      { x: 0.45, y: 0.48 },
+      { x: 0.66, y: 0.52 }
+    ];
+    const start = this.nodes.length;
+    positions.forEach((p, i) => {
+      this.nodes.push({
+        x: p.x * this.w, y: p.y * this.h,
+        r: i === 6 ? 8 : 6,
+        a: 0.95,
+        glow: i === 6,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: 200 + i * 200
+      });
+    });
+    // Connect every node to every other; mark pulses
+    for (let i = 0; i < positions.length; i++) {
+      for (let j = i + 1; j < positions.length; j++) {
+        this.edges.push({
+          a: start + i, b: start + j,
+          alpha: 0.16 + Math.random() * 0.08,
+          appearDelay: 800 + (i + j) * 100,
+          pulse: true,
+          pulseOffset: Math.random() * 3000,
+          pulsePeriod: 2400 + Math.random() * 1600
+        });
+      }
+    }
+    // Backdrop
+    for (let i = 0; i < 50; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.03,
+        vy: (Math.random() - 0.5) * 0.03,
+        r: 0.6 + Math.random() * 1,
+        a: 0.1, ambient: true,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  // ===== S11: Growing organism — adds nodes + connections over time =====
+  _buildGrowingOrganism() {
+    // Seed with a few central nodes
+    const seedPositions = [
+      { x: 0.62, y: 0.46 },
+      { x: 0.7, y: 0.55 },
+      { x: 0.54, y: 0.55 }
+    ];
+    seedPositions.forEach((p, i) => {
+      this.nodes.push({
+        x: p.x * this.w, y: p.y * this.h,
+        r: 5, a: 0.95, glow: true,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 200
+      });
+    });
+    // Generate growth events programmatically (additional nodes appear)
+    this.growth = [];
+    let nextDelay = 800;
+    for (let i = 0; i < 38; i++) {
+      // attach new node to a random existing one (preferential attachment vibe)
+      const attachIdx = Math.floor(Math.random() * Math.min(this.nodes.length + i, 12));
+      const seedRef = seedPositions[Math.min(attachIdx, seedPositions.length - 1)];
+      const baseX = (seedRef.x * this.w);
+      const baseY = (seedRef.y * this.h);
+      // Random angle outward from center area
+      const ang = Math.random() * Math.PI * 2;
+      const dist = 40 + Math.random() * 200 + i * 4;
+      const nx = baseX + Math.cos(ang) * dist;
+      const ny = baseY + Math.sin(ang) * dist;
+      this.growth.push({
+        appear: nextDelay,
+        attachIdx,
+        x: Math.max(20, Math.min(this.w - 20, nx)),
+        y: Math.max(20, Math.min(this.h - 20, ny)),
+        r: 2.2 + Math.random() * 2,
+        glow: Math.random() < 0.18
+      });
+      nextDelay += 220 + Math.random() * 200;
+    }
+    // Backdrop
+    for (let i = 0; i < 60; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.025,
+        vy: (Math.random() - 0.5) * 0.025,
+        r: 0.6 + Math.random() * 1,
+        a: 0.1, ambient: true,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  // ===== S12: Dense knowledge graph (hero) =====
+  _buildDenseHero() {
+    // Hand-placed cluster — feels organic but laid out
+    const positions = [];
+    // Three loose galaxies
+    const galaxies = [
+      { cx: 0.55, cy: 0.4, count: 18 },
+      { cx: 0.72, cy: 0.55, count: 14 },
+      { cx: 0.4, cy: 0.6, count: 12 }
+    ];
+    galaxies.forEach((g) => {
+      for (let i = 0; i < g.count; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = Math.random() * Math.min(this.w, this.h) * 0.18;
+        positions.push({
+          x: g.cx * this.w + Math.cos(a) * r,
+          y: g.cy * this.h + Math.sin(a) * r,
+          hub: i < 2
+        });
+      }
+    });
+    const start = this.nodes.length;
+    positions.forEach((p, i) => {
+      this.nodes.push({
+        x: p.x, y: p.y,
+        r: p.hub ? 5 : 3,
+        a: 0.9, glow: p.hub,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 50
+      });
+    });
+    // Edges — nearest-neighbor + occasional long range
+    for (let i = 0; i < positions.length; i++) {
+      const candidates = [];
+      for (let j = 0; j < positions.length; j++) {
+        if (i === j) continue;
+        const d = Math.hypot(positions[i].x - positions[j].x, positions[i].y - positions[j].y);
+        candidates.push({ idx: j, d });
+      }
+      candidates.sort((a, b) => a.d - b.d);
+      const localCount = 2 + Math.floor(Math.random() * 3);
+      for (let k = 0; k < localCount; k++) {
+        if (Math.random() < 0.7) {
+          this.edges.push({
+            a: start + i, b: start + candidates[k].idx,
+            alpha: 0.12 + Math.random() * 0.1,
+            appearDelay: 800 + Math.random() * 1800,
+            pulse: Math.random() < 0.25,
+            pulseOffset: Math.random() * 3000,
+            pulsePeriod: 3000 + Math.random() * 2000
+          });
+        }
+      }
+      // long range
+      if (Math.random() < 0.1) {
+        const far = candidates[candidates.length - 1 - Math.floor(Math.random() * 4)];
+        this.edges.push({
+          a: start + i, b: start + far.idx,
+          alpha: 0.06,
+          appearDelay: 1500 + Math.random() * 1500
+        });
+      }
+    }
+    // Ambient backdrop
+    for (let i = 0; i < 80; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.025,
+        vy: (Math.random() - 0.5) * 0.025,
+        r: 0.5 + Math.random() * 1,
+        a: 0.08, ambient: true,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  start() {
+    if (this.started) return;
+    this.started = true;
+    this.startTime = performance.now();
+    this._loop();
+  }
+  stop() {
+    this.started = false;
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+  }
+  _loop() {
+    if (!this.started) return;
+    this.t = performance.now() - this.startTime;
+    this._render(this.t);
+    this.rafId = requestAnimationFrame(() => this._loop());
+  }
+
+  _render(elapsed) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.w, this.h);
+
+    // ===== Growth events (S11) =====
+    if (this.growth) {
+      const realCount = this.growth.length;
+      for (let g = 0; g < realCount; g++) {
+        const ev = this.growth[g];
+        if (ev.spawned) continue;
+        if (elapsed >= ev.appear) {
+          const newIdx = this.nodes.length;
+          this.nodes.push({
+            x: ev.x, y: ev.y,
+            r: ev.r, a: 0.85,
+            glow: ev.glow,
+            phase: Math.random() * Math.PI * 2,
+            appearDelay: elapsed
+          });
+          this.edges.push({
+            a: ev.attachIdx, b: newIdx,
+            alpha: 0.18,
+            appearDelay: elapsed,
+            pulse: Math.random() < 0.35,
+            pulseOffset: Math.random() * 1000,
+            pulsePeriod: 2400
+          });
+          ev.spawned = true;
+        }
+      }
+    }
+
+    // ===== Update positions =====
+    for (const n of this.nodes) {
+      if (n.ambient) {
+        n.x += n.vx || 0; n.y += n.vy || 0;
+        if (n.x < 0 || n.x > this.w) n.vx *= -1;
+        if (n.y < 0 || n.y > this.h) n.vy *= -1;
+      } else if (n.orbit) {
+        n.orbitA += n.orbitSpeed * 16;
+        n.x = n.orbitCx + Math.cos(n.orbitA) * n.orbitR;
+        n.y = n.orbitCy + Math.sin(n.orbitA) * n.orbitR;
+      } else if (n.escape) {
+        // Particles cycle outward then disappear (knowledge attempting to escape)
+        const cyclePos = ((elapsed + n.escapePhaseOffset) * n.escapeSpeed) % 1;
+        n.escapeRadius = cyclePos * n.escapeMax;
+        n.x = n.baseX + Math.cos(n.escapeAngle) * n.escapeRadius;
+        n.y = n.baseY + Math.sin(n.escapeAngle) * n.escapeRadius;
+        // alpha fades as it travels
+        n._currentA = 0.55 * (1 - cyclePos);
+      }
+    }
+
+    // ===== Draw edges =====
+    for (const e of this.edges) {
+      const delay = e.appearDelay || 0;
+      const t = Math.min(1, Math.max(0, (elapsed - delay) / 1200));
+      if (t <= 0) continue;
+      const a = this.nodes[e.a], b = this.nodes[e.b];
+      if (!a || !b) continue;
+      const x1 = a.x, y1 = a.y;
+      const x2 = a.x + (b.x - a.x) * t;
+      const y2 = a.y + (b.y - a.y) * t;
+      const baseAlpha = e.alpha * t;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+      ctx.strokeStyle = `rgba(244, 241, 232, ${baseAlpha})`;
+      ctx.lineWidth = 0.6;
+      ctx.shadowBlur = 0;
+      ctx.stroke();
+
+      // Pulse traveling
+      if (e.pulse && t >= 1) {
+        const period = e.pulsePeriod || 2400;
+        const offset = e.pulseOffset || 0;
+        const ph = ((elapsed + offset) / period) % 1;
+        const px = a.x + (b.x - a.x) * ph;
+        const py = a.y + (b.y - a.y) * ph;
+        const pulseAlpha = Math.sin(ph * Math.PI);
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 255, 31, ${0.85 * pulseAlpha})`;
+        ctx.shadowColor = 'rgba(200, 255, 31, 0.7)';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // ===== Draw nodes =====
+    for (const n of this.nodes) {
+      const delay = n.appearDelay || 0;
+      const t = Math.min(1, Math.max(0, (elapsed - delay) / 1000));
+      if (t <= 0) continue;
+      const pulse = n.glow ? 0.75 + 0.25 * Math.sin(elapsed / 900 + (n.phase || 0)) : 1;
+      const r = (n.r || 2) * t;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      const color = n.color || (n.glow ? '#C8FF1F' : '#F4F1E8');
+      const baseA = n._currentA !== undefined ? n._currentA : n.a;
+      const alpha = baseA * t * pulse;
+      ctx.fillStyle = this._rgba(color, alpha);
+      if (n.glow) {
+        ctx.shadowColor = this._rgba(color, 0.7);
+        ctx.shadowBlur = 18 * pulse;
+      }
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  _rgba(hex, alpha) {
+    if (hex.startsWith('rgb')) return hex;
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+}
+
+// ============================================================
+// WALL FRAGMENTS — drifting type for S4
+// ============================================================
+function spawnWallFragments() {
+  const wall = document.getElementById('wallFragments');
+  if (!wall) return;
+  wall.innerHTML = '';
+  const fragments = [
+    'theme review · march 2024',
+    'package study — second row',
+    'A-pillar proportion',
+    'brand DNA · '+'“'+'horizon'+'”',
+    'CMF — sustainable matte',
+    'customer clinic · west region',
+    'rejected · sketch wall',
+    'lessons learned · program K',
+    'aero study — third pass',
+    'leadership review notes',
+    'supplier feedback',
+    'meeting transcript',
+    'engineering tradeoff',
+    'surfacing iteration 14',
+    'side glass · DLO',
+    'wheel arch ratio'
+  ];
+  fragments.forEach((text, i) => {
+    const el = document.createElement('div');
+    el.className = 'wall-frag';
+    el.textContent = text;
+    el.style.fontSize = (14 + Math.random() * 18) + 'px';
+    el.style.left = (5 + Math.random() * 70) + 'vw';
+    el.style.top = (10 + Math.random() * 65) + 'vh';
+    el.style.animationDelay = (i * 0.3) + 's';
+    el.style.animationDuration = (7 + Math.random() * 4) + 's';
+    wall.appendChild(el);
+  });
+}
+
+// ============================================================
+// SLIDE MANAGER
+// ============================================================
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 1;
+const graphs = new Map();
+
+document.getElementById('totalMark').textContent = String(total).padStart(2, '0');
+
+function showSlide(n) {
+  if (n < 1) n = 1;
+  if (n > total) n = total;
+  if (graphs.has(current)) graphs.get(current).stop();
+  current = n;
+  slides.forEach((s, i) => s.classList.toggle('active', i === n - 1));
+  document.getElementById('currentMark').textContent = String(n).padStart(2, '0');
+  document.getElementById('edgeProgress').style.transform = `scaleX(${n / total})`;
+  document.getElementById('notesContent').textContent = slides[n - 1].dataset.notes || '';
+  setTimeout(() => initSlideGraph(n), 80);
+  if (n === 4) spawnWallFragments();
+}
+
+function initSlideGraph(n) {
+  const slide = slides[n - 1];
+  const canvas = slide.querySelector('.slide-canvas');
+  if (!canvas) return;
+  const type = slide.dataset.graph;
+  if (!type) return;
+  if (graphs.has(n)) graphs.get(n).stop();
+  const g = new NodeGraph(canvas, { type });
+  graphs.set(n, g);
+  g.start();
+}
+
+function nextSlide() { showSlide(current + 1); }
+function prevSlide() { showSlide(current - 1); }
+
+// Chrome autohide
+let chromeTimer;
+const chromeWrap = document.getElementById('chromeWrap');
+function flashChrome() {
+  chromeWrap.classList.add('visible');
+  clearTimeout(chromeTimer);
+  chromeTimer = setTimeout(() => chromeWrap.classList.remove('visible'), 3000);
+}
+let chromeLocked = false;
+function toggleChromeLock() {
+  chromeLocked = !chromeLocked;
+  if (chromeLocked) {
+    chromeWrap.classList.add('visible');
+    clearTimeout(chromeTimer);
+  } else {
+    chromeWrap.classList.remove('visible');
+  }
+}
+
+document.addEventListener('mousemove', () => {
+  if (!chromeLocked) flashChrome();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  else if (e.key === 'Home') { e.preventDefault(); showSlide(1); }
+  else if (e.key === 'End') { e.preventDefault(); showSlide(total); }
+  else if (e.key === 'h' || e.key === 'H') { e.preventDefault(); toggleChromeLock(); }
+  else if (e.key === 'n' || e.key === 'N') {
+    e.preventDefault();
+    document.getElementById('notesPanel').classList.toggle('open');
+  } else if (e.key === 'f' || e.key === 'F') {
+    e.preventDefault();
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen().catch(() => {});
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.chrome-wrap') || e.target.closest('.notes-panel')) return;
+  nextSlide();
+});
+
+window.addEventListener('resize', () => {
+  setTimeout(() => initSlideGraph(current), 100);
+});
+
+setTimeout(() => initSlideGraph(1), 80);
+showSlide(1);
+</script>
+</body>
+</html>
