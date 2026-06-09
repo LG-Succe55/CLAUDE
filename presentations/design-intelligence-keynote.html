@@ -1,0 +1,2974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Intelligence — From Individual Expertise to Collective Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000;
+  --bg-soft: #050505;
+  --surface: #0B0B0E;
+  --surface-2: #131318;
+  --line: rgba(245, 240, 224, 0.06);
+  --line-mid: rgba(245, 240, 224, 0.12);
+  --line-strong: rgba(245, 240, 224, 0.18);
+  --text: #F5F0E0;          /* warm white */
+  --text-mid: #8A8A8F;       /* muted gray */
+  --text-dim: #4A4A50;
+  --text-faint: #25252A;
+  --acid: #C8FF1F;           /* acid green */
+  --acid-soft: rgba(200, 255, 31, 0.18);
+  --acid-glow: rgba(200, 255, 31, 0.55);
+  --amber: #F5B547;          /* warm amber */
+  --amber-soft: rgba(245, 181, 71, 0.18);
+  --serif: 'Space Grotesk', system-ui, sans-serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 400;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ===== 16:9 STAGE ===== */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  overflow: hidden;
+}
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  max-width: calc(100vh * 16 / 9);
+  max-height: calc(100vw * 9 / 16);
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ===== SLIDES ===== */
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.2s var(--ease-cinematic), visibility 0s 1.2s;
+  padding: 7vh 8vw;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1.2s var(--ease-cinematic), visibility 0s 0s;
+}
+.slide-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.slide-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== CHROME ===== */
+.chrome {
+  position: absolute;
+  top: 4vh;
+  left: 8vw;
+  right: 8vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+  z-index: 10;
+  pointer-events: none;
+}
+.chrome .brand { color: var(--text); font-weight: 500; letter-spacing: 0.36em; }
+.chrome .brand .dot { color: var(--acid); }
+.chrome .act { color: var(--acid); }
+
+.page-mark {
+  position: absolute;
+  bottom: 4vh;
+  right: 8vw;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+  z-index: 10;
+  pointer-events: none;
+}
+.page-mark .cur { color: var(--text); font-family: var(--serif); }
+
+/* ===== TYPOGRAPHY — restrained, keynote-scale ===== */
+.eyebrow {
+  font-family: var(--sans);
+  font-size: clamp(10px, 0.85vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: clamp(20px, 3vw, 36px);
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--acid);
+}
+
+.title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(40px, 5.4vw, 88px);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+.title em {
+  font-style: italic;
+  color: var(--acid);
+  font-weight: 400;
+}
+.title.tight { font-size: clamp(32px, 4.4vw, 64px); }
+
+.subtitle {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(18px, 1.8vw, 28px);
+  color: var(--text-mid);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin-top: clamp(16px, 2vw, 24px);
+}
+.subtitle em { color: var(--acid); font-style: italic; }
+
+.message {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(18px, 1.7vw, 26px);
+  color: var(--acid);
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  max-width: 60ch;
+}
+.message .strong {
+  color: var(--text);
+  font-style: normal;
+  font-weight: 400;
+}
+.message-bar {
+  position: relative;
+  z-index: 3;
+  margin-top: auto;
+  padding-top: clamp(20px, 3vw, 32px);
+  border-top: 1px solid var(--line);
+}
+
+/* ===== REVEALS ===== */
+.slide.active .reveal {
+  animation: reveal 1.4s var(--ease-cinematic) forwards;
+}
+.reveal { opacity: 0; transform: translateY(28px); }
+@keyframes reveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide.active .reveal-2 { animation-delay: 0.18s; }
+.slide.active .reveal-3 { animation-delay: 0.36s; }
+.slide.active .reveal-4 { animation-delay: 0.54s; }
+.slide.active .reveal-5 { animation-delay: 0.72s; }
+.slide.active .reveal-6 { animation-delay: 0.9s; }
+
+.slide.active .fade {
+  animation: fade 1.8s var(--ease-cinematic) forwards;
+}
+.fade { opacity: 0; }
+@keyframes fade { to { opacity: 1; } }
+.slide.active .fade-2 { animation-delay: 0.3s; }
+.slide.active .fade-3 { animation-delay: 0.6s; }
+.slide.active .fade-4 { animation-delay: 0.9s; }
+
+/* ===== HERO / TITLE STAGE ===== */
+.title-stage {
+  display: grid;
+  place-content: center;
+  height: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+.title-stage .super {
+  font-family: var(--sans);
+  font-size: clamp(10px, 0.9vw, 13px);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--acid);
+  font-weight: 600;
+  margin-bottom: clamp(36px, 5vw, 56px);
+}
+.title-stage .mega {
+  font-family: var(--serif);
+  font-size: clamp(72px, 10vw, 180px);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  color: var(--text);
+  margin-bottom: clamp(28px, 4vw, 48px);
+}
+.title-stage .sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(22px, 2.4vw, 38px);
+  color: var(--text-mid);
+  margin-bottom: clamp(28px, 3vw, 40px);
+  letter-spacing: -0.015em;
+}
+.title-stage .sub em { color: var(--acid); font-style: normal; font-weight: 400; }
+.title-stage .smallsupport {
+  font-family: var(--sans);
+  font-size: clamp(11px, 0.95vw, 15px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+/* ===== ACT BREAK ===== */
+.act-break {
+  display: grid;
+  place-content: center;
+  height: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+.act-break .act-label {
+  font-family: var(--sans);
+  font-size: clamp(11px, 1vw, 15px);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--acid);
+  font-weight: 600;
+  margin-bottom: clamp(24px, 4vw, 48px);
+}
+.act-break .act-number {
+  font-family: var(--serif);
+  font-size: clamp(20px, 1.8vw, 26px);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-bottom: clamp(16px, 2vw, 24px);
+}
+.act-break .yr-mega {
+  font-family: var(--serif);
+  font-size: clamp(160px, 24vw, 400px);
+  font-weight: 300;
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  margin-bottom: clamp(28px, 4vw, 56px);
+  position: relative;
+  display: inline-block;
+}
+.act-break .yr-mega em { font-style: italic; color: var(--acid); }
+.act-break .act-title {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.6vw, 56px);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: clamp(16px, 2vw, 28px);
+}
+.act-break .act-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(16px, 1.6vw, 24px);
+  color: var(--text-mid);
+}
+
+/* ===== LAYOUT PRIMITIVES ===== */
+.header-block { position: relative; z-index: 3; max-width: 80%; }
+.body-region {
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: clamp(28px, 4vw, 56px);
+}
+.body-region.centered { justify-content: center; }
+.center-graph { position: relative; flex: 1; min-height: 0; width: 100%; }
+
+/* ===== TIMELINE (slide 2) ===== */
+.horizon-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+  padding: 8vh 0 2vh;
+  flex: 1;
+  align-content: center;
+}
+.horizon-timeline::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: var(--line-strong);
+}
+.horizon-timeline::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  width: 0%;
+  height: 1px;
+  background: var(--acid);
+  box-shadow: 0 0 12px var(--acid-glow);
+  transition: width 2.4s var(--ease-cinematic) 0.8s;
+}
+.slide.active .horizon-timeline::after { width: 84%; }
+.h-stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.h-stop .yr {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(14px, 1.3vw, 20px);
+  color: var(--text-dim);
+  margin-bottom: clamp(20px, 3vw, 32px);
+  transition: color 0.8s var(--ease-out);
+}
+.h-stop .dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--line-strong);
+  margin-bottom: clamp(20px, 3vw, 32px);
+  transition: all 0.8s var(--ease-out);
+}
+.h-stop .label {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 12px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  transition: color 0.8s var(--ease-out);
+}
+.h-stop .title-line {
+  font-family: var(--serif);
+  font-size: clamp(18px, 1.8vw, 26px);
+  color: var(--text-mid);
+  font-weight: 400;
+  line-height: 1.2;
+  max-width: 22ch;
+  transition: color 0.8s var(--ease-out);
+}
+.slide.active .h-stop[data-lit] .yr,
+.slide.active .h-stop[data-lit] .label {
+  color: var(--acid);
+}
+.slide.active .h-stop[data-lit] .dot {
+  background: var(--acid);
+  border-color: var(--acid);
+  box-shadow: 0 0 28px var(--acid-glow), 0 0 0 6px rgba(200,255,31,0.08);
+}
+.slide.active .h-stop[data-lit] .title-line { color: var(--text); }
+.slide.active .h-stop[data-step="1"] { transition-delay: 0.4s; }
+.slide.active .h-stop[data-step="1"] .yr,
+.slide.active .h-stop[data-step="1"] .label,
+.slide.active .h-stop[data-step="1"] .dot,
+.slide.active .h-stop[data-step="1"] .title-line { transition-delay: 0.5s; }
+.slide.active .h-stop[data-step="2"] .yr,
+.slide.active .h-stop[data-step="2"] .label,
+.slide.active .h-stop[data-step="2"] .dot,
+.slide.active .h-stop[data-step="2"] .title-line { transition-delay: 1.1s; }
+.slide.active .h-stop[data-step="3"] .yr,
+.slide.active .h-stop[data-step="3"] .label,
+.slide.active .h-stop[data-step="3"] .dot,
+.slide.active .h-stop[data-step="3"] .title-line { transition-delay: 1.7s; }
+.slide.active .h-stop[data-step="4"] .yr,
+.slide.active .h-stop[data-step="4"] .label,
+.slide.active .h-stop[data-step="4"] .dot,
+.slide.active .h-stop[data-step="4"] .title-line { transition-delay: 2.3s; }
+
+/* ===== LINEAR CHAIN (slide 5) ===== */
+.chain {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.chain-node {
+  flex: 1;
+  min-width: 90px;
+  padding: clamp(14px, 1.6vw, 22px) clamp(10px, 1vw, 18px);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  font-family: var(--serif);
+  font-size: clamp(13px, 1.2vw, 17px);
+  color: var(--text);
+  text-align: center;
+  position: relative;
+  letter-spacing: -0.005em;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.slide.active .chain-node { opacity: 1; transform: translateY(0); }
+.slide.active .chain-node[data-d="1"] { transition-delay: 0.4s; }
+.slide.active .chain-node[data-d="2"] { transition-delay: 0.55s; }
+.slide.active .chain-node[data-d="3"] { transition-delay: 0.7s; }
+.slide.active .chain-node[data-d="4"] { transition-delay: 0.85s; }
+.slide.active .chain-node[data-d="5"] { transition-delay: 1.0s; }
+.slide.active .chain-node[data-d="6"] { transition-delay: 1.15s; }
+.slide.active .chain-node[data-d="7"] { transition-delay: 1.3s; }
+.chain-arrow {
+  font-family: var(--mono);
+  color: var(--text-dim);
+  font-size: 14px;
+  padding: 0 4px;
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out) 1.4s;
+}
+.slide.active .chain-arrow { opacity: 1; }
+.chain-meta {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: clamp(8px, 0.7vw, 10px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out) 1.8s;
+}
+.slide.active .chain-meta { opacity: 1; }
+
+/* ===== THREE PILLARS (slide 7 Why Now) ===== */
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(20px, 3vw, 56px);
+  flex: 1;
+  align-items: stretch;
+}
+.pillar {
+  background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+  border-top: 1px solid var(--line-mid);
+  padding-top: clamp(20px, 3vw, 32px);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s var(--ease-out), transform 1s var(--ease-out);
+}
+.slide.active .pillar[data-d="1"] { transition-delay: 0.5s; opacity: 1; transform: translateY(0); }
+.slide.active .pillar[data-d="2"] { transition-delay: 0.8s; opacity: 1; transform: translateY(0); }
+.slide.active .pillar[data-d="3"] { transition-delay: 1.1s; opacity: 1; transform: translateY(0); }
+.pillar .p-num {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: clamp(12px, 1.6vw, 20px);
+}
+.pillar .p-title {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.2vw, 48px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--acid);
+  margin-bottom: clamp(20px, 3vw, 32px);
+}
+.pillar .p-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.2vw, 14px);
+}
+.pillar .p-list li {
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.4vw, 22px);
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+
+/* ===== TILE GRID (slide 8) ===== */
+.tile-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  padding: clamp(14px, 1.6vw, 22px);
+  border-radius: 2px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.slide.active .tile { opacity: 1; transform: translateY(0); }
+.slide.active .tile[data-d="1"] { transition-delay: 0.4s; }
+.slide.active .tile[data-d="2"] { transition-delay: 0.45s; }
+.slide.active .tile[data-d="3"] { transition-delay: 0.5s; }
+.slide.active .tile[data-d="4"] { transition-delay: 0.55s; }
+.slide.active .tile[data-d="5"] { transition-delay: 0.6s; }
+.slide.active .tile[data-d="6"] { transition-delay: 0.65s; }
+.slide.active .tile[data-d="7"] { transition-delay: 0.7s; }
+.slide.active .tile[data-d="8"] { transition-delay: 0.75s; }
+.slide.active .tile[data-d="9"] { transition-delay: 0.8s; }
+.slide.active .tile[data-d="10"] { transition-delay: 0.85s; }
+.tile.accent { border-color: var(--acid-soft); }
+.tile.accent::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 2px; height: 100%;
+  background: var(--acid);
+}
+.tile .t-label {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.8vw, 12px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.tile .t-title {
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.4vw, 20px);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  line-height: 1.15;
+}
+
+.assistant-node {
+  margin-top: clamp(28px, 4vw, 48px);
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-out) 1.2s;
+}
+.slide.active .assistant-node { opacity: 1; }
+.assistant-inner {
+  padding: clamp(18px, 2.4vw, 28px) clamp(36px, 5vw, 64px);
+  border: 1px solid var(--acid-soft);
+  background: linear-gradient(180deg, rgba(200,255,31,0.06), transparent);
+  border-radius: 2px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.assistant-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--acid-soft) 0%, transparent 60%);
+  opacity: 0.4;
+}
+.assistant-inner > * { position: relative; }
+.assistant-inner .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 8px;
+}
+.assistant-inner .title-text {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.4vw, 32px);
+  color: var(--text);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* ===== TWO-COLUMN COMPARE ===== */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  flex: 1;
+}
+.compare-col h4 {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+  margin-bottom: clamp(20px, 3vw, 32px);
+  padding-bottom: clamp(12px, 1.8vw, 20px);
+  border-bottom: 1px solid var(--line-strong);
+}
+.compare-col.future h4 { color: var(--acid); border-bottom-color: var(--acid-soft); }
+.compare-col ul { list-style: none; }
+.compare-col li {
+  font-family: var(--serif);
+  font-size: clamp(16px, 1.7vw, 26px);
+  font-weight: 400;
+  color: var(--text-mid);
+  padding: clamp(10px, 1.4vw, 18px) 0;
+  border-bottom: 1px solid var(--line);
+  letter-spacing: -0.005em;
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.compare-col.future li { color: var(--text); transform: translateX(12px); }
+.slide.active .compare-col li { opacity: 1; transform: translateX(0); }
+.slide.active .compare-col li:nth-child(1) { transition-delay: 0.5s; }
+.slide.active .compare-col li:nth-child(2) { transition-delay: 0.62s; }
+.slide.active .compare-col li:nth-child(3) { transition-delay: 0.74s; }
+.slide.active .compare-col li:nth-child(4) { transition-delay: 0.86s; }
+.slide.active .compare-col li:nth-child(5) { transition-delay: 0.98s; }
+.slide.active .compare-col li:nth-child(6) { transition-delay: 1.1s; }
+.slide.active .compare-col li:nth-child(7) { transition-delay: 1.22s; }
+.compare-col li:last-child { border-bottom: none; }
+
+/* ===== CREATIVE FLOW (slide 10) ===== */
+.flow-line {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+.flow-node {
+  padding: clamp(14px, 1.6vw, 20px) 8px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.4vw, 20px);
+  color: var(--text);
+  letter-spacing: -0.005em;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.slide.active .flow-node { opacity: 1; transform: translateY(0); }
+.slide.active .flow-node[data-d="1"] { transition-delay: 0.4s; }
+.slide.active .flow-node[data-d="2"] { transition-delay: 0.52s; }
+.slide.active .flow-node[data-d="3"] { transition-delay: 0.64s; }
+.slide.active .flow-node[data-d="4"] { transition-delay: 0.76s; }
+.slide.active .flow-node[data-d="5"] { transition-delay: 0.88s; }
+
+.capabilities {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2vw, 32px);
+  margin-top: clamp(28px, 4vw, 48px);
+}
+.cap {
+  font-family: var(--serif);
+  font-size: clamp(14px, 1.3vw, 18px);
+  color: var(--text-mid);
+  letter-spacing: -0.005em;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.cap .cap-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 4px;
+}
+.slide.active .cap { opacity: 1; transform: translateY(0); }
+.slide.active .cap:nth-child(1) { transition-delay: 1.0s; }
+.slide.active .cap:nth-child(2) { transition-delay: 1.1s; }
+.slide.active .cap:nth-child(3) { transition-delay: 1.2s; }
+.slide.active .cap:nth-child(4) { transition-delay: 1.3s; }
+.slide.active .cap:nth-child(5) { transition-delay: 1.4s; }
+.slide.active .cap:nth-child(6) { transition-delay: 1.5s; }
+.slide.active .cap:nth-child(7) { transition-delay: 1.6s; }
+
+/* ===== KNOWLEDGE CAPTURE FUNNEL ===== */
+.funnel {
+  display: grid;
+  grid-template-columns: 1.2fr auto 1fr;
+  gap: clamp(20px, 3vw, 56px);
+  align-items: center;
+  flex: 1;
+}
+.funnel-section .label {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: clamp(16px, 2vw, 24px);
+}
+.funnel-section .label.acid { color: var(--acid); }
+.funnel-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.funnel-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  color: var(--acid);
+  font-size: 28px;
+  opacity: 0;
+  transition: opacity 1s var(--ease-out) 1s;
+}
+.slide.active .funnel-arrow { opacity: 1; }
+.funnel-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===== PIPELINE (slide 15) ===== */
+.pipeline {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: clamp(16px, 2vw, 32px);
+  align-items: stretch;
+  flex: 1;
+}
+.pipeline-step {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  padding: clamp(20px, 2.4vw, 32px);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.2vw, 14px);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s var(--ease-out), transform 1s var(--ease-out);
+}
+.slide.active .pipeline-step { opacity: 1; transform: translateY(0); }
+.slide.active .pipeline-step[data-d="1"] { transition-delay: 0.4s; }
+.slide.active .pipeline-step[data-d="2"] { transition-delay: 0.7s; }
+.slide.active .pipeline-step[data-d="3"] { transition-delay: 1.0s; }
+.pipeline-step.acid {
+  border-color: var(--acid-soft);
+  background: linear-gradient(180deg, rgba(200,255,31,0.05), var(--surface));
+  position: relative;
+}
+.pipeline-step.acid::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 2px; height: 100%;
+  background: var(--acid);
+}
+.pipeline-step .stage-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.pipeline-step.acid .stage-num { color: var(--acid); }
+.pipeline-step .stage-title {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.4vw, 36px);
+  color: var(--text-mid);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.pipeline-step.acid .stage-title { color: var(--text); }
+.pipeline-step ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.pipeline-step li {
+  font-family: var(--sans);
+  font-size: clamp(12px, 1vw, 15px);
+  color: var(--text-mid);
+  line-height: 1.5;
+}
+.pipeline-step li::before { content: '— '; color: var(--text-dim); }
+.pipeline-step.acid li { color: var(--text); }
+.pipeline-step.acid li::before { color: var(--acid); }
+.pipeline-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--acid);
+  font-size: 22px;
+  font-family: var(--mono);
+  opacity: 0;
+  transition: opacity 1s var(--ease-out) 1.2s;
+}
+.slide.active .pipeline-arrow { opacity: 1; }
+
+/* ===== ORGANIZATIONAL CHANGE (slide 16) — vertical 3-stage ===== */
+.org-flow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: clamp(20px, 3vw, 56px);
+  align-items: stretch;
+  flex: 1;
+}
+.org-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  border-radius: 2px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s var(--ease-out), transform 1s var(--ease-out);
+}
+.slide.active .org-stage { opacity: 1; transform: translateY(0); }
+.slide.active .org-stage[data-d="1"] { transition-delay: 0.4s; }
+.slide.active .org-stage[data-d="2"] { transition-delay: 0.8s; }
+.slide.active .org-stage[data-d="3"] { transition-delay: 1.2s; }
+.org-stage.acid {
+  border-color: var(--acid-soft);
+  background: linear-gradient(180deg, rgba(200,255,31,0.05), var(--surface));
+}
+.org-stage.acid::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 2px; height: 100%;
+  background: var(--acid);
+}
+.org-stage .when {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: clamp(16px, 2vw, 28px);
+}
+.org-stage.acid .when { color: var(--acid); }
+.org-stage .state {
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.6vw, 36px);
+  color: var(--text);
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+.org-stage .visual {
+  margin-top: clamp(20px, 3vw, 32px);
+  height: clamp(80px, 14vh, 140px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid var(--line);
+  padding-top: clamp(20px, 3vw, 32px);
+}
+
+/* ===== DAY TIMELINE (slide 20) ===== */
+.day-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+  width: 100%;
+  margin-top: clamp(20px, 3vw, 40px);
+}
+.day-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: clamp(20px, 3vw, 56px);
+  align-items: center;
+  padding: clamp(12px, 1.6vw, 18px) 0;
+  border-bottom: 1px solid var(--line);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.slide.active .day-row { opacity: 1; transform: translateY(0); }
+.slide.active .day-row:nth-child(1) { transition-delay: 0.4s; }
+.slide.active .day-row:nth-child(2) { transition-delay: 0.52s; }
+.slide.active .day-row:nth-child(3) { transition-delay: 0.64s; }
+.slide.active .day-row:nth-child(4) { transition-delay: 0.76s; }
+.slide.active .day-row:nth-child(5) { transition-delay: 0.88s; }
+.slide.active .day-row:nth-child(6) { transition-delay: 1.0s; }
+.slide.active .day-row:nth-child(7) { transition-delay: 1.12s; }
+.day-row .time {
+  font-family: var(--mono);
+  font-size: clamp(16px, 1.4vw, 22px);
+  color: var(--acid);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.day-row .scene {
+  font-family: var(--serif);
+  font-size: clamp(18px, 1.8vw, 28px);
+  color: var(--text);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+}
+
+/* ===== ECO TRIGGERS (slide 21) ===== */
+.eco-triggers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2vw, 32px);
+  margin-top: clamp(20px, 3vw, 32px);
+}
+.eco-trigger {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  padding: clamp(16px, 2vw, 24px);
+  border-radius: 2px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.slide.active .eco-trigger:nth-child(1) { transition-delay: 1.0s; opacity: 1; transform: translateY(0); }
+.slide.active .eco-trigger:nth-child(2) { transition-delay: 1.2s; opacity: 1; transform: translateY(0); }
+.slide.active .eco-trigger:nth-child(3) { transition-delay: 1.4s; opacity: 1; transform: translateY(0); }
+.eco-trigger .label {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.8vw, 12px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 8px;
+}
+.eco-trigger .title-line {
+  font-family: var(--serif);
+  font-size: clamp(16px, 1.4vw, 22px);
+  color: var(--text);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+/* ===== BOM METRICS (slide 22) ===== */
+.bom-panel {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+  flex: 1;
+}
+.bom-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bom-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 80px;
+  gap: 16px;
+  align-items: center;
+  padding: clamp(10px, 1.4vw, 16px) 0;
+  border-bottom: 1px solid var(--line);
+}
+.bom-label {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.bom-bar {
+  position: relative;
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bom-bar-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--acid);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.4s var(--ease-cinematic);
+  box-shadow: 0 0 8px var(--acid-glow);
+}
+.slide.active .bom-bar-fill { transform: scaleX(var(--w, 0.5)); }
+.slide.active .bom-bar-fill[data-d="1"] { transition-delay: 0.8s; }
+.slide.active .bom-bar-fill[data-d="2"] { transition-delay: 0.92s; }
+.slide.active .bom-bar-fill[data-d="3"] { transition-delay: 1.04s; }
+.slide.active .bom-bar-fill[data-d="4"] { transition-delay: 1.16s; }
+.slide.active .bom-bar-fill[data-d="5"] { transition-delay: 1.28s; }
+.slide.active .bom-bar-fill[data-d="6"] { transition-delay: 1.4s; }
+.slide.active .bom-bar-fill[data-d="7"] { transition-delay: 1.52s; }
+.bom-value {
+  font-family: var(--mono);
+  font-size: clamp(11px, 0.95vw, 14px);
+  color: var(--text);
+  text-align: right;
+  font-weight: 500;
+}
+.bom-trigger {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: clamp(16px, 2vw, 24px);
+}
+
+/* ===== REVIEW 2032 (slide 23) ===== */
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1fr;
+  gap: clamp(28px, 4vw, 64px);
+  flex: 1;
+}
+.review-side h4 {
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: clamp(16px, 2vw, 24px);
+  padding-bottom: clamp(10px, 1.4vw, 16px);
+  border-bottom: 1px solid var(--line-strong);
+}
+.review-side.digital h4 { color: var(--acid); border-bottom-color: var(--acid-soft); }
+.review-side ul { list-style: none; }
+.review-side li {
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.4vw, 20px);
+  color: var(--text-mid);
+  padding: clamp(8px, 1.2vw, 14px) 0;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+.review-side.digital li { color: var(--text); }
+.review-center {
+  text-align: center;
+  padding: clamp(20px, 3vw, 40px);
+  background: var(--surface);
+  border: 1px solid var(--acid-soft);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+.review-center::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(200,255,31,0.04), transparent 70%);
+  pointer-events: none;
+}
+.review-center > * { position: relative; }
+.review-q-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: clamp(18px, 2.4vw, 28px);
+}
+.review-question {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(18px, 1.9vw, 28px);
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: clamp(24px, 3vw, 36px);
+  letter-spacing: -0.01em;
+}
+.review-trace-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: clamp(12px, 1.6vw, 18px);
+}
+.review-trace {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+}
+.review-trace .step {
+  font-family: var(--mono);
+  font-size: clamp(11px, 0.95vw, 14px);
+  color: var(--text-mid);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.review-trace .step::before { content: '→ '; color: var(--acid); }
+
+/* ===== SUCCESS DASHBOARD (slide 13) ===== */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  flex: 1;
+}
+.metric-tile {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  padding: clamp(20px, 2.4vw, 32px);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s var(--ease-out), transform 1s var(--ease-out);
+}
+.slide.active .metric-tile { opacity: 1; transform: translateY(0); }
+.slide.active .metric-tile[data-d="1"] { transition-delay: 0.4s; }
+.slide.active .metric-tile[data-d="2"] { transition-delay: 0.55s; }
+.slide.active .metric-tile[data-d="3"] { transition-delay: 0.7s; }
+.slide.active .metric-tile[data-d="4"] { transition-delay: 0.85s; }
+.slide.active .metric-tile[data-d="5"] { transition-delay: 1.0s; }
+.metric-tile.acid {
+  border-color: var(--acid-soft);
+}
+.metric-tile .m-label {
+  font-family: var(--mono);
+  font-size: clamp(9px, 0.75vw, 11px);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: clamp(20px, 3vw, 32px);
+}
+.metric-tile .m-title {
+  font-family: var(--serif);
+  font-size: clamp(16px, 1.5vw, 22px);
+  color: var(--text);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+}
+.metric-tile .m-trend {
+  margin-top: clamp(16px, 2vw, 24px);
+  padding-top: clamp(12px, 1.6vw, 20px);
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 12px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--acid);
+}
+
+/* ===== CDD/ENGINEERING DIGITAL MODEL (slide 11) ===== */
+.layers-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+.layer-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: clamp(16px, 2vw, 32px);
+  align-items: center;
+  padding: clamp(12px, 1.6vw, 20px) 0;
+  border-bottom: 1px solid var(--line);
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.slide.active .layer-row { opacity: 1; transform: translateX(0); }
+.slide.active .layer-row[data-d="1"] { transition-delay: 0.4s; }
+.slide.active .layer-row[data-d="2"] { transition-delay: 0.52s; }
+.slide.active .layer-row[data-d="3"] { transition-delay: 0.64s; }
+.slide.active .layer-row[data-d="4"] { transition-delay: 0.76s; }
+.slide.active .layer-row[data-d="5"] { transition-delay: 0.88s; }
+.slide.active .layer-row[data-d="6"] { transition-delay: 1.0s; }
+.slide.active .layer-row[data-d="7"] { transition-delay: 1.12s; }
+.layer-row .layer-name {
+  font-family: var(--mono);
+  font-size: clamp(11px, 0.95vw, 13px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--acid);
+  font-weight: 500;
+}
+.layer-row .layer-state {
+  font-family: var(--serif);
+  font-size: clamp(18px, 1.8vw, 26px);
+  color: var(--text);
+  font-weight: 300;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+}
+
+/* ===== CLOSING ===== */
+.closing-stage {
+  display: grid;
+  place-content: center;
+  height: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+.closing-stage .lines {
+  margin: clamp(28px, 4vw, 48px) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.closing-stage .line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(20px, 2.1vw, 32px);
+  color: var(--text-mid);
+  letter-spacing: -0.01em;
+}
+.closing-stage .final {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.6vw, 60px);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+  color: var(--text);
+  margin-top: clamp(40px, 6vw, 80px);
+  max-width: 84%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.closing-stage .final em {
+  font-style: italic;
+  color: var(--acid);
+  font-weight: 400;
+}
+
+/* ===== NAV ===== */
+.nav-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 1000;
+  padding: 8px 14px;
+  background: rgba(11, 11, 14, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-family: var(--mono);
+}
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.1); color: var(--acid); }
+.slide-counter {
+  color: var(--text-mid);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  font-family: var(--mono);
+}
+.slide-counter .cur { color: var(--text); }
+.shortcuts {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  z-index: 1000;
+  display: flex;
+  gap: 14px;
+}
+.shortcuts kbd {
+  display: inline-block;
+  padding: 2px 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  color: var(--text-mid);
+  margin-right: 4px;
+  font-family: var(--mono);
+}
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--acid);
+  transition: width 0.5s ease;
+  z-index: 1001;
+  box-shadow: 0 0 12px var(--acid-glow);
+}
+
+.notes-panel {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(8, 8, 10, 0.96);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--acid-soft);
+  padding: 22px 8vw 26px;
+  transform: translateY(100%);
+  transition: transform 0.45s var(--ease-cinematic);
+  z-index: 90;
+}
+.notes-panel.open { transform: translateY(0); }
+.notes-panel .notes-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.notes-panel .notes-content {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(15px, 1.4vw, 20px);
+  color: var(--text);
+  line-height: 1.5;
+  max-width: 80%;
+}
+
+/* ===== UTIL ===== */
+.flex-grow { flex: 1; min-height: 0; }
+.mt-auto { margin-top: auto; }
+
+@media (max-width: 768px) {
+  .slide { padding: 4vh 5vw; }
+  .chrome { left: 5vw; right: 5vw; top: 2.5vh; font-size: 9px; }
+  .page-mark { right: 5vw; bottom: 2.5vh; }
+  .tile-grid-5 { grid-template-columns: 1fr 1fr; }
+  .pillars, .pipeline, .org-flow, .review-grid, .funnel, .bom-panel, .dashboard-grid, .compare, .capabilities, .eco-triggers, .flow-line {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="stage">
+<div class="deck" id="deck">
+
+<!-- ====================================================== -->
+<!-- 01 — HERO -->
+<!-- ====================================================== -->
+<section class="slide active" data-slide="1" data-graph="ambient-dense" data-notes="The future of Design is not AI. The future of Design is an organization that learns. This presentation is bigger than any single technology.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="title-stage">
+      <div class="super reveal">STELLANTIS · PRODUCT DESIGN OFFICE</div>
+      <h1 class="mega reveal reveal-2">DESIGN<br>INTELLIGENCE</h1>
+      <div class="sub reveal reveal-3">From Individual Expertise to <em>Collective Intelligence</em></div>
+      <div class="smallsupport reveal reveal-4">Accelerating Creativity · Knowledge · Decisions</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 02 — THE VISION -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="2" data-graph="ambient-faint" data-notes="This is not a technology roadmap. It is an organizational evolution roadmap. Four horizons. Each builds on the last.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 1 · THE FUTURE</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">THE VISION</div>
+      <h1 class="title reveal reveal-2">A design organization<br>that <em>learns.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="horizon-timeline">
+        <div class="h-stop" data-step="1" data-lit>
+          <div class="yr">TODAY</div>
+          <div class="dot"></div>
+          <div class="label">Horizon 0</div>
+          <div class="title-line">Information</div>
+        </div>
+        <div class="h-stop" data-step="2" data-lit>
+          <div class="yr">2026</div>
+          <div class="dot"></div>
+          <div class="label">Year 1</div>
+          <div class="title-line">AI Assisted Teams</div>
+        </div>
+        <div class="h-stop" data-step="3" data-lit>
+          <div class="yr">2028</div>
+          <div class="dot"></div>
+          <div class="label">Year 3</div>
+          <div class="title-line">Agentic Product<br>Design Office</div>
+        </div>
+        <div class="h-stop" data-step="4" data-lit>
+          <div class="yr">2031</div>
+          <div class="dot"></div>
+          <div class="label">Year 6</div>
+          <div class="title-line">Connected Design<br>Intelligence Ecosystem</div>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">This is not a technology roadmap.<br><span class="strong">It is an organizational evolution roadmap.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">02</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 03 — WHAT BECOMES POSSIBLE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="3" data-graph="radial-design-intel" data-notes="Imagine every employee having access to decades of organizational judgment. Not information. Judgment.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 1 · THE FUTURE</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">WHAT BECOMES POSSIBLE</div>
+      <h1 class="title tight reveal reveal-2">Every employee connected to<br><em>collective intelligence.</em></h1>
+    </div>
+    <div class="body-region center-graph"></div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Imagine every employee with access to decades of organizational judgment.<br><span class="strong">Not information. Judgment.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">03</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 04 — VALUABLE KNOWLEDGE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="4" data-graph="three-clusters" data-notes="The challenge is not information. The challenge is preserving understanding.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 2 · THE CHALLENGE</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">THE GAP TODAY</div>
+      <h1 class="title tight reveal reveal-2">Valuable knowledge is created every day.<br><em>But rarely reused.</em></h1>
+    </div>
+    <div class="body-region center-graph"></div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">The challenge is not information.<br><span class="strong">The challenge is preserving understanding.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">04</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 05 — TODAY'S MODEL -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="5" data-graph="ambient-faint" data-notes="Information travels. Context degrades. Understanding must be rebuilt at every handoff.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 2 · THE CHALLENGE</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">TODAY'S PRODUCT DEVELOPMENT MODEL</div>
+      <h1 class="title tight reveal reveal-2">Information moves<br><em>between teams.</em></h1>
+    </div>
+    <div class="body-region centered">
+      <div class="chain">
+        <div class="chain-node" data-d="1">Planning</div>
+        <div class="chain-arrow"><span class="chain-meta">Meetings</span>→</div>
+        <div class="chain-node" data-d="2">Design</div>
+        <div class="chain-arrow"><span class="chain-meta">Decks</span>→</div>
+        <div class="chain-node" data-d="3">CDD</div>
+        <div class="chain-arrow"><span class="chain-meta">Emails</span>→</div>
+        <div class="chain-node" data-d="4">Engineering</div>
+        <div class="chain-arrow"><span class="chain-meta">Reviews</span>→</div>
+        <div class="chain-node" data-d="5">Manufacturing</div>
+        <div class="chain-arrow"><span class="chain-meta">Documents</span>→</div>
+        <div class="chain-node" data-d="6">Marketing</div>
+        <div class="chain-arrow">→</div>
+        <div class="chain-node" data-d="7">Operations</div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Information travels. Context degrades.<br><span class="strong">Understanding must be rebuilt repeatedly.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">05</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 06 — TOMORROW'S MODEL -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="6" data-graph="mesh-functions" data-notes="The future is not faster communication. The future is shared understanding.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 2 · THE CHALLENGE</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">TOMORROW'S PRODUCT DEVELOPMENT MODEL</div>
+      <h1 class="title tight reveal reveal-2">Intelligence flows<br><em>across teams.</em></h1>
+    </div>
+    <div class="body-region center-graph"></div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">The future is not faster communication.<br><span class="strong">The future is shared understanding.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">06</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 07 — WHY NOW -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="7" data-graph="ambient-faint" data-notes="The opportunity is no longer collecting information. It is transforming information into organizational judgment.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 2 · THE CHALLENGE</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">WHY NOW</div>
+      <h1 class="title tight reveal reveal-2">The ingredients<br><em>already exist.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="pillars">
+        <div class="pillar" data-d="1">
+          <div class="p-num">PILLAR · 01</div>
+          <div class="p-title">Data</div>
+          <ul class="p-list">
+            <li>Programs</li>
+            <li>Reviews</li>
+            <li>Files</li>
+            <li>Transcripts</li>
+            <li>Research</li>
+          </ul>
+        </div>
+        <div class="pillar" data-d="2">
+          <div class="p-num">PILLAR · 02</div>
+          <div class="p-title">Intelligence</div>
+          <ul class="p-list">
+            <li>Claude</li>
+            <li>GPT</li>
+            <li>Copilot</li>
+            <li>Future Models</li>
+          </ul>
+        </div>
+        <div class="pillar" data-d="3">
+          <div class="p-num">PILLAR · 03</div>
+          <div class="p-title">Connectivity</div>
+          <ul class="p-list">
+            <li>Microsoft Ecosystem</li>
+            <li>Meeting Capture</li>
+            <li>Cloud Infrastructure</li>
+            <li>Enterprise Search</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">The opportunity is no longer collecting information.<br><span class="strong">The opportunity is transforming information into organizational judgment.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">07</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 08 — ACT BREAK · YEAR 1 -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="8" data-graph="ambient-emerging" data-notes="Year 1 is about returning time to people. Productivity, automation, accessibility — the foundation.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 3 · YEAR 1</div>
+  </div>
+  <div class="slide-content">
+    <div class="act-break">
+      <div class="act-label reveal">ACT 3</div>
+      <div class="act-number reveal reveal-2">2026</div>
+      <div class="yr-mega reveal reveal-3">YEAR <em>01</em></div>
+      <div class="act-title reveal reveal-4">AI Assisted<br>Product Design Office</div>
+      <div class="act-sub reveal reveal-5">Building the foundation.</div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">08</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 09 — AI ASSISTED TEAMS -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="9" data-graph="ambient-faint" data-notes="Every team gains an intelligent assistant. Less administration, less searching, more creating.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 3 · YEAR 1</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">AI ASSISTED TEAMS</div>
+      <h1 class="title tight reveal reveal-2">Every team gains<br>an <em>intelligent assistant.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="tile-grid-5">
+        <div class="tile" data-d="1"><div class="t-label">F01</div><div class="t-title">Operations</div></div>
+        <div class="tile" data-d="2"><div class="t-label">F02</div><div class="t-title">CDD</div></div>
+        <div class="tile" data-d="3"><div class="t-label">F03</div><div class="t-title">Exterior</div></div>
+        <div class="tile" data-d="4"><div class="t-label">F04</div><div class="t-title">Interior</div></div>
+        <div class="tile" data-d="5"><div class="t-label">F05</div><div class="t-title">ACM / CMF</div></div>
+        <div class="tile" data-d="6"><div class="t-label">F06</div><div class="t-title">UX</div></div>
+        <div class="tile" data-d="7"><div class="t-label">F07</div><div class="t-title">Animation</div></div>
+        <div class="tile" data-d="8"><div class="t-label">F08</div><div class="t-title">Fabrication</div></div>
+        <div class="tile" data-d="9"><div class="t-label">F09</div><div class="t-title">Milling</div></div>
+        <div class="tile" data-d="10"><div class="t-label">F10</div><div class="t-title">Studio Engineering</div></div>
+      </div>
+      <div class="assistant-node">
+        <div class="assistant-inner">
+          <div class="label">SHARED LAYER</div>
+          <div class="title-text">AI Assistant</div>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Less administration. Less searching.<br><span class="strong">More creating.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">09</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 10 — OPERATIONS INTELLIGENCE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="10" data-graph="ambient-faint" data-notes="The goal is not replacing people. It is eliminating low-value work.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 3 · YEAR 1</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">OPERATIONS INTELLIGENCE</div>
+      <h1 class="title tight reveal reveal-2">Returning time to<br><em>higher-value work.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="compare">
+        <div class="compare-col current">
+          <h4>Current</h4>
+          <ul>
+            <li>Schedules</li>
+            <li>Meeting notes</li>
+            <li>Reporting</li>
+            <li>Budget tracking</li>
+          </ul>
+        </div>
+        <div class="compare-col future">
+          <h4>Future</h4>
+          <ul>
+            <li>Automated summaries</li>
+            <li>Risk alerts</li>
+            <li>Resource forecasting</li>
+            <li>Program dashboards</li>
+            <li>Budget visibility</li>
+            <li>Fabrication queue visibility</li>
+            <li>Milling queue visibility</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">The goal is not replacing people.<br><span class="strong">The goal is eliminating low-value work.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">10</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 11 — CREATIVE INTELLIGENCE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="11" data-graph="ambient-faint" data-notes="AI accelerates exploration. Humans own taste, judgment, and vision.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 3 · YEAR 1</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">CREATIVE INTELLIGENCE</div>
+      <h1 class="title tight reveal reveal-2">Exterior · Interior · ACM · UX · Animation</h1>
+    </div>
+    <div class="body-region">
+      <div class="flow-line" style="margin-top: 2vh">
+        <div class="flow-node" data-d="1">Research</div>
+        <div class="flow-node" data-d="2">Ideation</div>
+        <div class="flow-node" data-d="3">Visualization</div>
+        <div class="flow-node" data-d="4">Storytelling</div>
+        <div class="flow-node" data-d="5">Review</div>
+      </div>
+      <div class="capabilities">
+        <div class="cap"><div class="cap-label">CAPABILITY</div>Concept Exploration</div>
+        <div class="cap"><div class="cap-label">CAPABILITY</div>Sketch Enhancement</div>
+        <div class="cap"><div class="cap-label">CAPABILITY</div>Render Variations</div>
+        <div class="cap"><div class="cap-label">CAPABILITY</div>Competitive Analysis</div>
+        <div class="cap"><div class="cap-label">CAPABILITY</div>Research Synthesis</div>
+        <div class="cap"><div class="cap-label">CAPABILITY</div>Storyboard Generation</div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">AI accelerates exploration.<br><span class="strong">Humans own taste, judgment, and vision.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">11</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 12 — CDD & ENGINEERING INTELLIGENCE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="12" data-graph="ambient-faint" data-notes="Find issues earlier. Reuse knowledge faster. Reduce repetitive analysis.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 3 · YEAR 1</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">CDD &amp; ENGINEERING INTELLIGENCE</div>
+      <h1 class="title tight reveal reveal-2">Accelerating<br><em>technical development.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="layers-stack">
+        <div class="layer-row" data-d="1">
+          <div class="layer-name">Layer 01</div>
+          <div class="layer-state">Packaging — earlier constraint visibility</div>
+        </div>
+        <div class="layer-row" data-d="2">
+          <div class="layer-name">Layer 02</div>
+          <div class="layer-state">Surfacing — pattern reuse across programs</div>
+        </div>
+        <div class="layer-row" data-d="3">
+          <div class="layer-name">Layer 03</div>
+          <div class="layer-state">Geometry Validation — automated checks</div>
+        </div>
+        <div class="layer-row" data-d="4">
+          <div class="layer-name">Layer 04</div>
+          <div class="layer-state">Data Quality — issues surfaced at source</div>
+        </div>
+        <div class="layer-row" data-d="5">
+          <div class="layer-name">Layer 05</div>
+          <div class="layer-state">Engineering Constraints — known before they bite</div>
+        </div>
+        <div class="layer-row" data-d="6">
+          <div class="layer-name">Layer 06</div>
+          <div class="layer-state">Prior Programs — recoverable on demand</div>
+        </div>
+        <div class="layer-row" data-d="7">
+          <div class="layer-name">Layer 07</div>
+          <div class="layer-state">Lessons Learned — connected to live work</div>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Find issues earlier. Reuse knowledge faster.<br><span class="strong">Reduce repetitive analysis.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">12</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 13 — KNOWLEDGE CAPTURE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="13" data-graph="ambient-faint" data-notes="Year 1 is not the full knowledge graph. Year 1 makes information accessible.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 3 · YEAR 1</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">KNOWLEDGE CAPTURE</div>
+      <h1 class="title tight reveal reveal-2">Every project<br><em>leaves a trail.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="funnel">
+        <div class="funnel-section">
+          <div class="label">INPUTS</div>
+          <div class="funnel-inputs">
+            <div class="tile" data-d="1" style="padding:12px 14px"><div class="t-title" style="font-size:14px">Meeting</div></div>
+            <div class="tile" data-d="2" style="padding:12px 14px"><div class="t-title" style="font-size:14px">Review</div></div>
+            <div class="tile" data-d="3" style="padding:12px 14px"><div class="t-title" style="font-size:14px">Presentation</div></div>
+            <div class="tile" data-d="4" style="padding:12px 14px"><div class="t-title" style="font-size:14px">Sketch</div></div>
+            <div class="tile" data-d="5" style="padding:12px 14px"><div class="t-title" style="font-size:14px">Clinic</div></div>
+            <div class="tile" data-d="6" style="padding:12px 14px"><div class="t-title" style="font-size:14px">Engineering Study</div></div>
+            <div class="tile" data-d="7" style="padding:12px 14px"><div class="t-title" style="font-size:14px">Shared Drive</div></div>
+            <div class="tile" data-d="8" style="padding:12px 14px"><div class="t-title" style="font-size:14px">Program File</div></div>
+          </div>
+        </div>
+        <div class="funnel-arrow">→</div>
+        <div class="funnel-section">
+          <div class="label acid">FLOW</div>
+          <div class="funnel-flow">
+            <div class="tile accent" data-d="1"><div class="t-title">Captured</div></div>
+            <div class="tile accent" data-d="2"><div class="t-title">Indexed</div></div>
+            <div class="tile accent" data-d="3"><div class="t-title">Searchable</div></div>
+            <div class="tile accent" data-d="4"><div class="t-title">Reusable</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Year One is not the knowledge graph.<br><span class="strong">Year One makes information accessible.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">13</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 14 — YEAR 1 SUCCESS -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="14" data-graph="ambient-faint" data-notes="Success is measured in time returned to people. Not in software deployed.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 3 · YEAR 1</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">YEAR 1 SUCCESS</div>
+      <h1 class="title tight reveal reveal-2">Success is measured in<br><em>time returned to people.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="dashboard-grid">
+        <div class="metric-tile acid" data-d="1">
+          <div class="m-label">OUTCOME · 01</div>
+          <div class="m-title">Reduced<br>Administrative<br>Effort</div>
+          <div class="m-trend">↓ Time spent</div>
+        </div>
+        <div class="metric-tile acid" data-d="2">
+          <div class="m-label">OUTCOME · 02</div>
+          <div class="m-title">Faster<br>Information<br>Retrieval</div>
+          <div class="m-trend">↑ Speed to answer</div>
+        </div>
+        <div class="metric-tile acid" data-d="3">
+          <div class="m-label">OUTCOME · 03</div>
+          <div class="m-title">Meeting<br>Capture<br>Coverage</div>
+          <div class="m-trend">↑ Coverage</div>
+        </div>
+        <div class="metric-tile acid" data-d="4">
+          <div class="m-label">OUTCOME · 04</div>
+          <div class="m-title">Searchable<br>Knowledge<br>Assets</div>
+          <div class="m-trend">↑ Findable</div>
+        </div>
+        <div class="metric-tile acid" data-d="5">
+          <div class="m-label">OUTCOME · 05</div>
+          <div class="m-title">AI Assistant<br>Availability</div>
+          <div class="m-trend">↑ Coverage</div>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Success is not software deployed.<br><span class="strong">Success is time returned to people.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">14</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 15 — ACT BREAK · YEAR 3 -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="15" data-graph="ambient-structured" data-notes="Year 3 moves from productivity to intelligence. Agents become digital teammates, not replacements.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 4 · YEAR 3</div>
+  </div>
+  <div class="slide-content">
+    <div class="act-break">
+      <div class="act-label reveal">ACT 4</div>
+      <div class="act-number reveal reveal-2">2028</div>
+      <div class="yr-mega reveal reveal-3">YEAR <em>03</em></div>
+      <div class="act-title reveal reveal-4">The Agentic<br>Product Design Office</div>
+      <div class="act-sub reveal reveal-5">From productivity to intelligence.</div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">15</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 16 — SPECIALIZED AGENTS -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="16" data-graph="agents-radial" data-notes="Agents advise. Humans decide. Every function gains a digital teammate.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 4 · YEAR 3</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">SPECIALIZED AGENTS</div>
+      <h1 class="title tight reveal reveal-2">Digital teammates<br>for <em>every function.</em></h1>
+    </div>
+    <div class="body-region center-graph"></div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Agents advise.<br><span class="strong">Humans decide.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">16</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 17 — KNOWLEDGE ENGINE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="17" data-graph="ambient-faint" data-notes="Capturing information is easy. Capturing judgment is the opportunity.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 4 · YEAR 3</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">THE KNOWLEDGE ENGINE</div>
+      <h1 class="title tight reveal reveal-2">From information<br>to <em>judgment.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="pipeline">
+        <div class="pipeline-step" data-d="1">
+          <div class="stage-num">STAGE 01</div>
+          <div class="stage-title">Information</div>
+          <ul>
+            <li>Files</li>
+            <li>Emails</li>
+            <li>Transcripts</li>
+            <li>Presentations</li>
+          </ul>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step" data-d="2">
+          <div class="stage-num">STAGE 02</div>
+          <div class="stage-title">Knowledge</div>
+          <ul>
+            <li>Context</li>
+            <li>Connections</li>
+            <li>Research</li>
+            <li>Reviews</li>
+          </ul>
+        </div>
+        <div class="pipeline-arrow">→</div>
+        <div class="pipeline-step acid" data-d="3">
+          <div class="stage-num">STAGE 03</div>
+          <div class="stage-title">Judgment</div>
+          <ul>
+            <li>Reasoning</li>
+            <li>Tradeoffs · Authority</li>
+            <li>Outcomes · Confidence</li>
+            <li>Provenance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Capturing information is easy.<br><span class="strong">Capturing judgment is the opportunity.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">17</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 18 — WHAT CHANGES ORGANIZATIONALLY -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="18" data-graph="ambient-structured" data-notes="The organization evolves. Not just the technology.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 4 · YEAR 3</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">WHAT CHANGES ORGANIZATIONALLY</div>
+      <h1 class="title tight reveal reveal-2">The organization <em>evolves.</em><br>Not just the technology.</h1>
+    </div>
+    <div class="body-region">
+      <div class="org-flow">
+        <div class="org-stage" data-d="1">
+          <div class="when">TODAY</div>
+          <div class="state">Functional<br>silos.</div>
+          <div class="visual"><svg viewBox="0 0 120 60" style="width:100%; height:100%; max-width: 160px;"><circle cx="20" cy="30" r="6" fill="#8A8A8F"/><circle cx="60" cy="30" r="6" fill="#8A8A8F"/><circle cx="100" cy="30" r="6" fill="#8A8A8F"/></svg></div>
+        </div>
+        <div class="org-stage" data-d="2">
+          <div class="when">YEAR 3</div>
+          <div class="state">Teams<br>+ Agents.</div>
+          <div class="visual"><svg viewBox="0 0 120 60" style="width:100%; height:100%; max-width: 160px;"><circle cx="20" cy="30" r="6" fill="#F5F0E0"/><circle cx="60" cy="30" r="6" fill="#F5F0E0"/><circle cx="100" cy="30" r="6" fill="#F5F0E0"/><line x1="20" y1="30" x2="60" y2="30" stroke="#C8FF1F" stroke-width="1.5"/><line x1="60" y1="30" x2="100" y2="30" stroke="#C8FF1F" stroke-width="1.5"/></svg></div>
+        </div>
+        <div class="org-stage acid" data-d="3">
+          <div class="when">YEAR 6</div>
+          <div class="state">Connected<br>intelligence network.</div>
+          <div class="visual"><svg viewBox="0 0 120 60" style="width:100%; height:100%; max-width: 160px;">
+            <line x1="20" y1="30" x2="60" y2="15" stroke="#C8FF1F" stroke-width="1"/>
+            <line x1="20" y1="30" x2="60" y2="45" stroke="#C8FF1F" stroke-width="1"/>
+            <line x1="20" y1="30" x2="100" y2="30" stroke="#C8FF1F" stroke-width="1"/>
+            <line x1="60" y1="15" x2="100" y2="30" stroke="#C8FF1F" stroke-width="1"/>
+            <line x1="60" y1="45" x2="100" y2="30" stroke="#C8FF1F" stroke-width="1"/>
+            <line x1="60" y1="15" x2="60" y2="45" stroke="#C8FF1F" stroke-width="1"/>
+            <circle cx="20" cy="30" r="5" fill="#C8FF1F"/>
+            <circle cx="60" cy="15" r="5" fill="#C8FF1F"/>
+            <circle cx="60" cy="45" r="5" fill="#C8FF1F"/>
+            <circle cx="100" cy="30" r="5" fill="#C8FF1F"/>
+          </svg></div>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">The organization evolves.<br><span class="strong">Not just the technology.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">18</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 19 — PDO DIGITAL TWIN -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="19" data-graph="pdo-twin" data-notes="Every function remains unique. Every function becomes connected.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 4 · YEAR 3</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">THE PDO DIGITAL TWIN</div>
+      <h1 class="title tight reveal reveal-2">A living model<br>of the <em>organization.</em></h1>
+    </div>
+    <div class="body-region center-graph"></div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Every function remains unique.<br><span class="strong">Every function becomes connected.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">19</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 20 — INTELLIGENT PROGRAM -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="20" data-graph="program-radial" data-notes="Programs no longer lose understanding. Programs accumulate understanding.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 4 · YEAR 3</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">THE INTELLIGENT PROGRAM</div>
+      <h1 class="title tight reveal reveal-2">Every program<br>develops a <em>memory.</em></h1>
+    </div>
+    <div class="body-region center-graph"></div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Programs no longer lose understanding.<br><span class="strong">Programs accumulate understanding.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">20</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 21 — ACT BREAK · YEAR 6 -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="21" data-graph="ambient-global" data-notes="Year 6 — collective intelligence at scale. Every project strengthens the next.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 5 · YEAR 6</div>
+  </div>
+  <div class="slide-content">
+    <div class="act-break">
+      <div class="act-label reveal">ACT 5</div>
+      <div class="act-number reveal reveal-2">2031</div>
+      <div class="yr-mega reveal reveal-3">YEAR <em>06</em></div>
+      <div class="act-title reveal reveal-4">Connected Design<br>Intelligence Ecosystem</div>
+      <div class="act-sub reveal reveal-5">Collective intelligence at scale.</div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">21</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 22 — GLOBAL KNOWLEDGE GRAPH -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="22" data-graph="global-knowledge" data-notes="Today we search files. Tomorrow we navigate relationships.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 5 · YEAR 6</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">THE GLOBAL KNOWLEDGE GRAPH</div>
+      <h1 class="title tight reveal reveal-2">From documents<br>to <em>intelligence.</em></h1>
+    </div>
+    <div class="body-region center-graph"></div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Today we search files.<br><span class="strong">Tomorrow we navigate relationships.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">22</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 23 — DAY IN LIFE: DESIGNER -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="23" data-graph="ambient-faint" data-notes="The designer spends more time creating because the organization brings context to them.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 5 · YEAR 6</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">A DAY IN THE LIFE OF A DESIGNER · 2032</div>
+      <h1 class="title tight reveal reveal-2">Less searching.<br><em>More creating.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="day-timeline">
+        <div class="day-row"><div class="time">08:00</div><div class="scene">Personalized intelligence briefing</div></div>
+        <div class="day-row"><div class="time">09:00</div><div class="scene">Planning insight auto-connected to active programs</div></div>
+        <div class="day-row"><div class="time">10:00</div><div class="scene">Designer sketches · Packaging Agent evaluates live</div></div>
+        <div class="day-row"><div class="time">11:00</div><div class="scene">Engineering architecture update</div></div>
+        <div class="day-row"><div class="time">13:00</div><div class="scene">Global ACM material discovery shared</div></div>
+        <div class="day-row"><div class="time">14:00</div><div class="scene">Design review · humans + agents</div></div>
+        <div class="day-row"><div class="time">16:00</div><div class="scene">Knowledge graph updated</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">23</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 24 — DAY IN LIFE: PROGRAM -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="24" data-graph="ecosystem-circle" data-notes="Ideas no longer move through a sequence. Ideas move through an ecosystem.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 5 · YEAR 6</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">A DAY IN THE LIFE OF A VEHICLE PROGRAM · 2032</div>
+      <h1 class="title tight reveal reveal-2">Innovation can<br><em>start anywhere.</em></h1>
+    </div>
+    <div class="body-region center-graph"></div>
+    <div class="eco-triggers">
+      <div class="eco-trigger">
+        <div class="label">TRIGGER · 01</div>
+        <div class="title-line">Customer Insight</div>
+      </div>
+      <div class="eco-trigger">
+        <div class="label">TRIGGER · 02</div>
+        <div class="title-line">Engineering Breakthrough</div>
+      </div>
+      <div class="eco-trigger">
+        <div class="label">TRIGGER · 03</div>
+        <div class="title-line">Design Concept</div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-6">
+      <div class="message">Ideas no longer move through a sequence.<br><span class="strong">Ideas move through an ecosystem.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">24</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 25 — INTELLIGENT BOM -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="25" data-graph="bom-network" data-notes="Today BOMs describe products. Tomorrow BOMs help understand products. Long-term ambition, not a Year 1 promise.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 5 · YEAR 6</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">THE INTELLIGENT BOM <span style="color: var(--amber); font-size: 0.8em; margin-left: 1vw;">· LONG-TERM AMBITION</span></div>
+      <h1 class="title tight reveal reveal-2">Every decision<br>has <em>consequences.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="bom-panel">
+        <div class="center-graph" style="min-height: 360px;"></div>
+        <div>
+          <div class="bom-trigger">CHANGE · Front Fascia Geometry</div>
+          <div class="bom-metrics">
+            <div class="bom-row"><div class="bom-label">Cost</div><div class="bom-bar"><div class="bom-bar-fill" data-d="1" style="--w: 0.62"></div></div><div class="bom-value">+1.4%</div></div>
+            <div class="bom-row"><div class="bom-label">Weight</div><div class="bom-bar"><div class="bom-bar-fill" data-d="2" style="--w: 0.34"></div></div><div class="bom-value">+0.8 kg</div></div>
+            <div class="bom-row"><div class="bom-label">Carbon</div><div class="bom-bar"><div class="bom-bar-fill" data-d="3" style="--w: 0.28"></div></div><div class="bom-value">+0.6%</div></div>
+            <div class="bom-row"><div class="bom-label">Supplier</div><div class="bom-bar"><div class="bom-bar-fill" data-d="4" style="--w: 0.82"></div></div><div class="bom-value">High</div></div>
+            <div class="bom-row"><div class="bom-label">Mfg Complexity</div><div class="bom-bar"><div class="bom-bar-fill" data-d="5" style="--w: 0.55"></div></div><div class="bom-value">Med</div></div>
+            <div class="bom-row"><div class="bom-label">Timing</div><div class="bom-bar"><div class="bom-bar-fill" data-d="6" style="--w: 0.45"></div></div><div class="bom-value">+2 wks</div></div>
+            <div class="bom-row"><div class="bom-label">Tooling</div><div class="bom-bar"><div class="bom-bar-fill" data-d="7" style="--w: 0.71"></div></div><div class="bom-value">$220k</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">25</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 26 — DESIGN REVIEW 2032 -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="26" data-graph="ambient-faint" data-notes="Everyone already has the information. The review focuses on judgment. Creativity. Taste. Vision.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 5 · YEAR 6</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">A DESIGN REVIEW IN 2032</div>
+      <h1 class="title tight reveal reveal-2">Reviews become exercises<br>in <em>judgment.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="review-grid">
+        <div class="review-side human">
+          <h4>Human Participants</h4>
+          <ul>
+            <li>Design</li>
+            <li>Planning</li>
+            <li>Engineering</li>
+            <li>Marketing</li>
+            <li>Manufacturing</li>
+            <li>Operations</li>
+          </ul>
+        </div>
+        <div class="review-center">
+          <div class="review-q-label">CENTRAL QUESTION</div>
+          <div class="review-question">"Have we solved<br>this before?"</div>
+          <div class="review-trace-label">THE GRAPH RETURNS</div>
+          <div class="review-trace">
+            <div class="step">Decision</div>
+            <div class="step">Rationale</div>
+            <div class="step">Tradeoffs</div>
+            <div class="step">Outcome</div>
+            <div class="step">Authority</div>
+          </div>
+        </div>
+        <div class="review-side digital">
+          <h4>Digital Participants</h4>
+          <ul>
+            <li>Packaging Agent</li>
+            <li>Cost Agent</li>
+            <li>Manufacturing Agent</li>
+            <li>Customer Agent</li>
+            <li>Program Agent</li>
+            <li>Sustainability Agent</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-6">
+      <div class="message">Everyone already has the information.<br><span class="strong">The review is for judgment, creativity, taste, and vision.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">26</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 27 — WHAT SUCCESS LOOKS LIKE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="27" data-graph="ambient-faint" data-notes="Success is not more AI. Success is a smarter organization.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="chrome">
+    <div class="brand">DESIGN<span class="dot">.</span>INTELLIGENCE</div>
+    <div class="act">ACT 6 · THE CLOSE</div>
+  </div>
+  <div class="slide-content">
+    <div class="header-block">
+      <div class="eyebrow reveal">WHAT SUCCESS LOOKS LIKE</div>
+      <h1 class="title tight reveal reveal-2">Success is a <em>smarter organization.</em></h1>
+    </div>
+    <div class="body-region">
+      <div class="compare">
+        <div class="compare-col current">
+          <h4>Today</h4>
+          <ul>
+            <li>Repeated work</li>
+            <li>Lost rationale</li>
+            <li>Siloed expertise</li>
+            <li>Manual reporting</li>
+            <li>Delayed decisions</li>
+          </ul>
+        </div>
+        <div class="compare-col future">
+          <h4>Future</h4>
+          <ul>
+            <li>Reusable judgment</li>
+            <li>Connected expertise</li>
+            <li>Faster exploration</li>
+            <li>Earlier risk visibility</li>
+            <li>Better decisions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="message-bar reveal reveal-5">
+      <div class="message">Success is not more AI.<br><span class="strong">Success is a smarter organization.</span></div>
+    </div>
+  </div>
+  <div class="page-mark"><span class="cur">27</span> / 28</div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 28 — CLOSING -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="28" data-graph="ambient-dense" data-notes="The future of Design is not artificial intelligence. The future of Design is an organization that learns.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="closing-stage">
+      <div class="eyebrow reveal" style="justify-content: center;">FROM HUMAN EXPERTISE TO COLLECTIVE INTELLIGENCE</div>
+      <h1 class="title tight reveal reveal-2" style="text-align: center;">The future of Design is<br>an <em>organization that learns.</em></h1>
+      <div class="lines">
+        <div class="line reveal reveal-3">Every project creates knowledge.</div>
+        <div class="line reveal reveal-4">Every decision creates understanding.</div>
+        <div class="line reveal reveal-5">Every employee benefits from the collective judgment of the enterprise.</div>
+      </div>
+      <div class="final reveal reveal-6">
+        The future of Design is not artificial intelligence.<br>
+        It is an <em>organization that learns.</em>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<!-- NAV -->
+<div class="nav-controls">
+  <button class="nav-btn" onclick="prevSlide()" aria-label="Previous">←</button>
+  <span class="slide-counter"><span class="cur" id="current">01</span> · <span id="total">28</span></span>
+  <button class="nav-btn" onclick="nextSlide()" aria-label="Next">→</button>
+</div>
+
+<div class="shortcuts">
+  <span><kbd>← →</kbd> Navigate</span>
+  <span><kbd>N</kbd> Notes</span>
+  <span><kbd>F</kbd> Fullscreen</span>
+</div>
+
+<div class="notes-panel" id="notesPanel">
+  <div class="notes-label">SPEAKER NOTES</div>
+  <div class="notes-content" id="notesContent"></div>
+</div>
+
+<script>
+// ============================================================
+// NETWORK GRAPH ENGINE — keynote-tuned timing + acid palette
+// ============================================================
+class NodeGraph {
+  constructor(canvas, config) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.config = config;
+    this.nodes = [];
+    this.edges = [];
+    this.t = 0;
+    this.started = false;
+    this.animationId = null;
+    this.resize();
+    this._initFromConfig();
+  }
+
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.w = rect.width;
+    this.h = rect.height;
+  }
+
+  _initFromConfig() {
+    const cfg = this.config;
+    switch (cfg.type) {
+      case 'ambient-dense': this._buildAmbient(260, 0.55); break;
+      case 'ambient-faint': this._buildAmbient(80, 0.22); break;
+      case 'ambient-structured': this._buildAmbient(140, 0.32); break;
+      case 'ambient-emerging': this._buildAmbient(160, 0.38); break;
+      case 'ambient-global': this._buildAmbient(300, 0.65); break;
+      case 'radial-design-intel':
+        this._buildRadial({
+          center: 'DESIGN\nINTELLIGENCE',
+          ring: ['Customer Clinics','Brand DNA','Packaging Studies','Engineering Lessons','Manufacturing Constraints','CMF Research','Vehicle Programs','Customer Insights','Design Reviews','Leadership Decisions','BOM Intelligence'],
+          radius: Math.min(this.w, this.h) * 0.4
+        });
+        this._buildAmbient(60, 0.18, true);
+        break;
+      case 'three-clusters':
+        this._buildClusters([
+          { label: 'Design Review', x: 0.22, y: 0.5 },
+          { label: 'Customer Clinic', x: 0.5, y: 0.5 },
+          { label: 'Engineering Review', x: 0.78, y: 0.5 }
+        ]);
+        this._buildAmbient(40, 0.15, true);
+        break;
+      case 'mesh-functions':
+        this._buildMesh([
+          'Planning','Design','CDD','Engineering','Manufacturing','Marketing','Operations','Research','Suppliers','Customers'
+        ]);
+        this._buildAmbient(40, 0.16, true);
+        break;
+      case 'agents-radial':
+        this._buildRadial({
+          center: 'SHARED\nKNOWLEDGE',
+          ring: ['Operations Agent','Packaging Agent','CDD Agent','Design Agent','CMF Agent','UX Agent','Manufacturing Agent','Planning Agent','Marketing Agent','Program Agent'],
+          radius: Math.min(this.w, this.h) * 0.38,
+          centerColor: '#F5B547'
+        });
+        this._buildAmbient(50, 0.16, true);
+        break;
+      case 'pdo-twin':
+        this._buildRadial({
+          center: 'PDO\nDIGITAL TWIN',
+          ring: ['Operations','CDD','Exterior','Interior','ACM','UX','Animation','Fabrication','Milling','Studio Eng','Planning','Marketing','Engineering','Manufacturing','Suppliers','Research'],
+          radius: Math.min(this.w, this.h) * 0.4
+        });
+        this._buildAmbient(40, 0.14, true);
+        break;
+      case 'program-radial':
+        this._buildRadial({
+          center: 'FUTURE\nVEHICLE\nPROGRAM',
+          ring: ['Customer Research','Engineering','Manufacturing','BOM','Cost','Packaging','CMF','Design Reviews','Supplier Readiness','Lessons Learned'],
+          radius: Math.min(this.w, this.h) * 0.38
+        });
+        this._buildAmbient(50, 0.16, true);
+        break;
+      case 'global-knowledge': this._buildGlobalKnowledge(); break;
+      case 'ecosystem-circle': this._buildEcosystemCircle(); break;
+      case 'bom-network': this._buildBomNetwork(); break;
+      default: this._buildAmbient(60, 0.22);
+    }
+  }
+
+  _buildAmbient(count, alphaScale, additive = false) {
+    if (!additive) { this.nodes = []; this.edges = []; }
+    const baseOffset = this.nodes.length;
+    for (let i = 0; i < count; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.06,
+        vy: (Math.random() - 0.5) * 0.06,
+        r: 0.6 + Math.random() * 1.8,
+        a: 0.12 + Math.random() * alphaScale,
+        glow: Math.random() < 0.05,
+        phase: Math.random() * Math.PI * 2,
+        ambient: true
+      });
+    }
+    const cands = this.nodes.slice(baseOffset);
+    for (let i = 0; i < cands.length; i++) {
+      for (let j = i + 1; j < cands.length; j++) {
+        const a = cands[i], b = cands[j];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 100 && Math.random() < 0.02) {
+          this.edges.push({ a: baseOffset + i, b: baseOffset + j, alpha: 0.06, ambient: true });
+        }
+      }
+    }
+  }
+
+  _buildRadial({ center, ring, radius, centerColor }) {
+    const cx = this.w / 2, cy = this.h / 2;
+    this.nodes.push({
+      x: cx, y: cy, r: 7, a: 1, glow: true,
+      label: center, centerNode: true,
+      color: centerColor || '#C8FF1F',
+      phase: 0
+    });
+    const ci = this.nodes.length - 1;
+    ring.forEach((lab, i) => {
+      const a = (i / ring.length) * Math.PI * 2 - Math.PI / 2;
+      const x = cx + Math.cos(a) * radius;
+      const y = cy + Math.sin(a) * radius;
+      this.nodes.push({
+        x, y, r: 3.5, a: 0.92,
+        label: lab, labelAngle: a,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 70 + 500
+      });
+      this.edges.push({ a: ci, b: this.nodes.length - 1, alpha: 0.32, appearDelay: i * 70 + 800 });
+    });
+  }
+
+  _buildMesh(labels) {
+    const cx = this.w / 2, cy = this.h / 2;
+    const radius = Math.min(this.w, this.h) * 0.36;
+    const start = this.nodes.length;
+    labels.forEach((lab, i) => {
+      const a = (i / labels.length) * Math.PI * 2 - Math.PI / 2;
+      const r = radius * (0.85 + Math.random() * 0.3);
+      this.nodes.push({
+        x: cx + Math.cos(a) * r,
+        y: cy + Math.sin(a) * r,
+        r: 4, a: 0.95,
+        glow: i % 3 === 0,
+        label: lab, labelAngle: a,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 100
+      });
+    });
+    for (let i = 0; i < labels.length; i++) {
+      for (let j = i + 1; j < labels.length; j++) {
+        if (Math.random() < 0.55) {
+          this.edges.push({
+            a: start + i, b: start + j,
+            alpha: 0.16 + Math.random() * 0.15,
+            appearDelay: 500 + Math.random() * 1400,
+            pulse: Math.random() < 0.3
+          });
+        }
+      }
+    }
+  }
+
+  _buildClusters(clusters) {
+    clusters.forEach((cluster, ci) => {
+      const cx = cluster.x * this.w;
+      const cy = cluster.y * this.h;
+      this.nodes.push({
+        x: cx, y: cy, r: 7, a: 1, glow: true,
+        label: cluster.label, centerNode: true,
+        clusterId: ci, phase: 0,
+        appearDelay: ci * 400
+      });
+      const center = this.nodes.length - 1;
+      for (let i = 0; i < 14; i++) {
+        const a = (i / 14) * Math.PI * 2;
+        const r = 40 + Math.random() * 35;
+        this.nodes.push({
+          x: cx + Math.cos(a) * r,
+          y: cy + Math.sin(a) * r,
+          r: 1.6 + Math.random() * 1.4,
+          a: 0.42,
+          phase: Math.random() * Math.PI * 2,
+          clusterId: ci,
+          drift: true,
+          appearDelay: ci * 400 + i * 60
+        });
+        this.edges.push({
+          a: center, b: this.nodes.length - 1,
+          alpha: 0.16,
+          appearDelay: ci * 400 + 200
+        });
+      }
+    });
+  }
+
+  _buildGlobalKnowledge() {
+    const labels = [
+      { lab: 'Wrangler', x: 0.16, y: 0.36, hub: true },
+      { lab: 'Brand DNA', x: 0.5, y: 0.22, hub: true },
+      { lab: '35" Tires', x: 0.28, y: 0.58, traced: 1 },
+      { lab: 'Customer Clinics', x: 0.38, y: 0.42, traced: 2 },
+      { lab: 'Aero Studies', x: 0.7, y: 0.28 },
+      { lab: 'Packaging Decisions', x: 0.55, y: 0.5, traced: 3 },
+      { lab: 'CMF Studies', x: 0.74, y: 0.58 },
+      { lab: 'Manufacturing Lessons', x: 0.5, y: 0.7 },
+      { lab: 'Supplier Readiness', x: 0.66, y: 0.74 },
+      { lab: 'Engineering Tradeoffs', x: 0.5, y: 0.36, traced: 4 },
+      { lab: 'Design Reviews', x: 0.3, y: 0.3, traced: 5 },
+      { lab: 'Leadership Reviews', x: 0.66, y: 0.42, traced: 6 },
+      { lab: 'BOM Intelligence', x: 0.84, y: 0.66 }
+    ];
+    const start = this.nodes.length;
+    labels.forEach((n, i) => {
+      this.nodes.push({
+        x: n.x * this.w, y: n.y * this.h,
+        r: n.hub ? 6 : 4,
+        a: 0.95,
+        glow: n.hub,
+        traced: n.traced,
+        label: n.lab,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 90
+      });
+    });
+    for (let i = 0; i < labels.length; i++) {
+      for (let j = i + 1; j < labels.length; j++) {
+        if (Math.random() < 0.32) {
+          this.edges.push({
+            a: start + i, b: start + j,
+            alpha: 0.12 + Math.random() * 0.08,
+            appearDelay: 800 + Math.random() * 1500
+          });
+        }
+      }
+    }
+    const tracedSeq = labels.map((n, i) => n.traced ? { idx: i, t: n.traced } : null).filter(Boolean).sort((a, b) => a.t - b.t);
+    for (let i = 0; i < tracedSeq.length - 1; i++) {
+      this.edges.push({
+        a: start + tracedSeq[i].idx,
+        b: start + tracedSeq[i + 1].idx,
+        alpha: 0.85,
+        appearDelay: 2600 + i * 280,
+        traced: true,
+        pulse: true
+      });
+    }
+    this._buildAmbient(60, 0.16, true);
+  }
+
+  _buildEcosystemCircle() {
+    const cx = this.w / 2, cy = this.h / 2;
+    const radius = Math.min(this.w, this.h) * 0.35;
+    const labels = ['Customer', 'Planning', 'Design', 'Engineering', 'Manufacturing', 'Marketing', 'Operations'];
+    const start = this.nodes.length;
+    labels.forEach((lab, i) => {
+      const a = (i / labels.length) * Math.PI * 2 - Math.PI / 2;
+      this.nodes.push({
+        x: cx + Math.cos(a) * radius,
+        y: cy + Math.sin(a) * radius,
+        r: 5, a: 0.95,
+        glow: ['Customer', 'Engineering', 'Design'].includes(lab),
+        triggerColor: lab === 'Engineering' ? '#F5B547' : null,
+        label: lab, labelAngle: a,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 90
+      });
+    });
+    for (let i = 0; i < labels.length; i++) {
+      this.edges.push({
+        a: start + i, b: start + ((i + 1) % labels.length),
+        alpha: 0.3, appearDelay: 500 + i * 70
+      });
+    }
+    for (let i = 0; i < labels.length; i++) {
+      for (let j = i + 2; j < labels.length; j++) {
+        if (i === 0 && j === labels.length - 1) continue;
+        if (Math.random() < 0.6) {
+          this.edges.push({
+            a: start + i, b: start + j,
+            alpha: 0.13,
+            appearDelay: 900 + Math.random() * 1200,
+            pulse: Math.random() < 0.4
+          });
+        }
+      }
+    }
+    this._buildAmbient(50, 0.16, true);
+  }
+
+  _buildBomNetwork() {
+    const cx = this.w / 2, cy = this.h / 2;
+    const radius = Math.min(this.w, this.h) * 0.34;
+    const count = 24;
+    this.nodes.push({ x: cx, y: cy, r: 8, a: 1, glow: true, label: 'FRONT FASCIA', centerNode: true, phase: 0 });
+    const ci = this.nodes.length - 1;
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2;
+      const r = radius * (0.5 + Math.random() * 0.6);
+      this.nodes.push({
+        x: cx + Math.cos(a) * r,
+        y: cy + Math.sin(a) * r,
+        r: 2 + Math.random() * 2,
+        a: 0.5 + Math.random() * 0.4,
+        glow: Math.random() < 0.18,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 50
+      });
+      this.edges.push({
+        a: ci, b: this.nodes.length - 1,
+        alpha: 0.18 + Math.random() * 0.12,
+        appearDelay: 200 + i * 40,
+        pulse: Math.random() < 0.5
+      });
+    }
+  }
+
+  start() {
+    if (this.started) return;
+    this.started = true;
+    this.startTime = performance.now();
+    this._animate();
+  }
+  stop() {
+    this.started = false;
+    if (this.animationId) cancelAnimationFrame(this.animationId);
+  }
+  _animate() {
+    if (!this.started) return;
+    this.t = performance.now() - this.startTime;
+    this._render(this.t);
+    this.animationId = requestAnimationFrame(() => this._animate());
+  }
+
+  _render(elapsed) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.w, this.h);
+    for (const n of this.nodes) {
+      if (n.ambient || n.drift) {
+        n.x += n.vx || 0;
+        n.y += n.vy || 0;
+        if (n.x < 0 || n.x > this.w) n.vx *= -1;
+        if (n.y < 0 || n.y > this.h) n.vy *= -1;
+      }
+    }
+    // edges
+    for (const e of this.edges) {
+      const delay = e.appearDelay || 0;
+      const t = Math.min(1, Math.max(0, (elapsed - delay) / 800));
+      if (t <= 0) continue;
+      const a = this.nodes[e.a], b = this.nodes[e.b];
+      if (!a || !b) continue;
+      const x1 = a.x, y1 = a.y;
+      const x2 = a.x + (b.x - a.x) * t;
+      const y2 = a.y + (b.y - a.y) * t;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+      const baseA = e.alpha * t;
+      if (e.traced) {
+        ctx.strokeStyle = `rgba(200, 255, 31, ${baseA})`;
+        ctx.lineWidth = 1.8;
+        ctx.shadowColor = 'rgba(200,255,31,0.7)';
+        ctx.shadowBlur = 10;
+      } else {
+        ctx.strokeStyle = `rgba(245, 240, 224, ${baseA})`;
+        ctx.lineWidth = 0.6;
+        ctx.shadowBlur = 0;
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      if (e.pulse && t >= 1) {
+        const ph = ((elapsed - delay) / 2400) % 1;
+        const px = a.x + (b.x - a.x) * ph;
+        const py = a.y + (b.y - a.y) * ph;
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(200,255,31,0.9)';
+        ctx.shadowColor = 'rgba(200,255,31,0.8)';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+    // nodes
+    for (const n of this.nodes) {
+      const delay = n.appearDelay || 0;
+      const t = Math.min(1, Math.max(0, (elapsed - delay) / 700));
+      if (t <= 0) continue;
+      const pulse = n.glow ? 0.75 + 0.25 * Math.sin(elapsed / 900 + n.phase) : 1;
+      const r = (n.r || 2) * t;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      let color = n.color || (n.glow ? '#C8FF1F' : '#F5F0E0');
+      if (n.triggerColor) color = n.triggerColor;
+      if (n.traced) color = '#C8FF1F';
+      const alpha = (n.a || 0.5) * t * pulse;
+      ctx.fillStyle = this._hexToRgba(color, alpha);
+      if (n.glow || n.traced) {
+        ctx.shadowColor = this._hexToRgba(color, 0.85);
+        ctx.shadowBlur = 20 * pulse;
+      }
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      if (n.label && t > 0.5) {
+        const lt = (t - 0.5) * 2;
+        ctx.font = n.centerNode ? '600 14px Space Grotesk, serif' : '500 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const lc = n.centerNode ? color : (n.traced ? '#C8FF1F' : '#F5F0E0');
+        ctx.fillStyle = this._hexToRgba(lc, lt * (n.centerNode ? 1 : 0.85));
+        if (n.centerNode) {
+          const lines = (n.label || '').split('\n');
+          lines.forEach((line, i) => {
+            ctx.fillText(line, n.x, n.y + (i - (lines.length - 1) / 2) * 18);
+          });
+        } else if (n.labelAngle !== undefined) {
+          const off = 17;
+          const lx = n.x + Math.cos(n.labelAngle) * off;
+          const ly = n.y + Math.sin(n.labelAngle) * off;
+          const cosA = Math.cos(n.labelAngle);
+          ctx.textAlign = cosA > 0.3 ? 'left' : (cosA < -0.3 ? 'right' : 'center');
+          ctx.fillText(n.label, lx, ly);
+        } else {
+          ctx.fillText(n.label, n.x, n.y - 13);
+        }
+      }
+    }
+  }
+
+  _hexToRgba(hex, alpha) {
+    if (hex.startsWith('rgb')) return hex;
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+}
+
+// ============================================================
+// SLIDE MANAGER
+// ============================================================
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+const totalEl = document.getElementById('total');
+const currentEl = document.getElementById('current');
+const progressBar = document.getElementById('progressBar');
+const notesPanel = document.getElementById('notesPanel');
+const notesContent = document.getElementById('notesContent');
+let current = 1;
+let graphs = new Map();
+
+totalEl.textContent = String(total).padStart(2, '0');
+
+function showSlide(n) {
+  if (n < 1) n = 1;
+  if (n > total) n = total;
+  if (graphs.has(current)) graphs.get(current).stop();
+  current = n;
+  slides.forEach((s, i) => s.classList.toggle('active', i === n - 1));
+  currentEl.textContent = String(n).padStart(2, '0');
+  progressBar.style.width = (n / total * 100) + '%';
+  notesContent.textContent = slides[n - 1].dataset.notes || '';
+  setTimeout(() => initSlideGraph(n), 60);
+}
+
+function initSlideGraph(n) {
+  const slide = slides[n - 1];
+  const canvas = slide.querySelector('.slide-canvas');
+  if (!canvas) return;
+  const type = slide.dataset.graph;
+  if (!type) return;
+
+  const rect = slide.getBoundingClientRect();
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+
+  const wrap = slide.querySelector('.center-graph');
+  if (wrap && ['radial-design-intel','three-clusters','mesh-functions','agents-radial','pdo-twin','program-radial','global-knowledge','ecosystem-circle','bom-network'].includes(type)) {
+    const wR = wrap.getBoundingClientRect();
+    const sR = slide.getBoundingClientRect();
+    canvas.style.position = 'absolute';
+    canvas.style.left = (wR.left - sR.left) + 'px';
+    canvas.style.top = (wR.top - sR.top) + 'px';
+    canvas.style.width = wR.width + 'px';
+    canvas.style.height = wR.height + 'px';
+  }
+
+  if (graphs.has(n)) graphs.get(n).stop();
+  const g = new NodeGraph(canvas, { type });
+  graphs.set(n, g);
+  g.start();
+}
+
+function nextSlide() { showSlide(current + 1); }
+function prevSlide() { showSlide(current - 1); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  else if (e.key === 'Home') { e.preventDefault(); showSlide(1); }
+  else if (e.key === 'End') { e.preventDefault(); showSlide(total); }
+  else if (e.key === 'n' || e.key === 'N') {
+    e.preventDefault();
+    notesPanel.classList.toggle('open');
+  } else if (e.key === 'f' || e.key === 'F') {
+    e.preventDefault();
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen().catch(() => {});
+  }
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.nav-controls') || e.target.closest('.notes-panel') || e.target.closest('button')) return;
+  nextSlide();
+});
+
+window.addEventListener('resize', () => {
+  setTimeout(() => initSlideGraph(current), 100);
+});
+
+setTimeout(() => initSlideGraph(1), 80);
+showSlide(1);
+</script>
+</body>
+</html>
