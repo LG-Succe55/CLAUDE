@@ -793,6 +793,297 @@ html, body {
   font-weight: 400;
 }
 
+/* ===== SLIDE 02 — MILESTONES TIMELINE ===== */
+.s-milestones {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 0 8vw;
+}
+.milestones-anchor {
+  position: absolute;
+  top: 10vh;
+  left: 8vw;
+  z-index: 5;
+  max-width: 56ch;
+}
+.milestones-anchor .label { margin-bottom: 2vh; }
+.milestones-anchor .big {
+  margin-bottom: 2.5vh;
+}
+.milestones-anchor .sub-line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(16px, 1.8vw, 24px);
+  color: var(--text-mid);
+  letter-spacing: -0.005em;
+  max-width: 50ch;
+}
+.milestones-track-wrap {
+  position: absolute;
+  bottom: 16vh;
+  left: 8vw;
+  right: 8vw;
+  z-index: 4;
+}
+.milestones-track {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(244, 241, 232, 0.12) 6%,
+    rgba(244, 241, 232, 0.18) 50%,
+    rgba(244, 241, 232, 0.12) 94%,
+    transparent 100%);
+}
+.milestones-track::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  height: 1px;
+  width: 0%;
+  background: linear-gradient(90deg, transparent, var(--acid));
+  box-shadow: 0 0 14px var(--acid-glow);
+  transition: width 4.4s var(--ease-cinematic) 0.6s;
+}
+.slide.active .milestones-track::after { width: 100%; }
+.milestones-stops {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+}
+.m-stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transform: translateY(-50%);
+  max-width: 18ch;
+}
+.m-stop .m-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--text-dim);
+  margin-bottom: clamp(20px, 2.6vw, 32px);
+  transition: all 0.9s var(--ease-cinematic);
+}
+.m-stop.lit .m-dot {
+  background: var(--acid);
+  border-color: var(--acid);
+  box-shadow: 0 0 22px var(--acid-glow);
+}
+.m-stop .m-when {
+  font-family: var(--mono);
+  font-size: clamp(9px, 0.85vw, 12px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: clamp(6px, 0.8vw, 10px);
+  transition: color 0.9s var(--ease-cinematic);
+}
+.m-stop.lit .m-when { color: var(--acid); }
+.m-stop .m-event {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(13px, 1.3vw, 18px);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text-mid);
+  transition: color 0.9s var(--ease-cinematic);
+}
+.m-stop.lit .m-event { color: var(--text); }
+.slide.active .m-stop[data-step="0"] .m-dot,
+.slide.active .m-stop[data-step="0"] .m-when,
+.slide.active .m-stop[data-step="0"] .m-event { transition-delay: 0.7s; }
+.slide.active .m-stop[data-step="1"] .m-dot,
+.slide.active .m-stop[data-step="1"] .m-when,
+.slide.active .m-stop[data-step="1"] .m-event { transition-delay: 1.5s; }
+.slide.active .m-stop[data-step="2"] .m-dot,
+.slide.active .m-stop[data-step="2"] .m-when,
+.slide.active .m-stop[data-step="2"] .m-event { transition-delay: 2.3s; }
+.slide.active .m-stop[data-step="3"] .m-dot,
+.slide.active .m-stop[data-step="3"] .m-when,
+.slide.active .m-stop[data-step="3"] .m-event { transition-delay: 3.1s; }
+.slide.active .m-stop[data-step="4"] .m-dot,
+.slide.active .m-stop[data-step="4"] .m-when,
+.slide.active .m-stop[data-step="4"] .m-event { transition-delay: 3.9s; }
+
+/* ===== SLIDE 03 — WHAT WE BUILT — floating numbers ===== */
+.s-numbers {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10vh 8vw 8vh;
+}
+.numbers-header { margin-bottom: clamp(40px, 6vw, 80px); }
+.numbers-header .label { margin-bottom: 2vh; }
+.numbers-header .big { max-width: 40ch; }
+.numbers-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(20px, 3vw, 56px);
+  align-items: end;
+}
+.num-item {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1vw, 14px);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1.4s var(--ease-cinematic), transform 1.4s var(--ease-cinematic);
+}
+.slide.active .num-item { opacity: 1; transform: translateY(0); }
+.slide.active .num-item:nth-child(1) { transition-delay: 0.5s; }
+.slide.active .num-item:nth-child(2) { transition-delay: 0.8s; }
+.slide.active .num-item:nth-child(3) { transition-delay: 1.1s; }
+.slide.active .num-item:nth-child(4) { transition-delay: 1.4s; }
+.slide.active .num-item:nth-child(5) { transition-delay: 1.7s; }
+.num-item .num {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(56px, 8vw, 144px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+.num-item.lead .num { color: var(--acid); font-style: italic; }
+.num-item .num-label {
+  font-family: var(--sans);
+  font-size: clamp(11px, 1vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  line-height: 1.35;
+  padding-top: clamp(8px, 1vw, 14px);
+  border-top: 1px solid var(--text-faint);
+}
+@media (max-width: 900px) {
+  .numbers-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+
+/* ===== SLIDE 04 — BUILDING CAPABILITY ===== */
+.capability-block {
+  position: absolute;
+  bottom: 10vh;
+  left: 8vw;
+  z-index: 5;
+  max-width: 56ch;
+}
+.capability-block .big { margin-bottom: clamp(28px, 3.5vw, 44px); }
+.capability-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 0.9vw, 12px);
+  margin-bottom: clamp(28px, 3.5vw, 44px);
+}
+.capability-list li {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(18px, 2vw, 28px);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 1s var(--ease-cinematic), transform 1s var(--ease-cinematic);
+}
+.slide.active .capability-list li { opacity: 1; transform: translateY(0); }
+.slide.active .capability-list li:nth-child(1) { transition-delay: 0.6s; }
+.slide.active .capability-list li:nth-child(2) { transition-delay: 0.85s; }
+.slide.active .capability-list li:nth-child(3) { transition-delay: 1.1s; }
+.slide.active .capability-list li:nth-child(4) { transition-delay: 1.35s; }
+.slide.active .capability-list li:nth-child(5) { transition-delay: 1.6s; }
+.kicker-line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(18px, 2vw, 28px);
+  color: var(--acid);
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-cinematic) 1.9s;
+}
+.slide.active .kicker-line { opacity: 1; }
+
+/* ===== SLIDE 05 — GLOBAL MOMENTUM ===== */
+/* Reuses .s-corner + corner-anchor; canvas handles constellation */
+
+/* ===== SLIDE 06 — WHAT WE LEARNED ===== */
+.s-lessons {
+  width: 100%;
+  height: 100%;
+  padding: 10vh 8vw 8vh;
+  display: flex;
+  flex-direction: column;
+}
+.lessons-header { margin-bottom: clamp(40px, 5vw, 64px); }
+.lessons-header .label { margin-bottom: 2vh; }
+.lessons-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.4vw, 18px);
+  flex: 1;
+  justify-content: center;
+}
+.lessons-list li {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: clamp(20px, 3vw, 44px);
+  align-items: baseline;
+  padding: clamp(6px, 0.8vw, 10px) 0;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 1.2s var(--ease-cinematic), transform 1.2s var(--ease-cinematic);
+}
+.slide.active .lessons-list li { opacity: 1; transform: translateY(0); }
+.slide.active .lessons-list li:nth-child(1) { transition-delay: 0.6s; }
+.slide.active .lessons-list li:nth-child(2) { transition-delay: 1.1s; }
+.slide.active .lessons-list li:nth-child(3) { transition-delay: 1.6s; }
+.slide.active .lessons-list li:nth-child(4) { transition-delay: 2.1s; }
+.slide.active .lessons-list li:nth-child(5) { transition-delay: 2.6s; }
+.lessons-list li .l-num {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(12px, 1vw, 15px);
+  letter-spacing: 0.28em;
+  color: var(--acid);
+}
+.lessons-list li .l-text {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(22px, 2.8vw, 42px);
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+  color: var(--text);
+}
+.lessons-list li:last-child .l-text em {
+  color: var(--acid);
+  font-style: italic;
+}
+.lessons-foot {
+  margin-top: clamp(28px, 4vw, 48px);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(16px, 1.8vw, 24px);
+  color: var(--text-mid);
+  letter-spacing: -0.005em;
+  max-width: 70ch;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-cinematic) 3.2s;
+}
+.slide.active .lessons-foot { opacity: 1; }
+.lessons-foot em { color: var(--acid); font-style: italic; }
+
 /* ===== CHROME — autohide, film-like ===== */
 .chrome-wrap {
   position: fixed;
@@ -941,68 +1232,169 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 02 — THE THESIS -->
+<!-- 02 — FROM EXPLORATION TO ENTERPRISE CAPABILITY -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="2" data-graph="ambient-sparse" data-notes="Set the frame. The conversation is not about AI. It is about what Design becomes if it learns.">
+<section class="slide" data-slide="2" data-graph="ambient-faint-far" data-notes="What began as a proof of concept became a strategic capability. Walk the audience along the pulse — leadership interest in October became deployment momentum by spring.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
-    <div class="s-statement">
-      <div class="line1 reveal r1">The future advantage of Design</div>
-      <div class="line1 reveal r2">will not be Artificial Intelligence.</div>
-      <div class="line2 reveal r3">It will be what we do with what we know.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ====================================================== -->
-<!-- 03 — THE PREMISE -->
-<!-- ====================================================== -->
-<section class="slide" data-slide="3" data-graph="ambient-sparse" data-notes="The shift is from technology to organization. Design must evolve as an organism, not adopt a tool.">
-  <canvas class="slide-canvas"></canvas>
-  <div class="slide-content">
-    <div class="s-statement">
-      <div class="line1 reveal r1">Design is not a technology problem.</div>
-      <div class="line2 reveal r3">Design is an organizational one.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ====================================================== -->
-<!-- 04 — TODAY'S REALITY (sketch wall) -->
-<!-- ====================================================== -->
-<section class="slide" data-slide="4" data-graph="ambient-very-faint" data-notes="The sketch wall is full. Every program produces brilliance — most of it lives in the people who made it.">
-  <canvas class="slide-canvas"></canvas>
-  <div class="slide-content">
-    <div class="s-wall">
-      <div class="wall-fragments" id="wallFragments"></div>
-      <div class="wall-anchor reveal r5">
-        <div class="label">TODAY</div>
-        <div class="h">Expertise lives in<br><em>individuals.</em></div>
+    <div class="s-milestones">
+      <div class="milestones-anchor reveal r1">
+        <div class="label">CHAPTER ONE</div>
+        <div class="big">From exploration to<br><em>enterprise capability.</em></div>
+        <div class="sub-line">What began as a proof of concept became a strategic capability.</div>
+      </div>
+      <div class="milestones-track-wrap">
+        <div class="milestones-track"></div>
+        <div class="milestones-stops">
+          <div class="m-stop lit" data-step="0">
+            <div class="m-dot"></div>
+            <div class="m-when">Oct 2025</div>
+            <div class="m-event">Vizcom + Runway demonstrated to Global Design Leadership</div>
+          </div>
+          <div class="m-stop lit" data-step="1">
+            <div class="m-dot"></div>
+            <div class="m-when">Late 2025</div>
+            <div class="m-event">Leadership interest created</div>
+          </div>
+          <div class="m-stop lit" data-step="2">
+            <div class="m-dot"></div>
+            <div class="m-when">Winter</div>
+            <div class="m-event">Business case developed</div>
+          </div>
+          <div class="m-stop lit" data-step="3">
+            <div class="m-dot"></div>
+            <div class="m-when">Early 2026</div>
+            <div class="m-event">Global licensing secured</div>
+          </div>
+          <div class="m-stop lit" data-step="4">
+            <div class="m-dot"></div>
+            <div class="m-when">Spring 2026</div>
+            <div class="m-event">Global deployment initiated</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ====================================================== -->
-<!-- 05 — THE CHALLENGE — knowledge trapped -->
+<!-- 03 — WHAT WE BUILT — floating numbers -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="5" data-graph="escape-clusters" data-notes="Watch the motion. Knowledge tries to move between clusters. Most never arrives. The audience should feel the inefficiency.">
+<section class="slide" data-slide="3" data-graph="ambient-very-faint" data-notes="The organization moved from limited access to enterprise deployment. Let the numbers breathe — read them slowly. They are evidence, not metrics.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-numbers">
+      <div class="numbers-header reveal r1">
+        <div class="label">CHAPTER ONE · WHAT WE BUILT</div>
+        <div class="big">From limited access<br>to <em>enterprise deployment.</em></div>
+      </div>
+      <div class="numbers-grid">
+        <div class="num-item">
+          <div class="num">19</div>
+          <div class="num-label">Shared Vizcom<br>licenses · global</div>
+        </div>
+        <div class="num-item lead">
+          <div class="num">200+</div>
+          <div class="num-label">Global Vizcom<br>licenses</div>
+        </div>
+        <div class="num-item">
+          <div class="num">50</div>
+          <div class="num-label">North America PDO<br>Vizcom licenses</div>
+        </div>
+        <div class="num-item">
+          <div class="num">50</div>
+          <div class="num-label">Global Runway<br>licenses</div>
+        </div>
+        <div class="num-item">
+          <div class="num">5</div>
+          <div class="num-label">North America<br>Runway licenses</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 04 — BUILDING CAPABILITY BEFORE SCALE -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="4" data-graph="capability-spread" data-notes="Adoption matters more than licenses. The work this year was creating the conditions for the tools to actually take hold — training, workflows, community.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-corner">
+      <div class="capability-block">
+        <div class="label reveal r1" style="margin-bottom: 2vh">CHAPTER ONE · CAPABILITY</div>
+        <div class="big reveal r2">Building capability<br><em>before scale.</em></div>
+        <ul class="capability-list">
+          <li>— Global training delivered</li>
+          <li>— Early workflows demonstrated</li>
+          <li>— Cross-studio learning initiated</li>
+          <li>— Community building started</li>
+          <li>— Knowledge sharing accelerated</li>
+        </ul>
+        <div class="kicker-line">Adoption matters more than licenses.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 05 — GLOBAL MOMENTUM -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="5" data-graph="global-constellation" data-notes="AI is no longer a local initiative. Regions illuminate one at a time — North America, then Germany, France, Italy, Brazil, China. Momentum is building.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-corner">
       <div class="corner-anchor bottom-left reveal r5">
-        <div class="label">THE CHALLENGE</div>
-        <div class="h">Valuable knowledge<br>created every day.<br><em>Rarely reused.</em></div>
-        <div class="sub">Theme reviews. Customer clinics. Engineering tradeoffs. Lessons. — held inside the rooms that made them.</div>
+        <div class="label">CHAPTER ONE · GLOBAL MOMENTUM</div>
+        <div class="h">Global<br><em>momentum.</em></div>
+        <div class="sub">North America · Germany · France · Italy · Brazil · China — AI is becoming a global design capability.</div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ====================================================== -->
-<!-- 06 — THE MOONSHOT -->
+<!-- 06 — WHAT WE LEARNED -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="6" data-graph="silent" data-notes="Allow silence. This is the emotional anchor of the deck. Land it slowly. Hold the pause.">
+<section class="slide" data-slide="6" data-graph="ambient-faint" data-notes="The first year taught us where AI creates value and where humans remain irreplaceable. Pause on the last lesson — that is the framing for everything that follows.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-lessons">
+      <div class="lessons-header reveal r1">
+        <div class="label">CHAPTER ONE · WHAT WE LEARNED</div>
+        <div class="big">What the first year<br><em>taught us.</em></div>
+      </div>
+      <ol class="lessons-list">
+        <li><span class="l-num">01</span><span class="l-text">Adoption matters more than licenses.</span></li>
+        <li><span class="l-num">02</span><span class="l-text">Real use cases outperform demonstrations.</span></li>
+        <li><span class="l-num">03</span><span class="l-text">Training drives adoption.</span></li>
+        <li><span class="l-num">04</span><span class="l-text">AI accelerates exploration.</span></li>
+        <li><span class="l-num">05</span><span class="l-text">Human judgment <em>remains essential.</em></span></li>
+      </ol>
+      <div class="lessons-foot">
+        Where AI creates value — and <em>where humans remain irreplaceable.</em>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 07 — THE REAL OPPORTUNITY (bridge to moonshot) -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="7" data-graph="ambient-sparse" data-notes="The bridge. The tools proved value — that was the easy part. The real opportunity is what the tools serve. Hold the silence before the moonshot.">
+  <canvas class="slide-canvas"></canvas>
+  <div class="slide-content">
+    <div class="s-statement">
+      <div class="line1 reveal r1">The tools proved the opportunity.</div>
+      <div class="line2 reveal r3">The larger opportunity is organizational learning.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- 08 — THE MOONSHOT -->
+<!-- ====================================================== -->
+<section class="slide" data-slide="8" data-graph="silent" data-notes="Allow silence. This is the emotional anchor of the deck. Land it slowly. Hold the pause.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-moonshot">
@@ -1013,9 +1405,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 07 — THE PATH (bridge to roadmap) -->
+<!-- 09 — THE PATH (bridge to roadmap) -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="7" data-graph="ambient-sparse" data-notes="Setup for the roadmap. The shift is named.">
+<section class="slide" data-slide="9" data-graph="ambient-sparse" data-notes="Setup for the roadmap. The shift is named.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-statement">
@@ -1026,9 +1418,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 08 — TRANSFORMATION ROADMAP — horizon -->
+<!-- 10 — TRANSFORMATION ROADMAP — horizon -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="8" data-graph="ambient-faint-far" data-notes="A horizon — not a roadmap. The journey of capability across years.">
+<section class="slide" data-slide="10" data-graph="ambient-faint-far" data-notes="A horizon — not a roadmap. The journey of capability across years.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-horizon">
@@ -1066,9 +1458,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 09 — YEAR 1 — Individual Intelligence Amplified -->
+<!-- 11 — YEAR 1 — Individual Intelligence Amplified -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="9" data-graph="designer-orbit" data-notes="The designer remains central. AI surrounds and supports — never substitutes. The work of judgment stays human.">
+<section class="slide" data-slide="11" data-graph="designer-orbit" data-notes="The designer remains central. AI surrounds and supports — never substitutes. The work of judgment stays human.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-year">
@@ -1085,9 +1477,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 10 — YEAR 3 — Collective Design Intelligence -->
+<!-- 12 — YEAR 3 — Collective Design Intelligence -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="10" data-graph="collective-network" data-notes="Knowledge moves between people, teams, regions. A pulse leaves one node and arrives at many. Learning becomes shared.">
+<section class="slide" data-slide="12" data-graph="collective-network" data-notes="Knowledge moves between people, teams, regions. A pulse leaves one node and arrives at many. Learning becomes shared.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-year">
@@ -1104,9 +1496,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 11 — YEAR 6 — Learning Design Organization -->
+<!-- 13 — YEAR 6 — Learning Design Organization -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="11" data-graph="growing-organism" data-notes="The network visibly grows. Every program adds a node. Every decision leaves a trace. The organism becomes smarter.">
+<section class="slide" data-slide="13" data-graph="growing-organism" data-notes="The network visibly grows. Every program adds a node. Every decision leaves a trace. The organism becomes smarter.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-year">
@@ -1123,9 +1515,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 12 — COLLECTIVE INTELLIGENCE — hero, full bleed -->
+<!-- 14 — COLLECTIVE INTELLIGENCE — hero, full bleed -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="12" data-graph="dense-graph-hero" data-notes="The hero. Full bleed knowledge graph. The organization remembers. This should land emotionally — not technically.">
+<section class="slide" data-slide="14" data-graph="dense-graph-hero" data-notes="The hero. Full bleed knowledge graph. The organization remembers. This should land emotionally — not technically.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-hero">
@@ -1139,9 +1531,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 13 — DAY IN THE LIFE — TODAY -->
+<!-- 15 — DAY IN THE LIFE — TODAY -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="13" data-graph="ambient-very-faint" data-notes="Friction. Searching. Waiting. Disconnected information. The audience should feel the weight of the day.">
+<section class="slide" data-slide="15" data-graph="ambient-very-faint" data-notes="Friction. Searching. Waiting. Disconnected information. The audience should feel the weight of the day.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-day">
@@ -1164,9 +1556,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 14 — DAY IN THE LIFE — FUTURE -->
+<!-- 16 — DAY IN THE LIFE — FUTURE -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="14" data-graph="ambient-faint" data-notes="Flow. Context. Confidence. The contrast with the prior slide should be obvious without saying so.">
+<section class="slide" data-slide="16" data-graph="ambient-faint" data-notes="Flow. Context. Confidence. The contrast with the prior slide should be obvious without saying so.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-day">
@@ -1189,9 +1581,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 15 — DESIGN REVIEW IN 2032 -->
+<!-- 17 — DESIGN REVIEW IN 2032 -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="15" data-graph="ambient-very-faint" data-notes="The room is familiar. Information already present. The conversation is judgment, taste, vision.">
+<section class="slide" data-slide="17" data-graph="ambient-very-faint" data-notes="The room is familiar. Information already present. The conversation is judgment, taste, vision.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-review">
@@ -1215,9 +1607,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 16 — WHAT SUCCESS LOOKS LIKE — type-only -->
+<!-- 18 — WHAT SUCCESS LOOKS LIKE — type-only -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="16" data-graph="ambient-very-faint" data-notes="The picture of success. Not measured in software deployed. Measured in how the organization thinks.">
+<section class="slide" data-slide="18" data-graph="ambient-very-faint" data-notes="The picture of success. Not measured in software deployed. Measured in how the organization thinks.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-success">
@@ -1252,9 +1644,9 @@ html, body {
 </section>
 
 <!-- ====================================================== -->
-<!-- 17 — CLOSING -->
+<!-- 19 — CLOSING -->
 <!-- ====================================================== -->
-<section class="slide" data-slide="17" data-graph="dense-atmospheric-quiet" data-notes="Quiet. Confident. Allow black space. Leave the room with one thought.">
+<section class="slide" data-slide="19" data-graph="dense-atmospheric-quiet" data-notes="Quiet. Confident. Allow black space. Leave the room with one thought.">
   <canvas class="slide-canvas"></canvas>
   <div class="slide-content">
     <div class="s-close">
@@ -1270,7 +1662,7 @@ html, body {
 <div class="chrome-wrap" id="chromeWrap">
   <div class="nav-bar">
     <button class="nav-btn" onclick="prevSlide()" aria-label="Previous">‹</button>
-    <span class="nav-count"><span class="cur" id="currentMark">01</span> · <span id="totalMark">17</span></span>
+    <span class="nav-count"><span class="cur" id="currentMark">01</span> · <span id="totalMark">19</span></span>
     <button class="nav-btn" onclick="nextSlide()" aria-label="Next">›</button>
   </div>
   <div class="kbd-hint">
@@ -1329,6 +1721,8 @@ class NodeGraph {
       case 'collective-network': this._buildCollectiveNetwork(); break;
       case 'growing-organism': this._buildGrowingOrganism(); break;
       case 'dense-graph-hero': this._buildDenseHero(); break;
+      case 'capability-spread': this._buildCapabilitySpread(); break;
+      case 'global-constellation': this._buildGlobalConstellation(); break;
       default: this._ambient(60, 0.18);
     }
   }
@@ -1582,6 +1976,105 @@ class NodeGraph {
   }
 
   // ===== S12: Dense knowledge graph (hero) =====
+  // ===== S04: Capability spread — small cluster grows outward as adoption =====
+  _buildCapabilitySpread() {
+    // Anchor right-center so type sits left
+    const cx = this.w * 0.62;
+    const cy = this.h * 0.42;
+    // Seed cluster of 5 nodes near center
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      const r = 24 + Math.random() * 16;
+      this.nodes.push({
+        x: cx + Math.cos(a) * r,
+        y: cy + Math.sin(a) * r,
+        r: 4, a: 0.92, glow: true,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 140
+      });
+    }
+    // Schedule outward growth — nodes spawn over time, attaching to nearest existing
+    this.growth = [];
+    let delay = 900;
+    for (let i = 0; i < 42; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const ring = 60 + (i / 42) * 220 + Math.random() * 40;
+      const nx = cx + Math.cos(a) * ring;
+      const ny = cy + Math.sin(a) * ring;
+      this.growth.push({
+        appear: delay,
+        attachIdx: Math.floor(Math.random() * Math.min(5 + i, 14)),
+        x: Math.max(20, Math.min(this.w - 20, nx)),
+        y: Math.max(20, Math.min(this.h - 20, ny)),
+        r: 2 + Math.random() * 2,
+        glow: Math.random() < 0.15
+      });
+      delay += 140 + Math.random() * 160;
+    }
+    // Sparse ambient
+    for (let i = 0; i < 40; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.03,
+        vy: (Math.random() - 0.5) * 0.03,
+        r: 0.6 + Math.random() * 1,
+        a: 0.1, ambient: true,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  // ===== S05: Global constellation — 6 regional hubs illuminate in sequence =====
+  _buildGlobalConstellation() {
+    // Regions positioned approximating a world layout — visual constellation, not geographically accurate
+    const regions = [
+      { lab: 'North America', x: 0.22, y: 0.36, delay: 400 },
+      { lab: 'Germany',       x: 0.50, y: 0.28, delay: 900 },
+      { lab: 'France',        x: 0.46, y: 0.34, delay: 1400 },
+      { lab: 'Italy',         x: 0.52, y: 0.38, delay: 1900 },
+      { lab: 'Brazil',        x: 0.34, y: 0.62, delay: 2400 },
+      { lab: 'China',         x: 0.74, y: 0.40, delay: 2900 }
+    ];
+    const start = this.nodes.length;
+    regions.forEach((r) => {
+      this.nodes.push({
+        x: r.x * this.w, y: r.y * this.h,
+        r: 6, a: 0.95,
+        glow: true,
+        label: r.lab,
+        labelAbove: true,
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: r.delay
+      });
+    });
+    // Connections between all regions — appear after all nodes have ignited
+    for (let i = 0; i < regions.length; i++) {
+      for (let j = i + 1; j < regions.length; j++) {
+        this.edges.push({
+          a: start + i, b: start + j,
+          alpha: 0.12 + Math.random() * 0.08,
+          appearDelay: 3400 + Math.random() * 800,
+          pulse: Math.random() < 0.4,
+          pulseOffset: Math.random() * 2400,
+          pulsePeriod: 3200 + Math.random() * 1200
+        });
+      }
+    }
+    // Atmospheric backdrop
+    for (let i = 0; i < 90; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.025,
+        vy: (Math.random() - 0.5) * 0.025,
+        r: 0.5 + Math.random() * 1,
+        a: 0.08, ambient: true,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
   _buildDenseHero() {
     // Hand-placed cluster — feels organic but laid out
     const positions = [];
