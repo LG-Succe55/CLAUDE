@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Amplified — Cinematic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000;
+  --ink: #F4F1E8;
+  --text-mid: #8E8B82;
+  --text-dim: #4F4D48;
+  --acid: #C8FF1F;
+  --acid-soft: rgba(200, 255, 31, 0.18);
+  --acid-glow: rgba(200, 255, 31, 0.55);
+  --serif: 'Space Grotesk', system-ui, sans-serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  background: #000;
+  color: var(--ink);
+  font-family: var(--sans);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 16:9 STAGE */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  max-width: calc(100vh * 16 / 9);
+  max-height: calc(100vw * 9 / 16);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* SLIDE BASE — multi-layer composition */
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.6s var(--ease), visibility 0s 1.6s;
+  background: #000;
+  overflow: hidden;
+}
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1.6s var(--ease), visibility 0s 0s;
+}
+
+/* IMAGE LAYER — full bleed with Ken Burns */
+.bg-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+  transform: scale(1.06);
+  filter: brightness(0.55) contrast(1.1) saturate(0.85);
+  transition: transform 16s linear, filter 1.6s var(--ease);
+}
+.slide.active .bg-img {
+  transform: scale(1.18) translate(-1.5%, -1%);
+}
+.bg-img.bright { filter: brightness(0.75) contrast(1.05) saturate(0.95); }
+.bg-img.dim { filter: brightness(0.32) contrast(1.15) saturate(0.7); }
+.bg-img.cool { filter: brightness(0.55) contrast(1.15) saturate(0.6) hue-rotate(-15deg); }
+
+/* MULTI-IMAGE QUADRANT */
+.bg-quad {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  background: #000;
+  z-index: 1;
+}
+.bg-quad > div {
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4) contrast(1.1) saturate(0.7);
+  transform: scale(1.04);
+  transition: transform 14s linear, filter 1.4s var(--ease);
+}
+.slide.active .bg-quad > div { transform: scale(1.12); }
+.slide.active .bg-quad > div:nth-child(1) { transition-delay: 0s; }
+.slide.active .bg-quad > div:nth-child(2) { transition-delay: 0.2s; }
+.slide.active .bg-quad > div:nth-child(3) { transition-delay: 0.4s; }
+.slide.active .bg-quad > div:nth-child(4) { transition-delay: 0.6s; }
+
+/* VIGNETTE */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.45) 70%, rgba(0,0,0,0.92) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+.vignette.deep {
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.98) 100%);
+}
+.vignette.left {
+  background: linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 35%, transparent 70%);
+}
+.vignette.right {
+  background: linear-gradient(270deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 35%, transparent 70%);
+}
+.vignette.bottom {
+  background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 35%, transparent 75%);
+}
+
+/* FILM GRAIN OVERLAY */
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.96  0 0 0 0 0.95  0 0 0 0 0.91  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>");
+  opacity: 0.10;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 3;
+  animation: grainShift 1.6s steps(6) infinite;
+}
+@keyframes grainShift {
+  0% { transform: translate(0,0); }
+  20% { transform: translate(-2%, 1%); }
+  40% { transform: translate(1%, -2%); }
+  60% { transform: translate(-1%, 2%); }
+  80% { transform: translate(2%, -1%); }
+  100% { transform: translate(0,0); }
+}
+
+/* SCAN LINES (subtle, only on some slides) */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,0) 2px,
+    rgba(0,0,0,0.08) 3px,
+    rgba(0,0,0,0) 4px
+  );
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease);
+}
+.slide.active .scanlines { opacity: 1; }
+
+/* LIGHT LEAK — animated gradient sweep */
+.leak {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(200, 255, 31, 0.04) 45%,
+    rgba(200, 255, 31, 0.08) 50%,
+    rgba(200, 255, 31, 0.04) 55%,
+    transparent 70%
+  );
+  background-size: 300% 100%;
+  background-position: -100% 0;
+  opacity: 0;
+}
+.slide.active .leak {
+  opacity: 1;
+  animation: leakSweep 18s linear infinite;
+}
+@keyframes leakSweep {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* CANVAS LAYER (particles, networks) */
+.canvas-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+/* CONTENT LAYER — typography */
+.content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 8vh 8vw;
+}
+
+/* LETTERBOX BARS — cinematic crop on key slides */
+.letterbox::before,
+.letterbox::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 8vh;
+  background: #000;
+  z-index: 8;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1.4s var(--ease) 0.3s;
+}
+.letterbox::before { top: 0; transform-origin: top; }
+.letterbox::after { bottom: 0; transform-origin: bottom; }
+.slide.active .letterbox::before,
+.slide.active .letterbox::after { transform: scaleY(1); }
+
+/* TYPOGRAPHY */
+.eyebrow {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--acid);
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-shadow: 0 0 12px rgba(0,0,0,0.8);
+}
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--acid);
+}
+
+.h-mega {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(64px, 11vw, 200px);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+  text-shadow: 0 4px 32px rgba(0,0,0,0.7);
+}
+.h-mega em { font-style: italic; color: var(--acid); font-weight: 400; }
+
+.h-big {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(40px, 6vw, 96px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.75);
+}
+.h-big em { font-style: italic; color: var(--acid); font-weight: 400; }
+
+.h-med {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(28px, 4vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+}
+.h-med em { font-style: italic; color: var(--acid); font-weight: 400; }
+
+.statement {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(18px, 2vw, 28px);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--text-mid);
+  text-shadow: 0 2px 14px rgba(0,0,0,0.7);
+}
+.statement em { color: var(--acid); font-style: italic; }
+.statement .strong { color: var(--ink); font-style: normal; font-weight: 400; }
+
+.label {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.label.acid { color: var(--acid); }
+
+/* TYPE REVEAL — letter by letter cascade */
+.reveal-words .w {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.4s var(--ease), transform 1.4s var(--ease);
+}
+.slide.active .reveal-words .w { opacity: 1; transform: translateY(0); }
+.slide.active .reveal-words .w:nth-child(1) { transition-delay: 0.3s; }
+.slide.active .reveal-words .w:nth-child(2) { transition-delay: 0.45s; }
+.slide.active .reveal-words .w:nth-child(3) { transition-delay: 0.6s; }
+.slide.active .reveal-words .w:nth-child(4) { transition-delay: 0.75s; }
+.slide.active .reveal-words .w:nth-child(5) { transition-delay: 0.9s; }
+.slide.active .reveal-words .w:nth-child(6) { transition-delay: 1.05s; }
+.slide.active .reveal-words .w:nth-child(7) { transition-delay: 1.2s; }
+.slide.active .reveal-words .w:nth-child(8) { transition-delay: 1.35s; }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1.4s var(--ease), transform 1.4s var(--ease);
+}
+.slide.active .reveal { opacity: 1; transform: translateY(0); }
+.slide.active .r1 { transition-delay: 0.2s; }
+.slide.active .r2 { transition-delay: 0.5s; }
+.slide.active .r3 { transition-delay: 0.85s; }
+.slide.active .r4 { transition-delay: 1.25s; }
+.slide.active .r5 { transition-delay: 1.7s; }
+.slide.active .r6 { transition-delay: 2.2s; }
+
+/* LAYOUTS */
+.title-stage {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto auto 1fr;
+  gap: 3vh;
+  align-items: end;
+}
+.title-stage .top {
+  align-self: start;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.title-stage .top .ac { color: var(--acid); }
+.title-stage .h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(80px, 14vw, 280px);
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  text-shadow: 0 8px 48px rgba(0,0,0,0.9);
+}
+.title-stage .sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(20px, 2.4vw, 38px);
+  color: var(--text-mid);
+  letter-spacing: -0.015em;
+  max-width: 28ch;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+.title-stage .sub em { color: var(--acid); font-style: italic; }
+.title-stage .footer {
+  align-self: end;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  font-family: var(--mono);
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  padding-top: 4vh;
+  border-top: 1px solid rgba(200,255,31,0.2);
+}
+
+/* CORNER ANCHOR */
+.corner-anchor {
+  position: absolute;
+  z-index: 11;
+  max-width: 56ch;
+}
+.corner-anchor.bl { bottom: 10vh; left: 8vw; }
+.corner-anchor.tl { top: 10vh; left: 8vw; }
+.corner-anchor.br { bottom: 10vh; right: 8vw; text-align: right; }
+.corner-anchor .label { margin-bottom: 2vh; }
+.corner-anchor .h-big { margin-bottom: 2vh; }
+
+/* MILESTONES timeline */
+.milestone-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+}
+.milestone-anchor {
+  position: absolute;
+  top: 10vh;
+  left: 8vw;
+  max-width: 52ch;
+}
+.milestone-anchor .label { margin-bottom: 2vh; }
+.milestone-track-wrap {
+  position: absolute;
+  bottom: 18vh;
+  left: 8vw;
+  right: 8vw;
+}
+.milestone-track {
+  position: relative;
+  height: 1px;
+  background: rgba(244,241,232,0.18);
+}
+.milestone-track::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  height: 1px;
+  width: 0%;
+  background: var(--acid);
+  box-shadow: 0 0 14px var(--acid-glow);
+  transition: width 4.4s var(--ease) 0.8s;
+}
+.slide.active .milestone-track::after { width: 100%; }
+.milestone-stops {
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+}
+.mstop {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 14ch;
+}
+.mstop .mdot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #000;
+  border: 1.5px solid rgba(244,241,232,0.32);
+  margin-bottom: 1.4vh;
+  transition: all 0.9s var(--ease);
+}
+.slide.active .mstop.lit .mdot {
+  background: var(--acid);
+  border-color: var(--acid);
+  box-shadow: 0 0 22px var(--acid-glow);
+}
+.mstop .mwhen {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(9px, 0.85vw, 12px);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: 6px;
+  transition: color 0.9s var(--ease);
+}
+.slide.active .mstop.lit .mwhen { color: var(--acid); }
+.mstop .mwhat {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(12px, 1.2vw, 16px);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  color: var(--text-mid);
+  transition: color 0.9s var(--ease);
+  text-shadow: 0 1px 10px rgba(0,0,0,0.8);
+}
+.slide.active .mstop.lit .mwhat { color: var(--ink); }
+.slide.active .mstop[data-d="1"] .mdot,
+.slide.active .mstop[data-d="1"] .mwhen,
+.slide.active .mstop[data-d="1"] .mwhat { transition-delay: 0.7s; }
+.slide.active .mstop[data-d="2"] .mdot,
+.slide.active .mstop[data-d="2"] .mwhen,
+.slide.active .mstop[data-d="2"] .mwhat { transition-delay: 1.5s; }
+.slide.active .mstop[data-d="3"] .mdot,
+.slide.active .mstop[data-d="3"] .mwhen,
+.slide.active .mstop[data-d="3"] .mwhat { transition-delay: 2.3s; }
+.slide.active .mstop[data-d="4"] .mdot,
+.slide.active .mstop[data-d="4"] .mwhen,
+.slide.active .mstop[data-d="4"] .mwhat { transition-delay: 3.1s; }
+.slide.active .mstop[data-d="5"] .mdot,
+.slide.active .mstop[data-d="5"] .mwhen,
+.slide.active .mstop[data-d="5"] .mwhat { transition-delay: 3.9s; }
+
+/* NUMBERS GRID */
+.numbers-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  padding: 8vh 8vw;
+  display: flex;
+  flex-direction: column;
+}
+.numbers-header { margin-bottom: 4vh; }
+.numbers-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(20px, 3vw, 56px);
+  align-items: end;
+}
+.num-item {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1vw, 14px);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1.6s var(--ease), transform 1.6s var(--ease);
+}
+.slide.active .num-item:nth-child(1) { transition-delay: 0.6s; opacity: 1; transform: translateY(0); }
+.slide.active .num-item:nth-child(2) { transition-delay: 0.95s; opacity: 1; transform: translateY(0); }
+.slide.active .num-item:nth-child(3) { transition-delay: 1.3s; opacity: 1; transform: translateY(0); }
+.slide.active .num-item:nth-child(4) { transition-delay: 1.65s; opacity: 1; transform: translateY(0); }
+.num-item .num {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(56px, 9vw, 168px);
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  text-shadow: 0 4px 28px rgba(0,0,0,0.85);
+}
+.num-item.lead .num {
+  color: var(--acid);
+  font-style: italic;
+  text-shadow: 0 0 24px var(--acid-glow), 0 4px 28px rgba(0,0,0,0.85);
+}
+.num-item .num-label {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: clamp(11px, 1vw, 14px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  line-height: 1.4;
+  padding-top: 14px;
+  border-top: 1px solid rgba(244,241,232,0.18);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+}
+
+/* LIST REVEAL */
+.cap-list { list-style: none; display: flex; flex-direction: column; gap: clamp(10px, 1.4vw, 16px); }
+.cap-list li {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: clamp(16px, 2vw, 28px);
+  align-items: baseline;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(20px, 2.4vw, 32px);
+  line-height: 1.2;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  text-shadow: 0 2px 14px rgba(0,0,0,0.8);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1s var(--ease), transform 1s var(--ease);
+}
+.cap-list li .n {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(11px, 0.95vw, 14px);
+  letter-spacing: 0.28em;
+  color: var(--acid);
+}
+.slide.active .cap-list li { opacity: 1; transform: translateY(0); }
+.slide.active .cap-list li:nth-child(1) { transition-delay: 0.6s; }
+.slide.active .cap-list li:nth-child(2) { transition-delay: 0.85s; }
+.slide.active .cap-list li:nth-child(3) { transition-delay: 1.1s; }
+.slide.active .cap-list li:nth-child(4) { transition-delay: 1.35s; }
+.slide.active .cap-list li:nth-child(5) { transition-delay: 1.6s; }
+
+/* LESSON STACK */
+.lessons-stack { display: flex; flex-direction: column; gap: clamp(10px, 1.4vw, 18px); }
+.lesson-row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: clamp(20px, 3vw, 44px);
+  align-items: baseline;
+  padding: clamp(6px, 0.8vw, 10px) 0;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 1.2s var(--ease), transform 1.2s var(--ease);
+}
+.slide.active .lesson-row:nth-child(1) { transition-delay: 0.6s; opacity: 1; transform: translateY(0); }
+.slide.active .lesson-row:nth-child(2) { transition-delay: 1.0s; opacity: 1; transform: translateY(0); }
+.slide.active .lesson-row:nth-child(3) { transition-delay: 1.4s; opacity: 1; transform: translateY(0); }
+.slide.active .lesson-row:nth-child(4) { transition-delay: 1.8s; opacity: 1; transform: translateY(0); }
+.slide.active .lesson-row:nth-child(5) { transition-delay: 2.2s; opacity: 1; transform: translateY(0); }
+.lesson-row .n {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(11px, 0.95vw, 14px);
+  letter-spacing: 0.28em;
+  color: var(--acid);
+}
+.lesson-row .t {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(22px, 2.6vw, 38px);
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  text-shadow: 0 2px 14px rgba(0,0,0,0.8);
+}
+.lesson-row:last-child .t em { color: var(--acid); font-style: italic; }
+
+/* HORIZON timeline */
+.horizon-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+}
+.horizon-anchor {
+  position: absolute;
+  top: 10vh;
+  left: 8vw;
+  max-width: 50ch;
+}
+.horizon-anchor .label { margin-bottom: 2vh; }
+.horizon-track-wrap {
+  position: absolute;
+  top: 56%;
+  left: 8vw; right: 8vw;
+  height: 1px;
+}
+.horizon-track {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(244,241,232,0.2) 10%, rgba(244,241,232,0.2) 90%, transparent);
+}
+.horizon-track::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  height: 1px;
+  width: 0%;
+  background: linear-gradient(90deg, transparent, var(--acid));
+  box-shadow: 0 0 14px var(--acid-glow);
+  transition: width 3.6s var(--ease) 0.8s;
+}
+.slide.active .horizon-track::after { width: 100%; }
+.horizon-stops {
+  position: absolute;
+  top: 56%;
+  left: 8vw; right: 8vw;
+  display: flex;
+  justify-content: space-between;
+}
+.hstop {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transform: translateY(-50%);
+}
+.hstop .hdot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #000;
+  border: 1.5px solid rgba(244,241,232,0.32);
+  transition: all 0.9s var(--ease);
+}
+.slide.active .hstop.lit .hdot {
+  background: var(--acid);
+  border-color: var(--acid);
+  box-shadow: 0 0 22px var(--acid-glow);
+}
+.hstop .hwhen {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-top: 24px;
+  margin-bottom: 8px;
+  transition: color 0.9s var(--ease);
+}
+.slide.active .hstop.lit .hwhen { color: var(--acid); }
+.hstop .hwhat {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(16px, 1.8vw, 24px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--text-mid);
+  max-width: 18ch;
+  transition: color 0.9s var(--ease);
+  text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+}
+.slide.active .hstop.lit .hwhat { color: var(--ink); }
+.slide.active .hstop[data-d="0"] .hdot,
+.slide.active .hstop[data-d="0"] .hwhen,
+.slide.active .hstop[data-d="0"] .hwhat { transition-delay: 0.5s; }
+.slide.active .hstop[data-d="1"] .hdot,
+.slide.active .hstop[data-d="1"] .hwhen,
+.slide.active .hstop[data-d="1"] .hwhat { transition-delay: 1.3s; }
+.slide.active .hstop[data-d="2"] .hdot,
+.slide.active .hstop[data-d="2"] .hwhen,
+.slide.active .hstop[data-d="2"] .hwhat { transition-delay: 2.1s; }
+.slide.active .hstop[data-d="3"] .hdot,
+.slide.active .hstop[data-d="3"] .hwhen,
+.slide.active .hstop[data-d="3"] .hwhat { transition-delay: 2.9s; }
+
+/* YEAR SLIDES */
+.year-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+}
+.year-mark {
+  position: absolute;
+  top: 8vh;
+  left: 8vw;
+}
+.year-mark .pre { margin-bottom: 1.6vh; }
+.year-mark .yr-num {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(140px, 22vw, 360px);
+  line-height: 0.85;
+  letter-spacing: -0.055em;
+  color: var(--ink);
+  text-shadow: 0 8px 48px rgba(0,0,0,0.9);
+}
+.year-mark .yr-num em { font-style: italic; color: var(--acid); font-weight: 400; }
+.year-anchor {
+  position: absolute;
+  bottom: 10vh;
+  left: 8vw;
+  max-width: 56ch;
+}
+.year-anchor .h-big { margin-bottom: 2vh; }
+.year-anchor .statement { max-width: 50ch; }
+
+/* DAY ROWS */
+.day-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  padding: 8vh 8vw;
+  display: flex;
+  flex-direction: column;
+}
+.day-header { margin-bottom: 5vh; }
+.day-rows {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.2vh, 14px);
+  flex: 1;
+  position: relative;
+}
+.day-rows.flow::before {
+  content: '';
+  position: absolute;
+  left: 36px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--acid-soft) 15%, var(--acid-soft) 85%, transparent);
+}
+.day-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: clamp(28px, 3vw, 48px);
+  align-items: baseline;
+  padding: clamp(4px, 0.6vw, 8px) 0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1s var(--ease), transform 1s var(--ease);
+}
+.slide.active .day-row:nth-of-type(1) { transition-delay: 0.5s; opacity: 1; transform: translateY(0); }
+.slide.active .day-row:nth-of-type(2) { transition-delay: 0.8s; opacity: 1; transform: translateY(0); }
+.slide.active .day-row:nth-of-type(3) { transition-delay: 1.1s; opacity: 1; transform: translateY(0); }
+.slide.active .day-row:nth-of-type(4) { transition-delay: 1.4s; opacity: 1; transform: translateY(0); }
+.slide.active .day-row:nth-of-type(5) { transition-delay: 1.7s; opacity: 1; transform: translateY(0); }
+.day-row .time {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(13px, 1.2vw, 18px);
+  color: var(--text-mid);
+  letter-spacing: 0.06em;
+}
+.day-row.flow .time { color: var(--acid); }
+.day-row .scene {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(20px, 2.4vw, 34px);
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  text-shadow: 0 2px 14px rgba(0,0,0,0.8);
+}
+.day-row.dim .scene { color: var(--text-mid); }
+
+/* REVIEW 2032 */
+.review-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  padding: 8vh 8vw;
+  display: flex;
+  flex-direction: column;
+}
+.review-header { margin-bottom: 4vh; }
+.review-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1fr;
+  gap: clamp(28px, 4vw, 64px);
+  align-items: stretch;
+}
+.review-side h4 {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: clamp(16px, 2vw, 24px);
+  padding-bottom: clamp(10px, 1.4vw, 16px);
+  border-bottom: 1px solid rgba(244,241,232,0.2);
+}
+.review-side.digital h4 { color: var(--acid); border-bottom-color: var(--acid-soft); }
+.review-side ul { list-style: none; }
+.review-side li {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(15px, 1.5vw, 22px);
+  color: var(--text-mid);
+  padding: clamp(8px, 1.2vw, 14px) 0;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 10px rgba(0,0,0,0.8);
+}
+.review-side.digital li { color: var(--ink); }
+.review-center {
+  text-align: center;
+  padding: clamp(28px, 4vw, 44px);
+  border: 1px solid var(--acid-soft);
+  background: rgba(8,8,10,0.5);
+  backdrop-filter: blur(14px);
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+.review-center::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--acid-soft), transparent 70%);
+  opacity: 0.5;
+}
+.review-center > * { position: relative; }
+.review-q-label {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: clamp(18px, 2.4vw, 28px);
+}
+.review-question {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(22px, 2.4vw, 36px);
+  color: var(--ink);
+  line-height: 1.3;
+  letter-spacing: -0.018em;
+}
+
+/* SUCCESS TWO COLUMN */
+.success-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  padding: 8vh 8vw;
+  display: flex;
+  flex-direction: column;
+}
+.success-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-content: center;
+  margin-top: 4vh;
+}
+.success-col h4 {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-bottom: clamp(20px, 3vw, 32px);
+  padding-bottom: clamp(10px, 1.4vw, 18px);
+  border-bottom: 1px solid rgba(244,241,232,0.2);
+}
+.success-col.future h4 { color: var(--acid); border-bottom-color: var(--acid-soft); }
+.success-col ul { list-style: none; }
+.success-col li {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(18px, 2.2vw, 30px);
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: var(--text-mid);
+  padding: clamp(10px, 1.4vw, 16px) 0;
+  border-bottom: 1px solid rgba(244,241,232,0.08);
+  text-shadow: 0 1px 10px rgba(0,0,0,0.7);
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+.success-col.future li {
+  color: var(--ink);
+  transform: translateX(12px);
+}
+.slide.active .success-col li { opacity: 1; transform: translateX(0); }
+.slide.active .success-col li:nth-child(1) { transition-delay: 0.5s; }
+.slide.active .success-col li:nth-child(2) { transition-delay: 0.65s; }
+.slide.active .success-col li:nth-child(3) { transition-delay: 0.8s; }
+.slide.active .success-col li:nth-child(4) { transition-delay: 0.95s; }
+.slide.active .success-col li:nth-child(5) { transition-delay: 1.1s; }
+.success-col li:last-child { border-bottom: none; }
+
+/* MOONSHOT — sacred dark */
+.moonshot-stage {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 0 10vw;
+  position: relative;
+  z-index: 11;
+}
+.moonshot-stage .pre { margin-bottom: clamp(40px, 6vw, 80px); }
+.moonshot-stage .line {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(48px, 8vw, 152px);
+  line-height: 1.0;
+  letter-spacing: -0.035em;
+  color: var(--acid);
+  text-shadow: 0 0 32px var(--acid-glow);
+}
+
+/* CENTER STATEMENT */
+.centered-statement {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 0 10vw;
+  position: relative;
+  z-index: 11;
+}
+.centered-statement .l1, .centered-statement .l2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(36px, 6vw, 92px);
+  line-height: 1.05;
+  letter-spacing: -0.028em;
+  text-shadow: 0 4px 32px rgba(0,0,0,0.85);
+}
+.centered-statement .l1 { color: var(--ink); }
+.centered-statement .l2 {
+  color: var(--acid);
+  font-style: italic;
+  margin-top: clamp(20px, 3vw, 36px);
+  text-shadow: 0 0 28px var(--acid-glow);
+}
+.centered-statement .sub-arrow {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(11px, 1vw, 14px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  margin-top: clamp(40px, 6vw, 80px);
+  display: flex;
+  justify-content: center;
+  gap: clamp(16px, 2vw, 32px);
+}
+.centered-statement .sub-arrow .acid { color: var(--acid); }
+
+/* CLOSING */
+.closing-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 8vh 8vw;
+  position: relative;
+  z-index: 11;
+}
+.closing-stage .credits {
+  margin-top: 6vh;
+  padding-top: 3vh;
+  border-top: 1px solid rgba(200,255,31,0.2);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+.closing-stage .credits .ac { color: var(--acid); }
+
+/* NAV CHROME */
+.nav-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  background: rgba(8, 8, 10, 0.75);
+  backdrop-filter: blur(14px);
+  border-radius: 999px;
+  border: 1px solid rgba(244,241,232,0.1);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+  pointer-events: none;
+}
+.nav-bar.visible { opacity: 1; pointer-events: auto; }
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.nav-btn:hover { background: rgba(244,241,232,0.1); color: var(--acid); }
+.slide-count {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(244,241,232,0.5);
+}
+.slide-count .cur { color: var(--ink); }
+.edge-progress {
+  position: fixed;
+  bottom: 0; left: 0;
+  height: 2px;
+  background: var(--acid);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.5s var(--ease);
+  z-index: 999;
+  box-shadow: 0 0 12px var(--acid-glow);
+  opacity: 0.6;
+}
+
+@media (max-width: 900px) {
+  .numbers-grid, .success-grid, .review-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="edge-progress" id="edgeProgress"></div>
+
+<div class="stage">
+<div class="deck">
+
+<!-- ========================================== -->
+<!-- 01 — TITLE — sketch hero -->
+<!-- ========================================== -->
+<section class="slide active letterbox" data-slide="1" data-graph="dense-atmospheric">
+  <div class="bg-img dim" style="background-image: url('img/sketch.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <div class="leak"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="title-stage">
+      <div class="top">
+        <span class="reveal r1">STELLANTIS · PRODUCT DESIGN OFFICE</span>
+        <span class="ac reveal r1">— REC · A VISION</span>
+      </div>
+      <div>
+        <h1 class="h1 reveal-words"><span class="w">Design</span><br><span class="w">Amplified.</span></h1>
+      </div>
+      <div class="sub reveal r4">From Individual Expertise<br>to <em>Organizational Intelligence</em></div>
+      <div class="footer reveal r5">
+        <span>2026 — 2032</span>
+        <span class="ac">L. GASEVSKI</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 02 — MILESTONES — Vizcom workbench bg -->
+<!-- ========================================== -->
+<section class="slide" data-slide="2" data-graph="atmospheric-faint">
+  <div class="bg-img" style="background-image: url('img/vizcom_grid.jpg');"></div>
+  <div class="vignette"></div>
+  <div class="vignette right"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="milestone-stage">
+      <div class="milestone-anchor reveal r1">
+        <div class="label">CHAPTER ONE</div>
+        <h1 class="h-big" style="margin-top: 2vh;">From exploration to<br><em>enterprise capability.</em></h1>
+      </div>
+      <div class="milestone-track-wrap">
+        <div class="milestone-track"></div>
+        <div class="milestone-stops">
+          <div class="mstop lit" data-d="1">
+            <div class="mdot"></div>
+            <div class="mwhen">Oct 2025</div>
+            <div class="mwhat">Vizcom + Runway demonstrated</div>
+          </div>
+          <div class="mstop lit" data-d="2">
+            <div class="mdot"></div>
+            <div class="mwhen">Late 2025</div>
+            <div class="mwhat">Leadership interest created</div>
+          </div>
+          <div class="mstop lit" data-d="3">
+            <div class="mdot"></div>
+            <div class="mwhen">Winter</div>
+            <div class="mwhat">Business case developed</div>
+          </div>
+          <div class="mstop lit" data-d="4">
+            <div class="mdot"></div>
+            <div class="mwhen">Early 2026</div>
+            <div class="mwhat">Global licensing secured</div>
+          </div>
+          <div class="mstop lit" data-d="5">
+            <div class="mdot"></div>
+            <div class="mwhen">Spring 2026</div>
+            <div class="mwhat">Global deployment initiated</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 03 — NUMBERS — Vizcom workflow quadrant -->
+<!-- ========================================== -->
+<section class="slide" data-slide="3" data-graph="atmospheric-faint">
+  <div class="bg-quad">
+    <div style="background-image: url('img/viz_step1_sketch.jpg');"></div>
+    <div style="background-image: url('img/viz_step2_refine.jpg');"></div>
+    <div style="background-image: url('img/viz_step3_silver.jpg');"></div>
+    <div style="background-image: url('img/viz_step4_final.jpg');"></div>
+  </div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="numbers-stage">
+      <div class="numbers-header">
+        <div class="eyebrow reveal r1">CHAPTER ONE · WHAT WE BUILT</div>
+        <h1 class="h-big reveal r2" style="margin-top: 2vh;">From limited access<br>to <em>enterprise deployment.</em></h1>
+      </div>
+      <div class="numbers-grid">
+        <div class="num-item lead">
+          <div class="num">200+</div>
+          <div class="num-label">Global Vizcom AI<br>licenses</div>
+        </div>
+        <div class="num-item">
+          <div class="num">50</div>
+          <div class="num-label">North America PDO<br>Vizcom seats</div>
+        </div>
+        <div class="num-item">
+          <div class="num">50</div>
+          <div class="num-label">Global Runway<br>licenses</div>
+        </div>
+        <div class="num-item">
+          <div class="num">5</div>
+          <div class="num-label">North America<br>Runway licenses</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 04 — CAPABILITY — AR studio hero -->
+<!-- ========================================== -->
+<section class="slide" data-slide="4" data-graph="atmospheric-faint">
+  <div class="bg-img" style="background-image: url('img/ar_studio.jpg');"></div>
+  <div class="vignette right"></div>
+  <div class="vignette bottom"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="corner-anchor bl">
+      <div class="label reveal r1">CHAPTER ONE · CAPABILITY</div>
+      <h1 class="h-big reveal r2" style="margin-top: 2vh; margin-bottom: 4vh;">Building capability<br><em>before scale.</em></h1>
+      <ul class="cap-list">
+        <li><span class="n">01</span><span>Global training delivered</span></li>
+        <li><span class="n">02</span><span>Early workflows demonstrated</span></li>
+        <li><span class="n">03</span><span>Cross-studio learning</span></li>
+        <li><span class="n">04</span><span>Community building</span></li>
+        <li><span class="n">05</span><span>Knowledge sharing</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 05 — GLOBAL — world map (cinematic bg subtle) -->
+<!-- ========================================== -->
+<section class="slide" data-slide="5" data-graph="world-map-cinematic">
+  <div class="bg-img cool dim" style="background-image: url('img/motion_city.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer" style="opacity: 1;"></canvas>
+  <div class="content">
+    <div class="corner-anchor bl">
+      <div class="label reveal r1">CHAPTER ONE · GLOBAL MOMENTUM</div>
+      <h1 class="h-big reveal r2" style="margin-top: 2vh;">Global<br><em>momentum.</em></h1>
+      <div class="statement reveal r4" style="margin-top: 2vh;">Detroit · Vélizy · Rüsselsheim · Turin ·<br>Belo Horizonte · Shanghai — <span class="strong">six studios, one capability.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 06 — LESSONS — beach lifestyle bg dim -->
+<!-- ========================================== -->
+<section class="slide" data-slide="6" data-graph="atmospheric-faint">
+  <div class="bg-img dim" style="background-image: url('img/sunset_lifestyle.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content" style="padding: 8vh 8vw;">
+    <div class="day-header" style="margin-bottom: 5vh;">
+      <div class="eyebrow reveal r1">CHAPTER ONE · WHAT WE LEARNED</div>
+      <h1 class="h-big reveal r2" style="margin-top: 2vh;">What the first year<br><em>taught us.</em></h1>
+    </div>
+    <div class="lessons-stack">
+      <div class="lesson-row"><div class="n">01</div><div class="t">Adoption matters more than licenses.</div></div>
+      <div class="lesson-row"><div class="n">02</div><div class="t">Real use cases outperform demos.</div></div>
+      <div class="lesson-row"><div class="n">03</div><div class="t">Training drives adoption.</div></div>
+      <div class="lesson-row"><div class="n">04</div><div class="t">AI accelerates exploration.</div></div>
+      <div class="lesson-row"><div class="n">05</div><div class="t">Human judgment <em>remains essential.</em></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 07 — REAL OPPORTUNITY — bridge, atmospheric -->
+<!-- ========================================== -->
+<section class="slide" data-slide="7" data-graph="atmospheric-sparse">
+  <div class="bg-img dim cool" style="background-image: url('img/clean_render_blue.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="centered-statement">
+      <div class="l1 reveal r1">The tools proved the opportunity.</div>
+      <div class="l2 reveal r3">The larger one is organizational learning.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 08 — MOONSHOT — pure dark sacred -->
+<!-- ========================================== -->
+<section class="slide" data-slide="8" data-graph="silent">
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="moonshot-stage">
+      <div class="pre reveal r1"><span class="label acid">THE MOONSHOT</span></div>
+      <div class="line reveal r3">Design becomes<br>a learning organization.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 09 — INDIVIDUAL → COLLECTIVE — sketch ⇒ studio transition -->
+<!-- ========================================== -->
+<section class="slide" data-slide="9" data-graph="atmospheric-sparse">
+  <div class="bg-img dim" style="background-image: url('img/sketch.jpg');"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="centered-statement">
+      <div class="l1 reveal r1">From individual brilliance</div>
+      <div class="l2 reveal r3">to collective intelligence.</div>
+      <div class="sub-arrow reveal r5">
+        <span>TODAY · INDIVIDUAL</span>
+        <span class="acid">›</span>
+        <span class="acid">TOMORROW · COLLECTIVE</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 10 — HORIZON — sunset lifestyle (literal horizon) -->
+<!-- ========================================== -->
+<section class="slide" data-slide="10" data-graph="atmospheric-faint">
+  <div class="bg-img cool" style="background-image: url('img/sunset_lifestyle.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="horizon-stage">
+      <div class="horizon-anchor reveal r1">
+        <div class="label">THE PATH</div>
+        <h1 class="h-big" style="margin-top: 2vh;">A horizon,<br><em>not a roadmap.</em></h1>
+      </div>
+      <div class="horizon-track-wrap">
+        <div class="horizon-track"></div>
+      </div>
+      <div class="horizon-stops">
+        <div class="hstop lit" data-d="0">
+          <div class="hdot"></div>
+          <div class="hwhen">Today</div>
+          <div class="hwhat">Information</div>
+        </div>
+        <div class="hstop lit" data-d="1">
+          <div class="hdot"></div>
+          <div class="hwhen">Year 1</div>
+          <div class="hwhat">Individual intelligence amplified</div>
+        </div>
+        <div class="hstop lit" data-d="2">
+          <div class="hdot"></div>
+          <div class="hwhen">Year 3</div>
+          <div class="hwhat">Collective design intelligence</div>
+        </div>
+        <div class="hstop lit" data-d="3">
+          <div class="hdot"></div>
+          <div class="hwhen">Year 6</div>
+          <div class="hwhat">Learning design organization</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 11 — YEAR 1 — single designer concept -->
+<!-- ========================================== -->
+<section class="slide" data-slide="11" data-graph="designer-orbit">
+  <div class="bg-img" style="background-image: url('img/clean_render_side.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="vignette left"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="year-stage">
+      <div class="year-mark">
+        <div class="pre reveal r1"><span class="label">YEAR 01 · 2026</span></div>
+        <div class="yr-num reveal r2"><em>01</em></div>
+      </div>
+      <div class="year-anchor reveal r4">
+        <h2 class="h-big">Individual intelligence<br><em>amplified.</em></h2>
+        <div class="statement">The designer stays central. Intelligence surrounds and supports.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 12 — YEAR 3 — theme exploration quadrant (collective) -->
+<!-- ========================================== -->
+<section class="slide" data-slide="12" data-graph="collective-network">
+  <div class="bg-quad">
+    <div style="background-image: url('img/theme_yellow.jpg');"></div>
+    <div style="background-image: url('img/beach_family.jpg');"></div>
+    <div style="background-image: url('img/theme_red.jpg');"></div>
+    <div style="background-image: url('img/theme_camo.jpg');"></div>
+  </div>
+  <div class="vignette deep"></div>
+  <div class="vignette left"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="year-stage">
+      <div class="year-mark">
+        <div class="pre reveal r1"><span class="label">YEAR 03 · 2029</span></div>
+        <div class="yr-num reveal r2"><em>03</em></div>
+      </div>
+      <div class="year-anchor reveal r4">
+        <h2 class="h-big">Collective design<br><em>intelligence.</em></h2>
+        <div class="statement">Knowledge moves between people, teams, and regions. Learning becomes shared.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 13 — YEAR 6 — Pronto night cinematic -->
+<!-- ========================================== -->
+<section class="slide" data-slide="13" data-graph="growing-organism">
+  <div class="bg-img" style="background-image: url('img/pronto_front.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="vignette left"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="year-stage">
+      <div class="year-mark">
+        <div class="pre reveal r1"><span class="label">YEAR 06 · 2032</span></div>
+        <div class="yr-num reveal r2"><em>06</em></div>
+      </div>
+      <div class="year-anchor reveal r4">
+        <h2 class="h-big">A learning design<br><em>organization.</em></h2>
+        <div class="statement">Every decision leaves a trace. Every program makes the next better.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 14 — COLLECTIVE INTELLIGENCE hero — Pronto rear -->
+<!-- ========================================== -->
+<section class="slide" data-slide="14" data-graph="dense-graph-hero">
+  <div class="bg-img" style="background-image: url('img/pronto_rear.jpg');"></div>
+  <div class="vignette"></div>
+  <div class="vignette left"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer" style="opacity: 1;"></canvas>
+  <div class="content">
+    <div class="corner-anchor bl">
+      <div class="label reveal r1">COLLECTIVE INTELLIGENCE</div>
+      <h1 class="h-mega reveal r2" style="font-size: clamp(48px, 7vw, 120px); line-height: 0.96; margin-top: 2vh;">The organization<br><em>remembers.</em></h1>
+      <div class="statement reveal r5" style="margin-top: 3vh; max-width: 60ch;">Every project. Every review. Every decision.<br><span class="strong">Connected.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 15 — DAY TODAY — friction (winter city) -->
+<!-- ========================================== -->
+<section class="slide" data-slide="15" data-graph="atmospheric-very-faint">
+  <div class="bg-img dim" style="background-image: url('img/winter_city.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="day-stage">
+      <div class="day-header">
+        <div class="eyebrow reveal r1" style="color: var(--text-mid);">A DAY IN THE LIFE — TODAY</div>
+        <h1 class="h-big reveal r2" style="margin-top: 2vh;">Friction.</h1>
+      </div>
+      <div class="day-rows">
+        <div class="day-row dim"><div class="time">09:00</div><div class="scene">Searching for prior research</div></div>
+        <div class="day-row dim"><div class="time">10:30</div><div class="scene">Rebuilding context from a deck written by someone who left</div></div>
+        <div class="day-row dim"><div class="time">12:00</div><div class="scene">Asking three teams the same question</div></div>
+        <div class="day-row dim"><div class="time">14:00</div><div class="scene">Waiting for an answer that exists somewhere</div></div>
+        <div class="day-row dim"><div class="time">16:30</div><div class="scene">Repeating a review the previous program already had</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 16 — DAY FUTURE — flow (desert open road) -->
+<!-- ========================================== -->
+<section class="slide" data-slide="16" data-graph="atmospheric-faint">
+  <div class="bg-img" style="background-image: url('img/desert.jpg');"></div>
+  <div class="vignette"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="day-stage">
+      <div class="day-header">
+        <div class="eyebrow reveal r1">A DAY IN THE LIFE — 2032</div>
+        <h1 class="h-big reveal r2" style="margin-top: 2vh;"><em>Flow.</em></h1>
+      </div>
+      <div class="day-rows flow">
+        <div class="day-row flow"><div class="time">08:00</div><div class="scene">A briefing assembles itself — the program's overnight signal</div></div>
+        <div class="day-row flow"><div class="time">10:00</div><div class="scene">A sketch lands · the package agent answers before the question is asked</div></div>
+        <div class="day-row flow"><div class="time">12:00</div><div class="scene">A breakthrough in another studio arrives, framed in context</div></div>
+        <div class="day-row flow"><div class="time">14:00</div><div class="scene">A review with humans and agents — discussion is judgment, not lookup</div></div>
+        <div class="day-row flow"><div class="time">16:00</div><div class="scene">Every decision today becomes tomorrow's starting point</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 17 — REVIEW 2032 — AR studio cinematic -->
+<!-- ========================================== -->
+<section class="slide" data-slide="17" data-graph="atmospheric-very-faint">
+  <div class="bg-img dim" style="background-image: url('img/ar_studio.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="review-stage">
+      <div class="review-header">
+        <div class="eyebrow reveal r1">A DESIGN REVIEW · 2032</div>
+        <h1 class="h-big reveal r2" style="margin-top: 2vh;">Reviews become exercises<br>in <em>judgment.</em></h1>
+      </div>
+      <div class="review-grid">
+        <div class="review-side human reveal r3">
+          <h4>Human Participants</h4>
+          <ul>
+            <li>Design</li>
+            <li>Planning</li>
+            <li>Engineering</li>
+            <li>Marketing</li>
+          </ul>
+        </div>
+        <div class="review-center reveal r4">
+          <div class="review-q-label">CENTRAL QUESTION</div>
+          <div class="review-question">"Have we solved<br>this before?"</div>
+        </div>
+        <div class="review-side digital reveal r5">
+          <h4>Digital Participants</h4>
+          <ul>
+            <li>Packaging Agent</li>
+            <li>Cost Agent</li>
+            <li>Manufacturing Agent</li>
+            <li>Program Agent</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 18 — SUCCESS — split comparison interior cinematic -->
+<!-- ========================================== -->
+<section class="slide" data-slide="18" data-graph="atmospheric-very-faint">
+  <div class="bg-img dim" style="background-image: url('img/interior.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="success-stage">
+      <div class="day-header">
+        <div class="eyebrow reveal r1">WHAT SUCCESS LOOKS LIKE</div>
+        <h1 class="h-big reveal r2" style="margin-top: 2vh;">A smarter, faster<br><em>organization.</em></h1>
+      </div>
+      <div class="success-grid">
+        <div class="success-col today">
+          <h4>Today</h4>
+          <ul>
+            <li>Repeated work</li>
+            <li>Lost rationale</li>
+            <li>Siloed expertise</li>
+            <li>Delayed decisions</li>
+            <li>Manual reporting</li>
+          </ul>
+        </div>
+        <div class="success-col future">
+          <h4>Future</h4>
+          <ul>
+            <li>Reusable judgment</li>
+            <li>Connected expertise</li>
+            <li>Faster exploration</li>
+            <li>Earlier risk visibility</li>
+            <li>Better decisions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 19 — CLOSING — Pronto rear cinematic final -->
+<!-- ========================================== -->
+<section class="slide letterbox" data-slide="19" data-graph="dense-atmospheric-quiet">
+  <div class="bg-img" style="background-image: url('img/motion_city.jpg');"></div>
+  <div class="vignette deep"></div>
+  <div class="grain"></div>
+  <div class="leak"></div>
+  <canvas class="canvas-layer"></canvas>
+  <div class="content">
+    <div class="closing-stage">
+      <div class="eyebrow reveal r1" style="margin-bottom: 4vh;">FIN.</div>
+      <h1 class="h-mega reveal r3" style="font-size: clamp(48px, 7vw, 124px); line-height: 0.94; max-width: 22ch;">Design becomes<br>an <em>organization that learns.</em></h1>
+      <div class="credits reveal r6">
+        <span>STELLANTIS · PRODUCT DESIGN OFFICE</span>
+        <span class="ac">DESIGN AMPLIFIED · 2026 — 2032</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<div class="nav-bar" id="navBar">
+  <button class="nav-btn" onclick="prevSlide()">‹</button>
+  <span class="slide-count"><span class="cur" id="cur">01</span> · 19</span>
+  <button class="nav-btn" onclick="nextSlide()">›</button>
+</div>
+
+<script>
+// Wrap text in title for word-by-word reveal handled via .reveal-words .w spans (already in markup)
+
+// ============================================================
+// NODE GRAPH ENGINE — reused for canvas layers
+// ============================================================
+class NodeGraph {
+  constructor(canvas, config) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.config = config;
+    this.nodes = [];
+    this.edges = [];
+    this.started = false;
+    this.rafId = null;
+    this.resize();
+    this._build();
+  }
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = this.canvas.getBoundingClientRect();
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.w = rect.width;
+    this.h = rect.height;
+  }
+  _build() {
+    const t = this.config.type;
+    switch (t) {
+      case 'dense-atmospheric': this._ambient(280, 0.45); break;
+      case 'dense-atmospheric-quiet': this._ambient(240, 0.4); break;
+      case 'atmospheric-sparse': this._ambient(60, 0.18); break;
+      case 'atmospheric-faint': this._ambient(80, 0.22); break;
+      case 'atmospheric-very-faint': this._ambient(40, 0.12); break;
+      case 'silent': this._ambient(20, 0.08); break;
+      case 'world-map-cinematic': this._buildWorldMap(); break;
+      case 'designer-orbit': this._buildDesignerOrbit(); break;
+      case 'collective-network': this._buildCollectiveNetwork(); break;
+      case 'growing-organism': this._buildGrowingOrganism(); break;
+      case 'dense-graph-hero': this._buildDenseHero(); break;
+      default: this._ambient(60, 0.18);
+    }
+  }
+  _ambient(count, alphaScale) {
+    for (let i = 0; i < count; i++) {
+      this.nodes.push({
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        vx: (Math.random() - 0.5) * 0.05,
+        vy: (Math.random() - 0.5) * 0.05,
+        r: 0.6 + Math.random() * 1.4,
+        a: 0.1 + Math.random() * alphaScale,
+        glow: Math.random() < 0.05,
+        phase: Math.random() * Math.PI * 2,
+        ambient: true
+      });
+    }
+  }
+  _buildWorldMap() {
+    const mapX = this.w * 0.30, mapY = this.h * 0.06;
+    const mapW = this.w * 0.66, mapH = this.h * 0.62;
+    const lngMin = -170, lngMax = 180, latMin = -55, latMax = 75;
+    const geo = (lat, lng) => [
+      mapX + ((lng - lngMin) / (lngMax - lngMin)) * mapW,
+      mapY + ((latMax - lat) / (latMax - latMin)) * mapH
+    ];
+    const isLand = (lat, lng) => {
+      if (lat >= 25 && lat <= 72 && lng >= -140 && lng <= -52) {
+        if (lng < -128 && lat < 49) return false;
+        if (lng > -82 && lat < 30) return false;
+        if (lat > 65 && lng > -95) return false;
+        return true;
+      }
+      if (lat >= 56 && lat <= 71 && lng >= -168 && lng <= -141) return true;
+      if (lat >= 8 && lat <= 32 && lng >= -118 && lng <= -82) {
+        if (lat < 17 && lng < -100) return false;
+        return true;
+      }
+      if (lat >= -55 && lat <= 12 && lng >= -82 && lng <= -34) {
+        if (lat < -25 && lng < -72) return false;
+        if (lat < -20 && lng > -45) return false;
+        if (lat > 5 && lng < -75) return false;
+        return true;
+      }
+      if (lat >= 36 && lat <= 71 && lng >= -10 && lng <= 50) {
+        if (lat > 60 && lng > 30) return false;
+        if (lat < 40 && lng > 28) return false;
+        return true;
+      }
+      if (lat >= 8 && lat <= 78 && lng >= 30 && lng <= 145) {
+        if (lat < 18 && lng > 105) return false;
+        if (lat > 70 && lng < 60) return false;
+        return true;
+      }
+      if (lat >= -10 && lat <= 8 && lng >= 95 && lng <= 142) return true;
+      if (lat >= -40 && lat <= -10 && lng >= 112 && lng <= 154) return true;
+      return false;
+    };
+    for (let lat = latMin; lat <= latMax; lat += 2.5) {
+      for (let lng = lngMin; lng <= lngMax; lng += 3.2) {
+        if (isLand(lat, lng)) {
+          const [x, y] = geo(lat, lng);
+          this.nodes.push({
+            x, y, r: 0.95, a: 0.28,
+            mapDot: true,
+            phase: Math.random() * Math.PI * 2,
+            appearDelay: 200 + Math.random() * 600
+          });
+        }
+      }
+    }
+    const cities = [
+      { lat: 42.33, lng: -83.05, delay: 900 },
+      { lat: 48.78, lng: 2.20, delay: 1500 },
+      { lat: 49.99, lng: 8.42, delay: 2000 },
+      { lat: 45.07, lng: 7.69, delay: 2500 },
+      { lat: -19.92, lng: -43.94, delay: 3100 },
+      { lat: 31.23, lng: 121.47, delay: 3700 }
+    ];
+    const cityStart = this.nodes.length;
+    cities.forEach(c => {
+      const [x, y] = geo(c.lat, c.lng);
+      this.nodes.push({
+        x, y, r: 6.5, a: 1,
+        glow: true, color: '#C8FF1F',
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: c.delay
+      });
+    });
+    for (let i = 0; i < cities.length; i++) {
+      for (let j = i + 1; j < cities.length; j++) {
+        this.edges.push({
+          a: cityStart + i, b: cityStart + j,
+          alpha: 0.18, appearDelay: 4400 + Math.random() * 800,
+          pulse: Math.random() < 0.55,
+          pulseOffset: Math.random() * 2400, pulsePeriod: 3000 + Math.random() * 1400
+        });
+      }
+    }
+  }
+  _buildDesignerOrbit() {
+    const cx = this.w * 0.66, cy = this.h * 0.5;
+    this.nodes.push({
+      x: cx, y: cy, r: 10, a: 1, glow: true,
+      color: '#F4F1E8',
+      phase: 0
+    });
+    const cIdx = this.nodes.length - 1;
+    const rings = [
+      { count: 8, radius: this.h * 0.16, speed: 0.0003, alpha: 0.5 },
+      { count: 14, radius: this.h * 0.26, speed: 0.00018, alpha: 0.32 },
+      { count: 22, radius: this.h * 0.36, speed: 0.00012, alpha: 0.22 }
+    ];
+    rings.forEach((ring, ri) => {
+      for (let i = 0; i < ring.count; i++) {
+        const a0 = (i / ring.count) * Math.PI * 2;
+        this.nodes.push({
+          x: cx + Math.cos(a0) * ring.radius,
+          y: cy + Math.sin(a0) * ring.radius,
+          orbitCx: cx, orbitCy: cy,
+          orbitR: ring.radius, orbitA: a0, orbitSpeed: ring.speed,
+          r: 2 + Math.random() * 1.4,
+          a: ring.alpha,
+          glow: Math.random() < 0.18,
+          color: '#C8FF1F',
+          phase: Math.random() * Math.PI * 2,
+          appearDelay: ri * 250 + i * 30,
+          orbit: true
+        });
+        if (ri === 0 && Math.random() < 0.4) {
+          this.edges.push({
+            a: cIdx, b: this.nodes.length - 1,
+            alpha: 0.2, ambient: true,
+            appearDelay: ri * 250 + 200
+          });
+        }
+      }
+    });
+  }
+  _buildCollectiveNetwork() {
+    const positions = [
+      { x: 0.66, y: 0.5 },
+      { x: 0.48, y: 0.32 },
+      { x: 0.82, y: 0.36 },
+      { x: 0.5, y: 0.7 },
+      { x: 0.84, y: 0.6 },
+      { x: 0.4, y: 0.55 },
+      { x: 0.7, y: 0.4 }
+    ];
+    const start = this.nodes.length;
+    positions.forEach((p, i) => {
+      this.nodes.push({
+        x: p.x * this.w, y: p.y * this.h,
+        r: i === 0 ? 8 : 6,
+        a: 0.95,
+        glow: true,
+        color: i === 0 ? '#F4F1E8' : '#C8FF1F',
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: 200 + i * 200
+      });
+    });
+    for (let i = 0; i < positions.length; i++) {
+      for (let j = i + 1; j < positions.length; j++) {
+        this.edges.push({
+          a: start + i, b: start + j,
+          alpha: 0.18, appearDelay: 800 + (i + j) * 100,
+          pulse: true,
+          pulseOffset: Math.random() * 3000, pulsePeriod: 2400 + Math.random() * 1600
+        });
+      }
+    }
+  }
+  _buildGrowingOrganism() {
+    const cx = this.w * 0.66, cy = this.h * 0.5;
+    const seeds = [{ x: cx, y: cy }, { x: cx + 60, y: cy + 40 }, { x: cx - 60, y: cy + 40 }];
+    seeds.forEach((p, i) => {
+      this.nodes.push({
+        x: p.x, y: p.y, r: 6, a: 0.95, glow: true,
+        color: '#C8FF1F',
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 200
+      });
+    });
+    this.growth = [];
+    let delay = 600;
+    for (let i = 0; i < 56; i++) {
+      const attachIdx = Math.floor(Math.random() * Math.min(this.nodes.length + i, 18));
+      const seed = seeds[Math.min(attachIdx, seeds.length - 1)];
+      const ang = Math.random() * Math.PI * 2;
+      const dist = 40 + Math.random() * 220 + i * 3.5;
+      this.growth.push({
+        appear: delay,
+        attachIdx,
+        x: Math.max(20, Math.min(this.w - 20, seed.x + Math.cos(ang) * dist)),
+        y: Math.max(20, Math.min(this.h - 20, seed.y + Math.sin(ang) * dist)),
+        r: 2 + Math.random() * 2.2,
+        glow: Math.random() < 0.22
+      });
+      delay += 180 + Math.random() * 180;
+    }
+  }
+  _buildDenseHero() {
+    const galaxies = [
+      { cx: this.w * 0.62, cy: this.h * 0.45, count: 22 },
+      { cx: this.w * 0.75, cy: this.h * 0.6, count: 18 },
+      { cx: this.w * 0.5, cy: this.h * 0.6, count: 16 }
+    ];
+    const positions = [];
+    galaxies.forEach(g => {
+      for (let i = 0; i < g.count; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = Math.random() * Math.min(this.w, this.h) * 0.18;
+        positions.push({
+          x: g.cx + Math.cos(a) * r,
+          y: g.cy + Math.sin(a) * r,
+          hub: i < 2
+        });
+      }
+    });
+    const start = this.nodes.length;
+    positions.forEach((p, i) => {
+      this.nodes.push({
+        x: p.x, y: p.y,
+        r: p.hub ? 5 : 3,
+        a: 0.85, glow: p.hub,
+        color: p.hub ? '#C8FF1F' : '#F4F1E8',
+        phase: Math.random() * Math.PI * 2,
+        appearDelay: i * 50
+      });
+    });
+    for (let i = 0; i < positions.length; i++) {
+      const candidates = [];
+      for (let j = 0; j < positions.length; j++) {
+        if (i === j) continue;
+        const d = Math.hypot(positions[i].x - positions[j].x, positions[i].y - positions[j].y);
+        candidates.push({ idx: j, d });
+      }
+      candidates.sort((a, b) => a.d - b.d);
+      for (let k = 0; k < 3; k++) {
+        if (Math.random() < 0.7) {
+          this.edges.push({
+            a: start + i, b: start + candidates[k].idx,
+            alpha: 0.12 + Math.random() * 0.1,
+            appearDelay: 800 + Math.random() * 1800,
+            pulse: Math.random() < 0.3,
+            pulseOffset: Math.random() * 3000, pulsePeriod: 3000 + Math.random() * 2000
+          });
+        }
+      }
+    }
+  }
+  start() {
+    if (this.started) return;
+    this.started = true;
+    this.startTime = performance.now();
+    this._loop();
+  }
+  stop() {
+    this.started = false;
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+  }
+  _loop() {
+    if (!this.started) return;
+    this._render(performance.now() - this.startTime);
+    this.rafId = requestAnimationFrame(() => this._loop());
+  }
+  _render(elapsed) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.w, this.h);
+    if (this.growth) {
+      for (const ev of this.growth) {
+        if (ev.spawned) continue;
+        if (elapsed >= ev.appear) {
+          const newIdx = this.nodes.length;
+          this.nodes.push({
+            x: ev.x, y: ev.y, r: ev.r, a: 0.82,
+            glow: ev.glow,
+            color: ev.glow ? '#C8FF1F' : '#F4F1E8',
+            phase: Math.random() * Math.PI * 2,
+            appearDelay: elapsed
+          });
+          this.edges.push({
+            a: ev.attachIdx, b: newIdx,
+            alpha: 0.18, appearDelay: elapsed,
+            pulse: Math.random() < 0.35, pulseOffset: 0, pulsePeriod: 2400
+          });
+          ev.spawned = true;
+        }
+      }
+    }
+    for (const n of this.nodes) {
+      if (n.ambient) {
+        n.x += n.vx || 0; n.y += n.vy || 0;
+        if (n.x < 0 || n.x > this.w) n.vx *= -1;
+        if (n.y < 0 || n.y > this.h) n.vy *= -1;
+      } else if (n.orbit) {
+        n.orbitA += n.orbitSpeed * 16;
+        n.x = n.orbitCx + Math.cos(n.orbitA) * n.orbitR;
+        n.y = n.orbitCy + Math.sin(n.orbitA) * n.orbitR;
+      }
+    }
+    for (const e of this.edges) {
+      const delay = e.appearDelay || 0;
+      const t = Math.min(1, Math.max(0, (elapsed - delay) / 1200));
+      if (t <= 0) continue;
+      const a = this.nodes[e.a], b = this.nodes[e.b];
+      if (!a || !b) continue;
+      const x2 = a.x + (b.x - a.x) * t;
+      const y2 = a.y + (b.y - a.y) * t;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y); ctx.lineTo(x2, y2);
+      ctx.strokeStyle = `rgba(244,241,232,${e.alpha * t})`;
+      ctx.lineWidth = 0.7;
+      ctx.stroke();
+      if (e.pulse && t >= 1) {
+        const period = e.pulsePeriod || 2400;
+        const offset = e.pulseOffset || 0;
+        const ph = ((elapsed + offset) / period) % 1;
+        const px = a.x + (b.x - a.x) * ph;
+        const py = a.y + (b.y - a.y) * ph;
+        const pulseA = Math.sin(ph * Math.PI);
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200,255,31,${0.85 * pulseA})`;
+        ctx.shadowColor = 'rgba(200,255,31,0.8)';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+    for (const n of this.nodes) {
+      const delay = n.appearDelay || 0;
+      const t = Math.min(1, Math.max(0, (elapsed - delay) / 900));
+      if (t <= 0) continue;
+      const pulse = n.glow ? 0.78 + 0.22 * Math.sin(elapsed / 900 + (n.phase || 0)) : 1;
+      const r = (n.r || 2) * t;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      const color = n.color || (n.glow ? '#C8FF1F' : '#F4F1E8');
+      const alpha = (n.a || 0.5) * t * pulse;
+      ctx.fillStyle = this._rgba(color, alpha);
+      if (n.glow) {
+        ctx.shadowColor = this._rgba(color, 0.7);
+        ctx.shadowBlur = 16 * pulse;
+      }
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+  _rgba(hex, alpha) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+}
+
+// ============================================================
+// SLIDE MANAGER
+// ============================================================
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 1;
+const animations = new Map();
+
+function showSlide(n) {
+  if (n < 1) n = 1;
+  if (n > total) n = total;
+  if (animations.has(current)) animations.get(current).stop();
+  current = n;
+  slides.forEach((s, i) => s.classList.toggle('active', i === n - 1));
+  document.getElementById('cur').textContent = String(n).padStart(2, '0');
+  document.getElementById('edgeProgress').style.transform = `scaleX(${n / total})`;
+  setTimeout(() => initSlide(n), 80);
+}
+
+function initSlide(n) {
+  const slide = slides[n - 1];
+  const canvas = slide.querySelector('.canvas-layer');
+  if (!canvas) return;
+  const type = slide.dataset.graph;
+  if (animations.has(n)) animations.get(n).stop();
+  const g = new NodeGraph(canvas, { type });
+  animations.set(n, g);
+  g.start();
+}
+
+function nextSlide() { showSlide(current + 1); }
+function prevSlide() { showSlide(current - 1); }
+
+let navTimer;
+const navBar = document.getElementById('navBar');
+document.addEventListener('mousemove', () => {
+  navBar.classList.add('visible');
+  clearTimeout(navTimer);
+  navTimer = setTimeout(() => navBar.classList.remove('visible'), 2500);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  else if (e.key === 'Home') { showSlide(1); }
+  else if (e.key === 'End') { showSlide(total); }
+  else if (e.key === 'f' || e.key === 'F') {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen().catch(() => {});
+  }
+});
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.nav-bar')) return;
+  nextSlide();
+});
+window.addEventListener('resize', () => { setTimeout(() => initSlide(current), 100); });
+
+setTimeout(() => initSlide(1), 80);
+showSlide(1);
+</script>
+</body>
+</html>
