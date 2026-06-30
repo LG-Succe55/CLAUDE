@@ -16,6 +16,7 @@ from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
+from pptx.oxml.ns import qn
 
 # ----------------------------------------------------------------------------
 # Design system
@@ -430,102 +431,179 @@ def s_interior(number, kick, title, caption):
     return s
 
 
+def _set_dash(shape, val="dash"):
+    ln = shape.line._get_or_add_ln()
+    d = ln.find(qn('a:prstDash'))
+    if d is None:
+        d = ln.makeelement(qn('a:prstDash'), {})
+        ln.append(d)
+    d.set('val', val)
+
+
 def s_stellantis_fit():
     s = add_slide(); set_bg(s)
-    # sibling-brand accent colors (restrained, deck-consistent)
-    DODGE = RGBColor(0xC4, 0x12, 0x30)   # performance red
-    JEEP  = RGBColor(0x3E, 0x4A, 0x33)   # adventure green
-    RAM   = RGBColor(0x6E, 0x74, 0x7C)   # capable steel
-    kicker(s, Inches(0.75), Inches(0.7), "Portfolio Positioning")
-    textbox(s, Inches(0.72), Inches(1.05), Inches(11.5), Inches(0.9),
-            [{"text": "How Chrysler Fits Within Stellantis", "size": 26,
+    kicker(s, Inches(0.75), Inches(0.55), "Portfolio Positioning")
+    textbox(s, Inches(0.72), Inches(0.9), Inches(11.5), Inches(0.6),
+            [{"text": "Customer Segmentation and Brand Placement", "size": 23,
               "color": INK, "bold": True, "name": FONT_DISPLAY}])
-    textbox(s, Inches(0.75), Inches(1.72), Inches(11.5), Inches(0.4),
-            [{"text": "Differentiation, not overlap — Chrysler owns the "
-                      "practical, forward-thinking space its siblings leave open.",
-              "size": 13, "color": GRAPHITE}])
+    # insight banner (from reference)
+    rect(s, Inches(0.75), Inches(1.55), Inches(11.83), Inches(0.5), fill=CLOUD)
+    textbox(s, Inches(0.95), Inches(1.55), Inches(11.4), Inches(0.5),
+            [{"text": "Chrysler customers align with Hyundai, Kia, and imports "
+                      "on the perception map.", "size": 14, "color": CHRYSLER,
+              "align": PP_ALIGN.CENTER}], anchor=MSO_ANCHOR.MIDDLE,
+            align=PP_ALIGN.CENTER)
 
-    # ---- perception map (left) ----
-    px, py, pw, ph = Inches(0.95), Inches(2.55), Inches(6.1), Inches(3.85)
+    # ---- perception map plot ----
+    px, py, pw, ph = Inches(1.85), Inches(2.35), Inches(9.5), Inches(3.25)
     cx = Emu(int(px + pw / 2)); cy = Emu(int(py + ph / 2))
-    hairline(s, px, cy, pw, color=PLATINUM, weight=Pt(1.0))               # x-axis
-    ax = s.shapes.add_connector(2, cx, py, cx, Emu(int(py + ph)))         # y-axis
-    ax.line.color.rgb = PLATINUM; ax.line.width = Pt(1.0)
+
+    def C(fx, fy):
+        return Emu(int(px + pw * fx)), Emu(int(py + ph * fy))
+
+    # axes
+    hairline(s, px, cy, pw, color=SLATE, weight=Pt(1.0))
+    ax = s.shapes.add_connector(2, cx, py, cx, Emu(int(py + ph)))
+    ax.line.color.rgb = SLATE; ax.line.width = Pt(1.0)
     # axis labels
-    textbox(s, px, Emu(int(cy - Inches(0.32))), Inches(1.4), Inches(0.3),
-            [{"text": "PRACTICAL", "size": 9, "color": SLATE, "bold": True,
-              "spacing": 1.5}])
-    textbox(s, Emu(int(px + pw - Inches(1.4))), Emu(int(cy - Inches(0.32))),
-            Inches(1.4), Inches(0.3),
-            [{"text": "EMOTIONAL", "size": 9, "color": SLATE, "bold": True,
-              "spacing": 1.5, "align": PP_ALIGN.RIGHT}], align=PP_ALIGN.RIGHT)
     textbox(s, Emu(int(cx - Inches(1.3))), Emu(int(py - Inches(0.30))),
             Inches(2.6), Inches(0.3),
-            [{"text": "FORWARD-THINKING", "size": 9, "color": SLATE, "bold": True,
-              "spacing": 1.5, "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
-    textbox(s, Emu(int(cx - Inches(1.3))), Emu(int(py + ph + Inches(0.04))),
+            [{"text": "Forward-Thinking", "size": 11, "color": GRAPHITE,
+              "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
+    textbox(s, Emu(int(cx - Inches(1.3))), Emu(int(py + ph + Inches(0.02))),
             Inches(2.6), Inches(0.3),
-            [{"text": "CONVENTIONAL", "size": 9, "color": SLATE, "bold": True,
-              "spacing": 1.5, "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
+            [{"text": "Conventional", "size": 11, "color": GRAPHITE,
+              "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
+    textbox(s, Emu(int(cx - Inches(2.0))), Emu(int(cy - Inches(0.34))),
+            Inches(1.5), Inches(0.3),
+            [{"text": "Practical", "size": 11, "color": GRAPHITE,
+              "align": PP_ALIGN.RIGHT}], align=PP_ALIGN.RIGHT)
+    textbox(s, Emu(int(cx + Inches(0.5))), Emu(int(cy - Inches(0.34))),
+            Inches(1.5), Inches(0.3),
+            [{"text": "Emotional", "size": 11, "color": GRAPHITE}])
+    # 56% / 44% split numbers flanking the map
+    textbox(s, Inches(0.15), Emu(int(cy - Inches(0.45))), Inches(1.55), Inches(0.9),
+            [{"text": "56%", "size": 34, "color": INK, "bold": True,
+              "name": FONT_DISPLAY, "align": PP_ALIGN.CENTER}],
+            align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    textbox(s, Inches(11.6), Emu(int(cy - Inches(0.45))), Inches(1.6), Inches(0.9),
+            [{"text": "44%", "size": 34, "color": INK, "bold": True,
+              "name": FONT_DISPLAY, "align": PP_ALIGN.CENTER}],
+            align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
 
-    def bubble(fx, fy, d, fill, label):
-        bx = Emu(int(px + pw * fx - d / 2))
-        by = Emu(int(py + ph * fy - d / 2))
-        rect(s, bx, by, d, d, fill=fill, shape=MSO_SHAPE.OVAL)
-        textbox(s, bx, by, d, d,
-                [{"text": label, "size": 10.5 if fill == CHRYSLER else 9.5,
-                  "color": WHITE, "bold": True, "spacing": 1.0,
+    # ---- grouping ellipses (behind bubbles) ----
+    def ellipse(fx0, fy0, fx1, fy1, color, dash=False, weight=Pt(1.25)):
+        x0, y0 = C(fx0, fy0); x1, y1 = C(fx1, fy1)
+        e = rect(s, x0, y0, Emu(int(x1 - x0)), Emu(int(y1 - y0)),
+                 fill=None, line=color, line_w=weight, shape=MSO_SHAPE.OVAL)
+        if dash:
+            _set_dash(e, "dash")
+        return e
+    # import cluster (dashed) around Hyundai / Chrysler / Kia
+    ellipse(0.14, 0.16, 0.50, 0.56, CHRYSLER, dash=True, weight=Pt(1.5))
+    # sibling groupings (solid, dark)
+    ellipse(0.60, 0.30, 0.82, 0.46, INK)     # Ford + Jeep
+    ellipse(0.66, 0.44, 0.86, 0.60, INK)     # Chevrolet + Dodge
+    ellipse(0.52, 0.62, 0.68, 0.80, INK)     # Ram
+
+    # ---- segment bubbles (name + %) ----
+    PURPLE = RGBColor(0x6E, 0x4A, 0x9E); REDS = RGBColor(0xC0, 0x39, 0x3C)
+    LBLUE = RGBColor(0x4F, 0xA3, 0xD1);  ORANGE = RGBColor(0xE2, 0x7D, 0x2E)
+    MAUVE = RGBColor(0x8E, 0x4B, 0x5E);  YELLO = RGBColor(0xE7, 0xC8, 0x4A)
+    TEAL = RGBColor(0x4C, 0xB1, 0x8E);   LIME = RGBColor(0x9E, 0xC1, 0x3B)
+    PINKM = RGBColor(0xC9, 0x6E, 0x8E);  BLUEB = RGBColor(0x2E, 0x52, 0xA0)
+    segs = [
+        ("Eco-Conscious Utilitarians", 7, 0.18, 0.27, PURPLE, WHITE),
+        ("Sensible Progressives", 13, 0.42, 0.22, REDS, WHITE),
+        ("Successful Stewards", 7, 0.66, 0.14, LBLUE, WHITE),
+        ("Affluent Achievers", 11, 0.67, 0.27, ORANGE, WHITE),
+        ("Functional Doers", 8, 0.56, 0.34, MAUVE, WHITE),
+        ("Cautious Commuters", 8, 0.46, 0.45, YELLO, INK),
+        ("Basic Drivers", 15, 0.29, 0.63, TEAL, WHITE),
+        ("Proud Workhorses", 14, 0.45, 0.71, LIME, INK),
+        ("Upscale Traditionalists", 9, 0.61, 0.57, PINKM, WHITE),
+        ("Empowered Enthusiasts", 9, 0.73, 0.62, BLUEB, WHITE),
+    ]
+    for name, pct, fx, fy, col, tc in segs:
+        d = Inches(0.52 + pct * 0.028)
+        cxp, cyp = C(fx, fy)
+        bx = Emu(int(cxp - d / 2)); by = Emu(int(cyp - d / 2))
+        rect(s, bx, by, d, d, fill=col, shape=MSO_SHAPE.OVAL)
+        textbox(s, bx, Emu(int(by + Inches(0.04))), d, Emu(int(d - Inches(0.08))),
+                [{"text": name, "size": 6.5, "color": tc, "bold": True,
+                  "align": PP_ALIGN.CENTER, "line_spacing": 0.95,
+                  "space_after": 1},
+                 {"text": f"{pct}%", "size": 8, "color": tc, "bold": True,
                   "align": PP_ALIGN.CENTER}],
                 align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
 
-    # Chrysler: practical + forward-thinking (the open quadrant)
-    bubble(0.24, 0.26, Inches(1.15), CHRYSLER, "CHRYSLER")
-    # siblings cluster on the emotional side
-    bubble(0.72, 0.34, Inches(0.9), DODGE, "DODGE")
-    bubble(0.83, 0.55, Inches(0.9), JEEP, "JEEP")
-    bubble(0.70, 0.79, Inches(0.9), RAM, "RAM")
-    # split data caption
-    textbox(s, px, Emu(int(py + ph + Inches(0.34))), pw, Inches(0.3),
-            [{"text": "Stellantis buyers split 56% practical · 44% emotional",
-              "size": 9.5, "color": SLATE, "align": PP_ALIGN.CENTER}],
-            align=PP_ALIGN.CENTER)
+    # ---- brand markers (chips) ----
+    def chip(fx, fy, name, hero=False):
+        w = Inches(1.05) if hero else Inches(0.78)
+        h = Inches(0.42) if hero else Inches(0.28)
+        cxp, cyp = C(fx, fy)
+        bx = Emu(int(cxp - w / 2)); by = Emu(int(cyp - h / 2))
+        fill = RGBColor(0xFB, 0xF2, 0xC4) if hero else WHITE
+        line = CHRYSLER if hero else SLATE
+        rect(s, bx, by, w, h, fill=fill, line=line,
+             line_w=Pt(1.25) if hero else Pt(0.5),
+             shape=MSO_SHAPE.ROUNDED_RECTANGLE)
+        textbox(s, bx, by, w, h,
+                [{"text": name, "size": 11 if hero else 8.5,
+                  "color": CHRYSLER if hero else INK, "bold": True,
+                  "spacing": 1.5 if hero else 0.5, "align": PP_ALIGN.CENTER}],
+                align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    chip(0.40, 0.11, "Honda")
+    chip(0.27, 0.31, "Hyundai")
+    chip(0.45, 0.31, "CHRYSLER", hero=True)
+    chip(0.33, 0.44, "Kia")
+    chip(0.15, 0.55, "Toyota")
+    chip(0.62, 0.38, "Ford")
+    chip(0.74, 0.38, "Jeep")
+    chip(0.69, 0.52, "Chevrolet")
+    chip(0.80, 0.52, "Dodge")
+    chip(0.58, 0.70, "Ram")
 
-    # ---- comparison cards (right) ----
-    cards = [
-        ("CHRYSLER", CHRYSLER, "People-first design",
-         "Practical · Forward-thinking · Human-centered"),
-        ("DODGE", DODGE, "Performance & emotion",
-         "Adrenaline · Bold · Free-spirited"),
-        ("JEEP", JEEP, "Authentic adventure",
-         "Rugged · Capable · All-terrain"),
-        ("RAM", RAM, "Hard-working capability",
-         "Confident · Capable · Committed"),
-    ]
-    cx0, cw = Inches(7.55), Inches(5.05)
-    ch, gap = Inches(0.92), Inches(0.12)
-    for i, (name, color, head, tags) in enumerate(cards):
-        y = Emu(int(Inches(2.55) + (ch + gap) * i))
-        rect(s, cx0, y, cw, ch, fill=CLOUD, line=PLATINUM, line_w=Pt(0.5))
-        rect(s, cx0, y, Inches(0.08), ch, fill=color)
-        textbox(s, Emu(int(cx0 + Inches(0.3))), Emu(int(y + Inches(0.14))),
-                Emu(int(cw - Inches(0.5))), Emu(int(ch - Inches(0.2))),
-                [{"text": name, "size": 12, "color": color, "bold": True,
-                  "spacing": 1.5, "space_after": 2},
-                 {"text": head, "size": 12.5, "color": INK, "bold": True,
-                  "space_after": 2},
-                 {"text": tags, "size": 9.5, "color": SLATE}])
+    # ---- bottom bars: Hyundai / Kia practical vs emotional ----
+    bx0, btot = Inches(2.55), Inches(5.2)
+    pw_ratio = 0.72
+    p_w = Emu(int(btot * pw_ratio)); e_w = Emu(int(btot * (1 - pw_ratio)))
+    textbox(s, bx0, Inches(5.92), p_w, Inches(0.25),
+            [{"text": "Practical", "size": 9, "color": SLATE,
+              "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
+    textbox(s, Emu(int(bx0 + p_w)), Inches(5.92), e_w, Inches(0.25),
+            [{"text": "Emotional", "size": 9, "color": SLATE,
+              "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
+    for i, brand in enumerate(["Hyundai", "Kia"]):
+        y = Emu(int(Inches(6.22) + Inches(0.34) * i))
+        textbox(s, Inches(1.2), Emu(int(y - Inches(0.02))), Inches(1.25),
+                Inches(0.28),
+                [{"text": brand, "size": 10, "color": INK,
+                  "align": PP_ALIGN.RIGHT}], align=PP_ALIGN.RIGHT)
+        rect(s, bx0, y, p_w, Inches(0.24), fill=CHRYSLER)
+        rect(s, Emu(int(bx0 + p_w)), y, e_w, Inches(0.24), fill=None,
+             line=PLATINUM, line_w=Pt(0.75))
+        textbox(s, bx0, y, Emu(int(p_w - Inches(0.12))), Inches(0.24),
+                [{"text": "72%", "size": 9, "color": WHITE, "bold": True,
+                  "align": PP_ALIGN.RIGHT}], align=PP_ALIGN.RIGHT,
+                anchor=MSO_ANCHOR.MIDDLE)
+        textbox(s, Emu(int(bx0 + p_w + Inches(0.1))), y, e_w, Inches(0.24),
+                [{"text": "28%", "size": 9, "color": SLATE}],
+                anchor=MSO_ANCHOR.MIDDLE)
 
-    textbox(s, Inches(0.75), Inches(7.0), Inches(8), Inches(0.3),
-            [{"text": "Source: Stellantis Segmentation Survey 2024",
-              "size": 7.5, "color": PLATINUM, "spacing": 0.5}])
+    textbox(s, Inches(0.75), Inches(7.02), Inches(9), Inches(0.3),
+            [{"text": "Sources: Segmentation Survey 2024; Hyundai/Kia: NVCS "
+                      "Oct ’23–Mar ’25", "size": 7.5,
+              "color": PLATINUM, "spacing": 0.3}])
     footer(s, 17)
-    notes(s, "Why this philosophy creates a unique position. On the perception "
-              "map, Dodge, Jeep, and Ram all sit on the emotional side — "
-              "performance, adventure, capability. Chrysler stands apart in the "
-              "practical, forward-thinking quadrant, alongside the imports buyers "
-              "cross-shop. That human-centered space is open, and only Chrysler "
-              "owns it. Transition: 'Together, these vehicles are more than a "
-              "portfolio — they define Chrysler's future.'")
+    notes(s, "The segmentation evidence: Chrysler buyers sit in the practical, "
+              "forward-thinking quadrant beside Honda, Hyundai, Kia and Toyota — "
+              "the imports they cross-shop. Stellantis siblings sit on the "
+              "emotional side: Ford/Jeep, Chevrolet/Dodge, and Ram. The market "
+              "splits 56% practical / 44% emotional, and Hyundai and Kia index "
+              "72% practical. Chrysler owns this human-centered space; its "
+              "siblings own emotion, adventure, and capability. Transition: "
+              "'Together, these vehicles define Chrysler's future.'")
     return s
 
 
