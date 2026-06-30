@@ -220,8 +220,10 @@ def s_title():
     textbox(s, Inches(0.85), Inches(6.65), Inches(7.0), Inches(0.5),
             [{"text": "The Future of Chrysler Design", "size": 16,
               "color": GRAPHITE}])
-    notes(s, "Open with the brand ambition. One sentence on why this vision "
-              "matters now. Set the tone — design-led, premium, confident.")
+    notes(s, "Open with the through-line of the whole deck: Chrysler removes "
+              "friction from everyday life through thoughtful, people-first "
+              "design. Set a calm, confident, design-led tone — and signal the "
+              "audience will never lose sight of that idea.")
     return s
 
 
@@ -234,14 +236,14 @@ def s_pillars():
     # executive summary statement
     rect(s, Inches(0.75), Inches(2.1), Inches(11.83), Inches(1.2), fill=CLOUD)
     textbox(s, Inches(1.1), Inches(2.1), Inches(11.1), Inches(1.2),
-            [{"text": "Chrysler makes everyday life effortless — design that "
-                      "removes friction and puts people first.", "size": 17,
+            [{"text": "Chrysler removes friction from everyday life through "
+                      "thoughtful, people-first design.", "size": 17,
               "color": GRAPHITE, "italic": True, "line_spacing": 1.25}],
             anchor=MSO_ANCHOR.MIDDLE)
     pillars = [
-        ("Modern American Design", "Optimistic, human, unmistakably Chrysler."),
-        ("Technology With Purpose", "Intelligence that disappears into the experience."),
-        ("Beautiful Simplicity", "Luxury as the absence of friction."),
+        ("Designed Around People", "Every decision begins with the people who use it."),
+        ("Removing Everyday Friction", "Thoughtful design that makes daily life easier."),
+        ("Modern American Design", "Confident, optimistic, unmistakably Chrysler."),
     ]
     for i, (h, sub) in enumerate(pillars):
         x, w = col_x(i, 3)
@@ -254,8 +256,10 @@ def s_pillars():
                   "space_after": 5},
                  {"text": sub, "size": 11, "color": SLATE, "line_spacing": 1.2}])
     footer(s, 2)
-    notes(s, "Three pillars frame the whole story. Keep to one line each. "
-              "These recur as the spine of the narrative.")
+    notes(s, "Open the story: this is why Chrysler exists. State the central "
+              "philosophy plainly, then the three ideas it rests on — we return "
+              "to exactly these three at the close. Transition: 'This belief is "
+              "not abstract. It begins with how we think.'")
     return s
 
 
@@ -272,25 +276,29 @@ def s_vision():
              {"text": "Luxury is no longer ornament. It is the removal of "
                       "friction from everyday life.", "size": 22,
               "color": INK, "line_spacing": 1.2}])
-    # three strategic pillars (left, compact)
+    # the four brand pillars — the principles behind every decision
     vpillars = [
-        ("Innovative Practicality", "design that solves real life"),
-        ("Human-Centered Technology", "built around people, not features"),
-        ("Beautiful Simplicity", "calm, considered, effortless"),
+        ("People First", "every decision begins with people"),
+        ("Everyday Ingenuity", "solutions that make daily life easier"),
+        ("Human-Centered Intelligence", "technology that quietly supports"),
+        ("Modern American Design", "confident, optimistic, unmistakably Chrysler"),
     ]
     for i, (h, d) in enumerate(vpillars):
-        y = Inches(5.05) + Inches(0.6) * i
+        y = Inches(4.95) + Inches(0.5) * i
         rect(s, Inches(0.78), y + Inches(0.04), Inches(0.16), Inches(0.16),
              fill=CHRYSLER, shape=MSO_SHAPE.DIAMOND)
-        textbox(s, Inches(1.15), y, Inches(5.8), Inches(0.5),
+        textbox(s, Inches(1.15), y, Inches(6.1), Inches(0.5),
                 [{"text": f"{h}  —  {d}",
                   "size": 13, "color": GRAPHITE}])
     # supporting visual (right)
     image_frame(s, Inches(7.5), Inches(2.2), Inches(5.08), Inches(4.4),
                 label="SUPPORTING VISUAL")
     footer(s, 3)
-    notes(s, "Land the vision in one quote. The three pillars echo slide 2. "
-              "Let the supporting visual carry the emotion.")
+    notes(s, "How Chrysler thinks differently. The quote reframes luxury as the "
+              "removal of friction. Introduce the four pillars that guide every "
+              "design decision — People First, Everyday Ingenuity, Human-Centered "
+              "Intelligence, Modern American Design. Transition: 'These principles "
+              "are not abstract. They become tangible in every vehicle.'")
     return s
 
 
@@ -301,17 +309,21 @@ def s_left_right_brain():
             [{"text": "Left Brain / Right Brain", "size": 28, "color": INK,
               "bold": True, "name": FONT_DISPLAY}])
     textbox(s, Inches(0.75), Inches(1.75), Inches(11.5), Inches(0.4),
-            [{"text": "Updated Chrysler Board", "size": 14, "color": GRAPHITE}])
+            [{"text": "How Chrysler thinks — logic and feeling, held together.",
+              "size": 14, "color": GRAPHITE}])
     # large board placeholder split into two halves
     image_frame(s, Inches(0.75), Inches(2.35), Inches(5.83), Inches(4.15),
-                label="LEFT BRAIN  ·  RATIONAL", note="Replace · board imagery")
+                label="LEFT BRAIN  ·  ENGINEERED FOR LIFE",
+                note="Replace · board imagery")
     image_frame(s, Inches(6.75), Inches(2.35), Inches(5.83), Inches(4.15),
-                label="RIGHT BRAIN  ·  EMOTIONAL", note="Replace · board imagery")
+                label="RIGHT BRAIN  ·  DESIGNED FOR PEOPLE",
+                note="Replace · board imagery")
     # center divider mark
     wing_mark(s, Inches(6.18), Inches(4.4), Inches(0.95))
     footer(s, 4)
-    notes(s, "Position the dual nature of the brand — rational engineering "
-              "credibility meeting emotional design. Walk the board left to right.")
+    notes(s, "Chrysler thinks differently: rational rigor and human emotion are "
+              "not opposites — together they remove friction. Transition: 'This "
+              "way of thinking resolves into a clear design DNA.'")
     return s
 
 
@@ -326,7 +338,8 @@ def s_design_dna():
                 label="LARGE DESIGN-DNA GRAPHIC")
     # three labeled columns (right)
     cols = [
-        ("Design Principles", "Thoughtful · Logical · Precise · Purposeful"),
+        ("The Four Pillars", "People First · Everyday Ingenuity · Human-Centered "
+                             "Intelligence · Modern American Design"),
         ("Brand Attributes", "Confident · Approachable · Effortless · Calm"),
         ("Visual Language", "Calm architecture · Warm materials · Human scale"),
     ]
@@ -334,8 +347,9 @@ def s_design_dna():
         y = Inches(2.2) + Inches(1.45) * i
         callout(s, Inches(7.35), y, Inches(5.23), Inches(1.2), h, sub)
     footer(s, 5)
-    notes(s, "Define the DNA that every Chrysler shares. Keep principles tight "
-              "and ownable. The graphic should make the language tangible.")
+    notes(s, "The shared DNA every Chrysler carries — the four pillars made "
+              "tangible. Transition: 'These principles are not abstract ideas. "
+              "They come to life in every vehicle.'")
     return s
 
 
@@ -345,6 +359,10 @@ def s_portfolio():
     textbox(s, Inches(0.72), Inches(1.05), Inches(11.5), Inches(0.9),
             [{"text": "Future Chrysler Portfolio", "size": 28, "color": INK,
               "bold": True, "name": FONT_DISPLAY}])
+    textbox(s, Inches(0.75), Inches(1.72), Inches(11.5), Inches(0.4),
+            [{"text": "One philosophy, serving different lives — and "
+                      "unmistakably Chrysler in every one.", "size": 14,
+              "color": GRAPHITE}])
     tiles = ["Future Pacifica", "Airflow", "Arrow", "Arrow Cross", "300 Concept"]
     for i, name in enumerate(tiles):
         x, w = col_x(i, 5, gap=Inches(0.3))
@@ -354,8 +372,10 @@ def s_portfolio():
                 [{"text": name, "size": 12, "color": INK, "bold": True,
                   "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
     footer(s, 6)
-    notes(s, "Reveal the full family at once — the scale of the vision. "
-              "Image placeholders only; no specs.")
+    notes(s, "Reveal the full family at once. Frame it as evidence: 'Together, "
+              "the portfolio shows how one philosophy serves different lifestyles "
+              "while remaining unmistakably Chrysler.' Each vehicle that follows "
+              "expresses one primary pillar. Image placeholders only; no specs.")
     return s
 
 
@@ -383,8 +403,11 @@ def s_exterior(number, kick, title, summary, bullets):
                   "space_after": 1},
                  {"text": sub, "size": 10, "color": SLATE, "line_spacing": 1.1}])
     footer(s, number)
-    notes(s, f"{title}: let the full-width exterior image dominate, supported "
-              "by one summary line and three strategic bullets.")
+    notes(s, f"{title} — primary principle: {kick}. Let the image carry the "
+              "emotion; the summary states the role this vehicle plays in the "
+              "philosophy, and the bullets reinforce that one principle while "
+              "quietly supporting the others. Tie every point back to removing "
+              "friction for the people who use it.")
     return s
 
 
@@ -401,8 +424,9 @@ def s_interior(number, kick, title, caption):
             [{"text": caption, "size": 12,
               "color": SLATE, "spacing": 0.5}])
     footer(s, number)
-    notes(s, f"{title}: one immersive rendering, one short caption. "
-              "Speak to the experience, not the features.")
+    notes(s, f"{title} — primary principle: {kick}. One immersive rendering, "
+              "one short caption. Speak to the lived experience and the calm of "
+              "everyday use, not the features.")
     return s
 
 
@@ -413,8 +437,8 @@ def s_stellantis_fit():
             [{"text": "How Chrysler Fits Within Stellantis", "size": 26,
               "color": INK, "bold": True, "name": FONT_DISPLAY}])
     textbox(s, Inches(0.75), Inches(1.75), Inches(11.5), Inches(0.4),
-            [{"text": "Differentiation, not overlap — the distinct, "
-                      "human-centered space Chrysler owns.", "size": 13,
+            [{"text": "Differentiation, not overlap — the human-centered space "
+                      "only Chrysler occupies.", "size": 13,
               "color": GRAPHITE}])
     # Chrysler hero box centered, sibling brand placeholders around
     rect(s, Inches(4.9), Inches(2.5), Inches(3.5), Inches(1.6),
@@ -422,7 +446,7 @@ def s_stellantis_fit():
     textbox(s, Inches(4.9), Inches(2.5), Inches(3.5), Inches(1.6),
             [{"text": "CHRYSLER", "size": 18, "color": WHITE, "bold": True,
               "spacing": 2.0, "align": PP_ALIGN.CENTER, "space_after": 4},
-             {"text": "Innovative practicality\nfor everyday life", "size": 11,
+             {"text": "Designed around people.\nFriction removed.", "size": 11,
               "color": PLATINUM, "align": PP_ALIGN.CENTER,
               "line_spacing": 1.1}], anchor=MSO_ANCHOR.MIDDLE)
     sibs = ["BRAND A", "BRAND B", "BRAND C", "BRAND D"]
@@ -437,9 +461,11 @@ def s_stellantis_fit():
                   "color": PLATINUM, "align": PP_ALIGN.CENTER,
                   "line_spacing": 1.1}], anchor=MSO_ANCHOR.MIDDLE)
     footer(s, 17)
-    notes(s, "Show where Chrysler sits and how it stays distinct. Replace "
-              "BRAND A–D with the relevant Stellantis siblings. Emphasize "
-              "white space Chrysler owns.")
+    notes(s, "Why this philosophy creates a unique position: within Stellantis, "
+              "only Chrysler owns human-centered, friction-free design. "
+              "Differentiation, not overlap. Replace BRAND A–D with the relevant "
+              "siblings. Transition: 'Together, these vehicles are more than a "
+              "portfolio — they define Chrysler's future.'")
     return s
 
 
@@ -484,8 +510,10 @@ def s_customer_experience():
                  {"text": note_txt, "size": 10, "color": SLATE,
                   "line_spacing": 1.15}])
     footer(s, 18)
-    notes(s, "Paint the experience Chrysler will deliver. Six themes — swap "
-              "ICON boxes for final iconography. Keep words minimal.")
+    notes(s, "Human-Centered Intelligence in practice: technology that quietly "
+              "supports and removes friction. AI is an enabler, never the brand. "
+              "Six themes — swap ICON boxes for final iconography. Keep words "
+              "minimal.")
     return s
 
 
@@ -513,8 +541,10 @@ def s_design_innovation():
                  {"text": name, "size": 11.5, "color": INK, "bold": True,
                   "line_spacing": 1.1}])
     footer(s, 19)
-    notes(s, "Show breadth of design capability across six domains. The "
-              "infographic ties them into one system. Replace nodes as needed.")
+    notes(s, "Breadth of design capability across six domains, unified by one "
+              "philosophy. Replace nodes as needed. Transition into the close: "
+              "'When every decision begins with people, this is what design "
+              "becomes.'")
     return s
 
 
@@ -523,14 +553,19 @@ def s_takeaways():
     image_frame(s, Inches(0), Inches(0), SLIDE_W, Inches(3.3),
                 label="CLOSING HERO IMAGE", fill=CLOUD,
                 note="Replace · aspirational closing visual", icon=False)
-    kicker(s, Inches(0.75), Inches(3.6), "In Summary")
-    textbox(s, Inches(0.72), Inches(3.95), Inches(11.0), Inches(0.8),
-            [{"text": "Executive Takeaways", "size": 30, "color": INK,
+    kicker(s, Inches(0.75), Inches(3.6), "In Closing")
+    textbox(s, Inches(0.72), Inches(3.95), Inches(11.0), Inches(0.6),
+            [{"text": "The Future of Chrysler", "size": 30, "color": INK,
               "bold": True, "name": FONT_DISPLAY}])
+    # closing statement — mirrors the philosophy stated on slide 2
+    textbox(s, Inches(0.75), Inches(4.5), Inches(11.83), Inches(0.5),
+            [{"text": "When every decision begins with people, thoughtful design "
+                      "becomes effortless living — that is the future of Chrysler.",
+              "size": 13, "color": GRAPHITE, "italic": True, "line_spacing": 1.2}])
     msgs = [
-        ("Designed Around People", "Luxury is the removal of everyday friction."),
-        ("Distinct Within Stellantis", "Modern American design — human and confident."),
-        ("Ready to Lead", "A clear, design-led vision for Chrysler's future."),
+        ("Designed Around People", "Every decision begins with the people who use it."),
+        ("Removing Everyday Friction", "Thoughtful design that makes life effortless."),
+        ("Modern American Design", "Confident, optimistic, unmistakably Chrysler."),
     ]
     for i, (h, sub) in enumerate(msgs):
         x, w = col_x(i, 3)
@@ -544,8 +579,10 @@ def s_takeaways():
                  {"text": sub, "size": 11.5, "color": GRAPHITE,
                   "line_spacing": 1.25}])
     footer(s, 20)
-    notes(s, "Close on three memorable messages that map to the three pillars. "
-              "End on the hero image and the ask.")
+    notes(s, "Come full circle: these are the same three ideas opened on slide 2 "
+              "— Designed Around People, Removing Everyday Friction, Modern "
+              "American Design. Deliver the closing statement as the final word; "
+              "it should feel like a vision, not a summary.")
     return s
 
 
@@ -558,46 +595,51 @@ s_vision()                                                         # 3
 s_left_right_brain()                                               # 4
 s_design_dna()                                                     # 5
 s_portfolio()                                                      # 6
-s_exterior(7, "The Modern Family Vehicle", "Pacifica",
-           "The evolution of the modern family vehicle — flexible, "
-           "sophisticated, and designed around people.",
-           [("Flexible by Design", "Space that adapts to every journey."),
-            ("Sophisticated Comfort", "Refined, calm, effortlessly livable."),
-            ("Technology Around People", "Intelligence that serves the family.")])
-s_interior(8, "Pacifica", "Pacifica Interior",
-           "A family sanctuary — flexible, comfortable, designed around people.")  # 8
-s_exterior(9, "The Emotional Halo", "300 Concept",
-           "The flagship expression of Chrysler design — composed, "
-           "commanding, never excessive.",
-           [("Commanding Presence", "Architectural proportion, balanced and tailored."),
-            ("Quiet Power", "Confidence expressed through restraint."),
-            ("Timeless Craftsmanship", "Authentic American design, refined.")])
-s_interior(10, "300 Concept", "300 Interior",
-           "An interior sanctuary — crafted, composed, human in scale.")  # 10
-s_exterior(11, "The Philosophy", "Airflow",
-           "Airflow introduces Chrysler's philosophy: innovative "
-           "practicality, designed around people.",
-           [("Spacious & Adaptive", "Versatile space for everyday life."),
-            ("Technology With Purpose", "Intelligence that serves, then disappears."),
-            ("Confident Simplicity", "Clean, logical, human-centered form.")])
-s_interior(12, "Airflow", "Airflow Interior",
-           "Designed around people — flexible, calm, effortlessly useful.")  # 12
-s_exterior(13, "Clever Accessibility", "Arrow",
-           "Chrysler's accessible entry — clever, design-led, and "
-           "attainable from around $24K.",
-           [("Smart & Simple", "Approachable design for the city."),
-            ("Attainable", "Thoughtful style within reach."),
-            ("Youthful & Modern", "Efficient, urban, design-led.")])
-s_interior(14, "Arrow", "Arrow Interior",
-           "Smart, simple, and useful — accessible design done thoughtfully.")  # 14
+# Pacifica — primary pillar: People First
+s_exterior(7, "People First", "Pacifica",
+           "Pacifica is the proof that Chrysler has always designed around "
+           "people.",
+           [("Family Mobility", "Built around the people who live in it."),
+            ("Flexible Living", "Space that adapts to every journey."),
+            ("Thoughtful Innovation", "Technology designed around people.")])
+s_interior(8, "People First", "Pacifica Interior",
+           "A family sanctuary — comfort, space, and calm, designed around people.")
+# 300 Concept — primary pillar: Modern American Design
+s_exterior(9, "Modern American Design", "300 Concept",
+           "The flagship expression of Chrysler design — presence through "
+           "confidence and craftsmanship, never excess.",
+           [("Commanding Presence", "Architectural proportion, calm and assured."),
+            ("Crafted Composure", "Confidence expressed through restraint."),
+            ("Authentically American", "Timeless design, unmistakably Chrysler.")])
+s_interior(10, "Modern American Design", "300 Interior",
+           "Crafted, composed, human in scale — presence without excess.")
+# Airflow — primary pillar: Everyday Ingenuity
+s_exterior(11, "Everyday Ingenuity", "Airflow",
+           "Chrysler's design manifesto — intelligent design that simplifies "
+           "everyday life rather than complicating it.",
+           [("Everyday Ingenuity", "Thoughtful solutions for daily life."),
+            ("Intelligence That Recedes", "Technology that quietly supports."),
+            ("Confident Simplicity", "Clean, modern, human-centered form.")])
+s_interior(12, "Everyday Ingenuity", "Airflow Interior",
+           "Designed around people — calm, intelligent, effortlessly useful.")
+# Arrow — primary theme: Accessible Design
+s_exterior(13, "Accessible Design", "Arrow",
+           "Thoughtful Chrysler design, made attainable — approachable, smart, "
+           "and easy to live with.",
+           [("Approachable Design", "An inviting introduction to Chrysler."),
+            ("Smart Packaging", "Everyday usability, thoughtfully resolved."),
+            ("Attainable by Design", "Accessible without compromise.")])
+s_interior(14, "Accessible Design", "Arrow Interior",
+           "Approachable and intuitive — thoughtful design, made attainable.")
+# Arrow Cross — primary theme: Purposeful Versatility
 s_exterior(15, "Purposeful Versatility", "Arrow Cross",
-           "An accessible crossover with purposeful versatility — "
-           "designed around everyday life.",
-           [("Flexible & Versatile", "Thoughtful packaging for families."),
-            ("Urban & Useful", "Confident, modern, accessible."),
-            ("Everyday Ready", "Simple design that adapts.")])
-s_interior(16, "Arrow Cross", "Arrow Cross Interior",
-           "Versatile and family-friendly — space designed for real life.")  # 16
+           "Thoughtful design that adapts to modern family life — flexible, "
+           "confident, and quietly intelligent.",
+           [("Purposeful Versatility", "Flexibility for how families really live."),
+            ("Practical Intelligence", "Smart packaging, calmly resolved."),
+            ("Confident & Capable", "Modern, accessible, ready for the everyday.")])
+s_interior(16, "Purposeful Versatility", "Arrow Cross Interior",
+           "Flexible and family-ready — design that adapts to everyday life.")
 s_stellantis_fit()                                                 # 17
 s_customer_experience()                                            # 18
 s_design_innovation()                                              # 19
