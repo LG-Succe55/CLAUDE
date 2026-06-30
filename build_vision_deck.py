@@ -432,39 +432,99 @@ def s_interior(number, kick, title, caption):
 
 def s_stellantis_fit():
     s = add_slide(); set_bg(s)
+    # sibling-brand accent colors (restrained, deck-consistent)
+    DODGE = RGBColor(0xC4, 0x12, 0x30)   # performance red
+    JEEP  = RGBColor(0x3E, 0x4A, 0x33)   # adventure green
+    RAM   = RGBColor(0x6E, 0x74, 0x7C)   # capable steel
     kicker(s, Inches(0.75), Inches(0.7), "Portfolio Positioning")
     textbox(s, Inches(0.72), Inches(1.05), Inches(11.5), Inches(0.9),
             [{"text": "How Chrysler Fits Within Stellantis", "size": 26,
               "color": INK, "bold": True, "name": FONT_DISPLAY}])
-    textbox(s, Inches(0.75), Inches(1.75), Inches(11.5), Inches(0.4),
-            [{"text": "Differentiation, not overlap — the human-centered space "
-                      "only Chrysler occupies.", "size": 13,
-              "color": GRAPHITE}])
-    # Chrysler hero box centered, sibling brand placeholders around
-    rect(s, Inches(4.9), Inches(2.5), Inches(3.5), Inches(1.6),
-         fill=CHRYSLER)
-    textbox(s, Inches(4.9), Inches(2.5), Inches(3.5), Inches(1.6),
-            [{"text": "CHRYSLER", "size": 18, "color": WHITE, "bold": True,
-              "spacing": 2.0, "align": PP_ALIGN.CENTER, "space_after": 4},
-             {"text": "Designed around people.\nFriction removed.", "size": 11,
-              "color": PLATINUM, "align": PP_ALIGN.CENTER,
-              "line_spacing": 1.1}], anchor=MSO_ANCHOR.MIDDLE)
-    sibs = ["BRAND A", "BRAND B", "BRAND C", "BRAND D"]
-    for i, name in enumerate(sibs):
-        x, w = col_x(i, 4)
-        rect(s, x, Inches(4.7), w, Inches(1.5), fill=CLOUD, line=PLATINUM,
-             line_w=Pt(0.5))
-        textbox(s, x, Inches(4.7), w, Inches(1.5),
-                [{"text": name, "size": 12, "color": SLATE, "bold": True,
-                  "spacing": 1.5, "align": PP_ALIGN.CENTER, "space_after": 4},
-                 {"text": "Distinct role", "size": 9.5,
-                  "color": PLATINUM, "align": PP_ALIGN.CENTER,
-                  "line_spacing": 1.1}], anchor=MSO_ANCHOR.MIDDLE)
+    textbox(s, Inches(0.75), Inches(1.72), Inches(11.5), Inches(0.4),
+            [{"text": "Differentiation, not overlap — Chrysler owns the "
+                      "practical, forward-thinking space its siblings leave open.",
+              "size": 13, "color": GRAPHITE}])
+
+    # ---- perception map (left) ----
+    px, py, pw, ph = Inches(0.95), Inches(2.55), Inches(6.1), Inches(3.85)
+    cx = Emu(int(px + pw / 2)); cy = Emu(int(py + ph / 2))
+    hairline(s, px, cy, pw, color=PLATINUM, weight=Pt(1.0))               # x-axis
+    ax = s.shapes.add_connector(2, cx, py, cx, Emu(int(py + ph)))         # y-axis
+    ax.line.color.rgb = PLATINUM; ax.line.width = Pt(1.0)
+    # axis labels
+    textbox(s, px, Emu(int(cy - Inches(0.32))), Inches(1.4), Inches(0.3),
+            [{"text": "PRACTICAL", "size": 9, "color": SLATE, "bold": True,
+              "spacing": 1.5}])
+    textbox(s, Emu(int(px + pw - Inches(1.4))), Emu(int(cy - Inches(0.32))),
+            Inches(1.4), Inches(0.3),
+            [{"text": "EMOTIONAL", "size": 9, "color": SLATE, "bold": True,
+              "spacing": 1.5, "align": PP_ALIGN.RIGHT}], align=PP_ALIGN.RIGHT)
+    textbox(s, Emu(int(cx - Inches(1.3))), Emu(int(py - Inches(0.30))),
+            Inches(2.6), Inches(0.3),
+            [{"text": "FORWARD-THINKING", "size": 9, "color": SLATE, "bold": True,
+              "spacing": 1.5, "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
+    textbox(s, Emu(int(cx - Inches(1.3))), Emu(int(py + ph + Inches(0.04))),
+            Inches(2.6), Inches(0.3),
+            [{"text": "CONVENTIONAL", "size": 9, "color": SLATE, "bold": True,
+              "spacing": 1.5, "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
+
+    def bubble(fx, fy, d, fill, label):
+        bx = Emu(int(px + pw * fx - d / 2))
+        by = Emu(int(py + ph * fy - d / 2))
+        rect(s, bx, by, d, d, fill=fill, shape=MSO_SHAPE.OVAL)
+        textbox(s, bx, by, d, d,
+                [{"text": label, "size": 10.5 if fill == CHRYSLER else 9.5,
+                  "color": WHITE, "bold": True, "spacing": 1.0,
+                  "align": PP_ALIGN.CENTER}],
+                align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+
+    # Chrysler: practical + forward-thinking (the open quadrant)
+    bubble(0.24, 0.26, Inches(1.15), CHRYSLER, "CHRYSLER")
+    # siblings cluster on the emotional side
+    bubble(0.72, 0.34, Inches(0.9), DODGE, "DODGE")
+    bubble(0.83, 0.55, Inches(0.9), JEEP, "JEEP")
+    bubble(0.70, 0.79, Inches(0.9), RAM, "RAM")
+    # split data caption
+    textbox(s, px, Emu(int(py + ph + Inches(0.34))), pw, Inches(0.3),
+            [{"text": "Stellantis buyers split 56% practical · 44% emotional",
+              "size": 9.5, "color": SLATE, "align": PP_ALIGN.CENTER}],
+            align=PP_ALIGN.CENTER)
+
+    # ---- comparison cards (right) ----
+    cards = [
+        ("CHRYSLER", CHRYSLER, "People-first design",
+         "Practical · Forward-thinking · Human-centered"),
+        ("DODGE", DODGE, "Performance & emotion",
+         "Adrenaline · Bold · Free-spirited"),
+        ("JEEP", JEEP, "Authentic adventure",
+         "Rugged · Capable · All-terrain"),
+        ("RAM", RAM, "Hard-working capability",
+         "Confident · Capable · Committed"),
+    ]
+    cx0, cw = Inches(7.55), Inches(5.05)
+    ch, gap = Inches(0.92), Inches(0.12)
+    for i, (name, color, head, tags) in enumerate(cards):
+        y = Emu(int(Inches(2.55) + (ch + gap) * i))
+        rect(s, cx0, y, cw, ch, fill=CLOUD, line=PLATINUM, line_w=Pt(0.5))
+        rect(s, cx0, y, Inches(0.08), ch, fill=color)
+        textbox(s, Emu(int(cx0 + Inches(0.3))), Emu(int(y + Inches(0.14))),
+                Emu(int(cw - Inches(0.5))), Emu(int(ch - Inches(0.2))),
+                [{"text": name, "size": 12, "color": color, "bold": True,
+                  "spacing": 1.5, "space_after": 2},
+                 {"text": head, "size": 12.5, "color": INK, "bold": True,
+                  "space_after": 2},
+                 {"text": tags, "size": 9.5, "color": SLATE}])
+
+    textbox(s, Inches(0.75), Inches(7.0), Inches(8), Inches(0.3),
+            [{"text": "Source: Stellantis Segmentation Survey 2024",
+              "size": 7.5, "color": PLATINUM, "spacing": 0.5}])
     footer(s, 17)
-    notes(s, "Why this philosophy creates a unique position: within Stellantis, "
-              "only Chrysler owns human-centered, friction-free design. "
-              "Differentiation, not overlap. Replace BRAND A–D with the relevant "
-              "siblings. Transition: 'Together, these vehicles are more than a "
+    notes(s, "Why this philosophy creates a unique position. On the perception "
+              "map, Dodge, Jeep, and Ram all sit on the emotional side — "
+              "performance, adventure, capability. Chrysler stands apart in the "
+              "practical, forward-thinking quadrant, alongside the imports buyers "
+              "cross-shop. That human-centered space is open, and only Chrysler "
+              "owns it. Transition: 'Together, these vehicles are more than a "
               "portfolio — they define Chrysler's future.'")
     return s
 
