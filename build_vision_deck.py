@@ -360,28 +360,31 @@ def s_portfolio():
 
 
 def s_exterior(number, kick, title, summary, bullets):
-    """Exec summary + large exterior + three bullets (head, sub)."""
+    """Large full-width exterior image; summary subtitle + three bullets below."""
     s = add_slide(); set_bg(s)
-    kicker(s, Inches(0.75), Inches(0.7), kick)
-    textbox(s, Inches(0.72), Inches(1.05), Inches(6.0), Inches(0.9),
-            [{"text": title, "size": 30, "color": INK, "bold": True,
+    kicker(s, Inches(0.75), Inches(0.6), kick)
+    textbox(s, Inches(0.72), Inches(0.95), Inches(11.0), Inches(0.7),
+            [{"text": title, "size": 26, "color": INK, "bold": True,
               "name": FONT_DISPLAY}])
-    textbox(s, Inches(0.75), Inches(2.0), Inches(5.6), Inches(1.2),
-            [{"text": summary, "size": 15,
-              "color": GRAPHITE, "italic": True, "line_spacing": 1.3}])
-    by = Inches(3.5)
-    for i, (head, sub) in enumerate(bullets):
-        y = by + Inches(0.95) * i
-        icon_chip(s, Inches(0.78), y, Inches(0.5))
-        textbox(s, Inches(1.5), y - Inches(0.02), Inches(5.0), Inches(0.8),
-                [{"text": head, "size": 14, "color": INK, "bold": True,
-                  "space_after": 2},
-                 {"text": sub, "size": 11, "color": SLATE}])
-    image_frame(s, Inches(7.1), Inches(1.05), Inches(5.48), Inches(5.45),
+    # executive summary as a single subtitle line
+    textbox(s, Inches(0.75), Inches(1.62), Inches(11.83), Inches(0.45),
+            [{"text": summary, "size": 13, "color": GRAPHITE, "italic": True,
+              "line_spacing": 1.2}])
+    # large full-width image (matches interior format)
+    image_frame(s, Inches(0.75), Inches(2.2), Inches(11.83), Inches(3.7),
                 label="LARGE EXTERIOR IMAGE")
+    # three strategic bullets in a row beneath the image
+    for i, (head, sub) in enumerate(bullets):
+        x, w = col_x(i, 3)
+        icon_chip(s, x, Inches(6.05), Inches(0.42))
+        textbox(s, Emu(int(x + Inches(0.6))), Inches(6.0),
+                Emu(int(w - Inches(0.6))), Inches(0.85),
+                [{"text": head, "size": 12.5, "color": INK, "bold": True,
+                  "space_after": 1},
+                 {"text": sub, "size": 10, "color": SLATE, "line_spacing": 1.1}])
     footer(s, number)
-    notes(s, f"{title}: lead with emotion, then the three strategic bullets. "
-              "Let the exterior image dominate.")
+    notes(s, f"{title}: let the full-width exterior image dominate, supported "
+              "by one summary line and three strategic bullets.")
     return s
 
 
