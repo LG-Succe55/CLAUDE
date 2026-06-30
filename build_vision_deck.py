@@ -433,7 +433,7 @@ def s_stellantis_fit():
                  {"text": "Distinct role", "size": 9.5,
                   "color": PLATINUM, "align": PP_ALIGN.CENTER,
                   "line_spacing": 1.1}], anchor=MSO_ANCHOR.MIDDLE)
-    footer(s, 15)
+    footer(s, 17)
     notes(s, "Show where Chrysler sits and how it stays distinct. Replace "
               "BRAND A–D with the relevant Stellantis siblings. Emphasize "
               "white space Chrysler owns.")
@@ -480,7 +480,7 @@ def s_customer_experience():
                   "space_after": 3},
                  {"text": note_txt, "size": 10, "color": SLATE,
                   "line_spacing": 1.15}])
-    footer(s, 16)
+    footer(s, 18)
     notes(s, "Paint the experience Chrysler will deliver. Six themes — swap "
               "ICON boxes for final iconography. Keep words minimal.")
     return s
@@ -509,7 +509,7 @@ def s_design_innovation():
                   "space_after": 4},
                  {"text": name, "size": 11.5, "color": INK, "bold": True,
                   "line_spacing": 1.1}])
-    footer(s, 17)
+    footer(s, 19)
     notes(s, "Show breadth of design capability across six domains. The "
               "infographic ties them into one system. Replace nodes as needed.")
     return s
@@ -540,7 +540,7 @@ def s_takeaways():
                   "space_after": 5},
                  {"text": sub, "size": 11.5, "color": GRAPHITE,
                   "line_spacing": 1.25}])
-    footer(s, 18)
+    footer(s, 20)
     notes(s, "Close on three memorable messages that map to the three pillars. "
               "End on the hero image and the ask.")
     return s
@@ -555,42 +555,50 @@ s_vision()                                                         # 3
 s_left_right_brain()                                               # 4
 s_design_dna()                                                     # 5
 s_portfolio()                                                      # 6
-s_exterior(7, "The Emotional Halo", "300 Concept",
+s_exterior(7, "The Modern Family Vehicle", "Pacifica",
+           "The evolution of the modern family vehicle — flexible, "
+           "sophisticated, and designed around people.",
+           [("Flexible by Design", "Space that adapts to every journey."),
+            ("Sophisticated Comfort", "Refined, calm, effortlessly livable."),
+            ("Technology Around People", "Intelligence that serves the family.")])
+s_interior(8, "Pacifica", "Pacifica Interior",
+           "A family sanctuary — flexible, comfortable, designed around people.")  # 8
+s_exterior(9, "The Emotional Halo", "300 Concept",
            "The flagship expression of Chrysler design — composed, "
            "commanding, never excessive.",
            [("Commanding Presence", "Architectural proportion, balanced and tailored."),
             ("Quiet Power", "Confidence expressed through restraint."),
             ("Timeless Craftsmanship", "Authentic American design, refined.")])
-s_interior(8, "300 Concept", "300 Interior",
-           "An interior sanctuary — crafted, composed, human in scale.")  # 8
-s_exterior(9, "The Philosophy", "Airflow",
+s_interior(10, "300 Concept", "300 Interior",
+           "An interior sanctuary — crafted, composed, human in scale.")  # 10
+s_exterior(11, "The Philosophy", "Airflow",
            "Airflow introduces Chrysler's philosophy: innovative "
            "practicality, designed around people.",
            [("Spacious & Adaptive", "Versatile space for everyday life."),
             ("Technology With Purpose", "Intelligence that serves, then disappears."),
             ("Confident Simplicity", "Clean, logical, human-centered form.")])
-s_interior(10, "Airflow", "Airflow Interior",
-           "Designed around people — flexible, calm, effortlessly useful.")  # 10
-s_exterior(11, "Clever Accessibility", "Arrow",
+s_interior(12, "Airflow", "Airflow Interior",
+           "Designed around people — flexible, calm, effortlessly useful.")  # 12
+s_exterior(13, "Clever Accessibility", "Arrow",
            "Chrysler's accessible entry — clever, design-led, and "
            "attainable from around $24K.",
            [("Smart & Simple", "Approachable design for the city."),
             ("Attainable", "Thoughtful style within reach."),
             ("Youthful & Modern", "Efficient, urban, design-led.")])
-s_interior(12, "Arrow", "Arrow Interior",
-           "Smart, simple, and useful — accessible design done thoughtfully.")  # 12
-s_exterior(13, "Purposeful Versatility", "Arrow Cross",
+s_interior(14, "Arrow", "Arrow Interior",
+           "Smart, simple, and useful — accessible design done thoughtfully.")  # 14
+s_exterior(15, "Purposeful Versatility", "Arrow Cross",
            "An accessible crossover with purposeful versatility — "
            "designed around everyday life.",
            [("Flexible & Versatile", "Thoughtful packaging for families."),
             ("Urban & Useful", "Confident, modern, accessible."),
             ("Everyday Ready", "Simple design that adapts.")])
-s_interior(14, "Arrow Cross", "Arrow Cross Interior",
-           "Versatile and family-friendly — space designed for real life.")  # 14
-s_stellantis_fit()                                                 # 15
-s_customer_experience()                                            # 16
-s_design_innovation()                                              # 17
-s_takeaways()                                                      # 18
+s_interior(16, "Arrow Cross", "Arrow Cross Interior",
+           "Versatile and family-friendly — space designed for real life.")  # 16
+s_stellantis_fit()                                                 # 17
+s_customer_experience()                                            # 18
+s_design_innovation()                                              # 19
+s_takeaways()                                                      # 20
 
 OUT = "/home/user/CLAUDE/Chrysler_Brand_Design_Vision.pptx"
 prs.save(OUT)
