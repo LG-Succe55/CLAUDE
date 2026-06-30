@@ -234,14 +234,14 @@ def s_pillars():
     # executive summary statement
     rect(s, Inches(0.75), Inches(2.1), Inches(11.83), Inches(1.2), fill=CLOUD)
     textbox(s, Inches(1.1), Inches(2.1), Inches(11.1), Inches(1.2),
-            [{"text": "[ Executive summary statement — one confident sentence "
-                      "on Chrysler's reason to lead. ]", "size": 17,
+            [{"text": "Chrysler makes everyday life effortless — design that "
+                      "removes friction and puts people first.", "size": 17,
               "color": GRAPHITE, "italic": True, "line_spacing": 1.25}],
             anchor=MSO_ANCHOR.MIDDLE)
     pillars = [
-        ("Premium American Design", "[ Supporting note placeholder ]"),
-        ("Technology with Purpose", "[ Supporting note placeholder ]"),
-        ("Emotional Simplicity", "[ Supporting note placeholder ]"),
+        ("Modern American Design", "Optimistic, human, unmistakably Chrysler."),
+        ("Technology With Purpose", "Intelligence that disappears into the experience."),
+        ("Beautiful Simplicity", "Luxury as the absence of friction."),
     ]
     for i, (h, sub) in enumerate(pillars):
         x, w = col_x(i, 3)
@@ -269,16 +269,21 @@ def s_vision():
     textbox(s, Inches(0.75), Inches(2.3), Inches(6.4), Inches(2.6),
             [{"text": "“", "size": 60, "color": PLATINUM, "bold": True,
               "space_after": 0},
-             {"text": "[ Large vision quote placeholder — a memorable, "
-                      "design-led statement of intent. ]", "size": 22,
+             {"text": "Luxury is no longer ornament. It is the removal of "
+                      "friction from everyday life.", "size": 22,
               "color": INK, "line_spacing": 1.2}])
     # three strategic pillars (left, compact)
-    for i, h in enumerate(["Pillar One", "Pillar Two", "Pillar Three"]):
+    vpillars = [
+        ("Innovative Practicality", "design that solves real life"),
+        ("Human-Centered Technology", "built around people, not features"),
+        ("Beautiful Simplicity", "calm, considered, effortless"),
+    ]
+    for i, (h, d) in enumerate(vpillars):
         y = Inches(5.05) + Inches(0.6) * i
         rect(s, Inches(0.78), y + Inches(0.04), Inches(0.16), Inches(0.16),
              fill=CHRYSLER, shape=MSO_SHAPE.DIAMOND)
         textbox(s, Inches(1.15), y, Inches(5.8), Inches(0.5),
-                [{"text": f"{h}  —  [ short descriptor placeholder ]",
+                [{"text": f"{h}  —  {d}",
                   "size": 13, "color": GRAPHITE}])
     # supporting visual (right)
     image_frame(s, Inches(7.5), Inches(2.2), Inches(5.08), Inches(4.4),
@@ -321,9 +326,9 @@ def s_design_dna():
                 label="LARGE DESIGN-DNA GRAPHIC")
     # three labeled columns (right)
     cols = [
-        ("Design Principles", "[ 3–4 principle placeholders ]"),
-        ("Brand Attributes", "[ 3–4 attribute placeholders ]"),
-        ("Visual Language", "[ form · proportion · surfacing ]"),
+        ("Design Principles", "Thoughtful · Logical · Precise · Purposeful"),
+        ("Brand Attributes", "Confident · Approachable · Effortless · Calm"),
+        ("Visual Language", "Calm architecture · Warm materials · Human scale"),
     ]
     for i, (h, sub) in enumerate(cols):
         y = Inches(2.2) + Inches(1.45) * i
@@ -354,26 +359,24 @@ def s_portfolio():
     return s
 
 
-def s_exterior(number, kick, title, bullets):
-    """Exec summary + large exterior + three bullets."""
+def s_exterior(number, kick, title, summary, bullets):
+    """Exec summary + large exterior + three bullets (head, sub)."""
     s = add_slide(); set_bg(s)
     kicker(s, Inches(0.75), Inches(0.7), kick)
     textbox(s, Inches(0.72), Inches(1.05), Inches(6.0), Inches(0.9),
             [{"text": title, "size": 30, "color": INK, "bold": True,
               "name": FONT_DISPLAY}])
     textbox(s, Inches(0.75), Inches(2.0), Inches(5.6), Inches(1.2),
-            [{"text": "[ Executive summary — one sentence on the role this "
-                      "vehicle plays in the vision. ]", "size": 15,
+            [{"text": summary, "size": 15,
               "color": GRAPHITE, "italic": True, "line_spacing": 1.3}])
     by = Inches(3.5)
-    for i, b in enumerate(bullets):
+    for i, (head, sub) in enumerate(bullets):
         y = by + Inches(0.95) * i
         icon_chip(s, Inches(0.78), y, Inches(0.5))
         textbox(s, Inches(1.5), y - Inches(0.02), Inches(5.0), Inches(0.8),
-                [{"text": b, "size": 14, "color": INK, "bold": True,
+                [{"text": head, "size": 14, "color": INK, "bold": True,
                   "space_after": 2},
-                 {"text": "[ supporting note placeholder ]", "size": 11,
-                  "color": SLATE}])
+                 {"text": sub, "size": 11, "color": SLATE}])
     image_frame(s, Inches(7.1), Inches(1.05), Inches(5.48), Inches(5.45),
                 label="LARGE EXTERIOR IMAGE")
     footer(s, number)
@@ -382,7 +385,7 @@ def s_exterior(number, kick, title, bullets):
     return s
 
 
-def s_interior(number, kick, title):
+def s_interior(number, kick, title, caption):
     """Large interior rendering + minimal caption."""
     s = add_slide(); set_bg(s)
     kicker(s, Inches(0.75), Inches(0.6), kick)
@@ -392,7 +395,7 @@ def s_interior(number, kick, title):
     image_frame(s, Inches(0.75), Inches(1.8), Inches(11.83), Inches(4.65),
                 label="LARGE INTERIOR RENDERING")
     textbox(s, Inches(0.75), Inches(6.55), Inches(11.0), Inches(0.4),
-            [{"text": "[ Minimal caption placeholder ]", "size": 12,
+            [{"text": caption, "size": 12,
               "color": SLATE, "spacing": 0.5}])
     footer(s, number)
     notes(s, f"{title}: one immersive rendering, one short caption. "
@@ -407,16 +410,18 @@ def s_stellantis_fit():
             [{"text": "How Chrysler Fits Within Stellantis", "size": 26,
               "color": INK, "bold": True, "name": FONT_DISPLAY}])
     textbox(s, Inches(0.75), Inches(1.75), Inches(11.5), Inches(0.4),
-            [{"text": "Differentiation, not overlap — Chrysler's distinct "
-                      "premium space.", "size": 13, "color": GRAPHITE}])
+            [{"text": "Differentiation, not overlap — the distinct, "
+                      "human-centered space Chrysler owns.", "size": 13,
+              "color": GRAPHITE}])
     # Chrysler hero box centered, sibling brand placeholders around
     rect(s, Inches(4.9), Inches(2.5), Inches(3.5), Inches(1.6),
          fill=CHRYSLER)
     textbox(s, Inches(4.9), Inches(2.5), Inches(3.5), Inches(1.6),
             [{"text": "CHRYSLER", "size": 18, "color": WHITE, "bold": True,
               "spacing": 2.0, "align": PP_ALIGN.CENTER, "space_after": 4},
-             {"text": "[ positioning statement ]", "size": 11, "color": PLATINUM,
-              "align": PP_ALIGN.CENTER}], anchor=MSO_ANCHOR.MIDDLE)
+             {"text": "Innovative practicality\nfor everyday life", "size": 11,
+              "color": PLATINUM, "align": PP_ALIGN.CENTER,
+              "line_spacing": 1.1}], anchor=MSO_ANCHOR.MIDDLE)
     sibs = ["BRAND A", "BRAND B", "BRAND C", "BRAND D"]
     for i, name in enumerate(sibs):
         x, w = col_x(i, 4)
@@ -425,7 +430,7 @@ def s_stellantis_fit():
         textbox(s, x, Inches(4.7), w, Inches(1.5),
                 [{"text": name, "size": 12, "color": SLATE, "bold": True,
                   "spacing": 1.5, "align": PP_ALIGN.CENTER, "space_after": 4},
-                 {"text": "[ adjacent\npositioning ]", "size": 9.5,
+                 {"text": "Distinct role", "size": 9.5,
                   "color": PLATINUM, "align": PP_ALIGN.CENTER,
                   "line_spacing": 1.1}], anchor=MSO_ANCHOR.MIDDLE)
     footer(s, 15)
@@ -441,15 +446,21 @@ def s_customer_experience():
     textbox(s, Inches(0.72), Inches(1.05), Inches(11.5), Inches(0.9),
             [{"text": "Future Customer Experience", "size": 28, "color": INK,
               "bold": True, "name": FONT_DISPLAY}])
-    items = ["Digital Ecosystem", "Technology", "Sustainability",
-             "Luxury", "AI", "Connected Mobility"]
+    items = [
+        ("Digital Ecosystem", "Seamless, connected, personal."),
+        ("Technology", "Purposeful and invisible."),
+        ("Sustainability", "Warm, recycled, responsible materials."),
+        ("Luxury", "Friction removed from daily life."),
+        ("AI", "Adaptive, predictive, human-centered."),
+        ("Connected Mobility", "Effortless, door to destination."),
+    ]
     # 3 x 2 grid of icon + label cards
     gx, gw = Inches(0.75), Inches(11.83)
     cols, rows = 3, 2
     gap = Inches(0.4)
     cw = Emu(int((gw - gap * (cols - 1)) / cols))
     ch = Inches(2.0)
-    for idx, name in enumerate(items):
+    for idx, (name, note_txt) in enumerate(items):
         r, c = divmod(idx, cols)
         x = Emu(int(gx + (cw + gap) * c))
         y = Inches(2.25) + (ch + Inches(0.35)) * r
@@ -467,7 +478,8 @@ def s_customer_experience():
                 Emu(int(cw - Inches(0.7))), Inches(0.6),
                 [{"text": name, "size": 14, "color": INK, "bold": True,
                   "space_after": 3},
-                 {"text": "[ note ]", "size": 10, "color": SLATE}])
+                 {"text": note_txt, "size": 10, "color": SLATE,
+                  "line_spacing": 1.15}])
     footer(s, 16)
     notes(s, "Paint the experience Chrysler will deliver. Six themes — swap "
               "ICON boxes for final iconography. Keep words minimal.")
@@ -513,9 +525,9 @@ def s_takeaways():
             [{"text": "Executive Takeaways", "size": 30, "color": INK,
               "bold": True, "name": FONT_DISPLAY}])
     msgs = [
-        ("A design-led future", "[ executive message placeholder ]"),
-        ("Distinct within Stellantis", "[ executive message placeholder ]"),
-        ("Ready to lead", "[ executive message placeholder ]"),
+        ("Designed Around People", "Luxury is the removal of everyday friction."),
+        ("Distinct Within Stellantis", "Modern American design — human and confident."),
+        ("Ready to Lead", "A clear, design-led vision for Chrysler's future."),
     ]
     for i, (h, sub) in enumerate(msgs):
         x, w = col_x(i, 3)
@@ -543,18 +555,38 @@ s_vision()                                                         # 3
 s_left_right_brain()                                               # 4
 s_design_dna()                                                     # 5
 s_portfolio()                                                      # 6
-s_exterior(7, "300 Concept", "300 Concept",
-           ["Flagship presence", "Premium restraint", "A statement of intent"])
-s_interior(8, "300 Concept", "300 Interior")                       # 8
-s_exterior(9, "Airflow", "Airflow",
-           ["Electric-first design", "Intelligent experience", "Future-forward form"])
-s_interior(10, "Airflow", "Airflow Interior")                      # 10
-s_exterior(11, "Arrow · Purpose", "Arrow",
-           ["Accessible premium", "Confident proportions", "Everyday desirability"])
-s_interior(12, "Arrow", "Arrow Interior")                          # 12
-s_exterior(13, "Arrow Cross · Purpose", "Arrow Cross",
-           ["Versatile premium", "Active capability", "Elevated presence"])
-s_interior(14, "Arrow Cross", "Arrow Cross Interior")              # 14
+s_exterior(7, "The Emotional Halo", "300 Concept",
+           "The flagship expression of Chrysler design — composed, "
+           "commanding, never excessive.",
+           [("Commanding Presence", "Architectural proportion, balanced and tailored."),
+            ("Quiet Power", "Confidence expressed through restraint."),
+            ("Timeless Craftsmanship", "Authentic American design, refined.")])
+s_interior(8, "300 Concept", "300 Interior",
+           "An interior sanctuary — crafted, composed, human in scale.")  # 8
+s_exterior(9, "The Philosophy", "Airflow",
+           "Airflow introduces Chrysler's philosophy: innovative "
+           "practicality, designed around people.",
+           [("Spacious & Adaptive", "Versatile space for everyday life."),
+            ("Technology With Purpose", "Intelligence that serves, then disappears."),
+            ("Confident Simplicity", "Clean, logical, human-centered form.")])
+s_interior(10, "Airflow", "Airflow Interior",
+           "Designed around people — flexible, calm, effortlessly useful.")  # 10
+s_exterior(11, "Clever Accessibility", "Arrow",
+           "Chrysler's accessible entry — clever, design-led, and "
+           "attainable from around $24K.",
+           [("Smart & Simple", "Approachable design for the city."),
+            ("Attainable", "Thoughtful style within reach."),
+            ("Youthful & Modern", "Efficient, urban, design-led.")])
+s_interior(12, "Arrow", "Arrow Interior",
+           "Smart, simple, and useful — accessible design done thoughtfully.")  # 12
+s_exterior(13, "Purposeful Versatility", "Arrow Cross",
+           "An accessible crossover with purposeful versatility — "
+           "designed around everyday life.",
+           [("Flexible & Versatile", "Thoughtful packaging for families."),
+            ("Urban & Useful", "Confident, modern, accessible."),
+            ("Everyday Ready", "Simple design that adapts.")])
+s_interior(14, "Arrow Cross", "Arrow Cross Interior",
+           "Versatile and family-friendly — space designed for real life.")  # 14
 s_stellantis_fit()                                                 # 15
 s_customer_experience()                                            # 16
 s_design_innovation()                                              # 17
