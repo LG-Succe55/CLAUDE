@@ -398,8 +398,8 @@ def s_design(kick, title, caption):
     return s
 
 
-def s_innovations(kick, title, hint):
-    """Large image + three innovation callouts (placeholders)."""
+def s_innovations(kick, title, hint, items=None):
+    """Large image + three innovation callouts (populated or placeholder)."""
     s = add_slide(); set_bg(s)
     kicker(s, Inches(0.75), Inches(0.6), kick)
     textbox(s, Inches(0.72), Inches(0.95), Inches(11.0), Inches(0.7),
@@ -409,8 +409,12 @@ def s_innovations(kick, title, hint):
                 label="INNOVATION IMAGE", note="Replace · call out details")
     for i in range(3):
         y = Emu(int(Inches(1.85) + Inches(1.6) * i))
+        if items:
+            head, sub = items[i]
+        else:
+            head, sub = "[ Innovation headline ]", hint
         callout(s, Inches(8.0), y, Inches(4.58), Inches(1.42),
-                "[ Innovation headline ]", hint, num=f"0{i+1}")
+                head, sub, num=f"0{i+1}")
     notes(s, f"{title}: highlight three innovations. For each, name it plainly "
              "and say how it simplifies the vehicle, removes complexity, or makes "
              "the experience more attainable — the through-line of the keynote.")
@@ -453,15 +457,73 @@ def s_acm(kick, name):
     return s
 
 
-def concept_block(idx, name, role, beat, ext_cap, int_cap):
+def concept_block(idx, name, role, beat, ext_cap, int_cap,
+                  ext_innov=None, int_innov=None):
     s_concept_intro(idx, name, role, beat)
     s_design(f"{name} · Exterior", f"{name} — Exterior", ext_cap)
     s_innovations(f"{name} · Exterior", f"{name} — Exterior Innovations",
-                  "[ how it simplifies or removes complexity ]")
+                  "[ how it simplifies or removes complexity ]", ext_innov)
     s_design(f"{name} · Interior", f"{name} — Interior", int_cap)
     s_innovations(f"{name} · Interior", f"{name} — Interior Innovations",
-                  "[ how it eases everyday use ]")
+                  "[ how it eases everyday use ]", int_innov)
     s_acm(f"{name} · ACM", name)
+
+
+# ----------------------------------------------------------------------------
+# Brand foundation (carried over from the Chrysler Brand Design Vision deck)
+# ----------------------------------------------------------------------------
+def s_why():
+    s = add_slide(); set_bg(s)
+    kicker(s, Inches(0.75), Inches(0.95), "The Vision")
+    textbox(s, Inches(0.72), Inches(1.35), Inches(5.9), Inches(1.0),
+            [{"text": "Why Chrysler?", "size": 32, "color": INK, "bold": True,
+              "name": FONT_DISPLAY}])
+    hairline(s, Inches(0.75), Inches(2.5), Inches(5.6))
+    textbox(s, Inches(0.75), Inches(2.75), Inches(5.7), Inches(2.4),
+            [{"text": "Chrysler removes friction from everyday life through "
+                      "thoughtful, people-first design.", "size": 22,
+              "color": GRAPHITE, "line_spacing": 1.25}])
+    textbox(s, Inches(0.75), Inches(5.4), Inches(5.7), Inches(1.0),
+            [{"text": "Every concept at CES is evidence of this one idea.",
+              "size": 13, "color": CHRYSLER, "italic": True}])
+    image_frame(s, Inches(7.1), Inches(0.95), Inches(5.48), Inches(5.5),
+                label="BRAND VISION IMAGE")
+    notes(s, "Ground the CES story in the brand vision: the single philosophy "
+             "every concept serves. This is the same idea that opens the Brand "
+             "Design Vision deck — keep the two consistent.")
+    footer(s, page())
+    return s
+
+
+def s_pillars():
+    s = add_slide(); set_bg(s)
+    kicker(s, Inches(0.75), Inches(0.55), "Design Principles")
+    textbox(s, Inches(0.72), Inches(0.9), Inches(11.5), Inches(0.7),
+            [{"text": "The Four Pillars", "size": 26, "color": INK,
+              "bold": True, "name": FONT_DISPLAY}])
+    textbox(s, Inches(0.75), Inches(1.6), Inches(11.5), Inches(0.4),
+            [{"text": "The principles behind every Chrysler design decision.",
+              "size": 13, "color": GRAPHITE}])
+    pillars = [
+        ("People First", "Every decision begins with the people who use it."),
+        ("Everyday Ingenuity", "Thoughtful solutions that make daily life easier."),
+        ("Human-Centered Intelligence", "Technology that quietly supports."),
+        ("Modern American Design", "Confident, optimistic, unmistakably Chrysler."),
+    ]
+    for i, (h, sub) in enumerate(pillars):
+        x, w = col_x(i, 4)
+        icon_chip(s, x, Inches(2.6), Inches(0.5))
+        hairline(s, x, Inches(3.4), Emu(int(w)))
+        textbox(s, x, Inches(3.55), w, Inches(2.6),
+                [{"text": f"0{i+1}", "size": 12, "color": SILVER, "bold": True,
+                  "spacing": 2.0, "space_after": 6},
+                 {"text": h, "size": 15, "color": INK, "bold": True,
+                  "space_after": 5},
+                 {"text": sub, "size": 11, "color": SLATE, "line_spacing": 1.2}])
+    notes(s, "The four pillars carried over from the brand vision. At CES they "
+             "become the lens for reading every concept and every innovation.")
+    footer(s, page())
+    return s
 
 
 # ----------------------------------------------------------------------------
@@ -470,6 +532,8 @@ def concept_block(idx, name, role, beat, ext_cap, int_cap):
 # Opening & keynote narrative
 s_title()
 s_portfolio()
+s_why()        # brand foundation carried over from the Vision deck
+s_pillars()    # brand foundation carried over from the Vision deck
 s_statement(
     "The Through-Line", "One Portfolio, One Story",
     "Six concepts that complement one another — together they tell the rebirth "
@@ -499,17 +563,30 @@ s_roadmap()
 # Concept expansions (intro / ext / ext innovations / int / int innovations / ACM)
 concept_block(
     1, "Chrysler 300",
-    "The flagship halo — the rebirth of Chrysler expressed in one confident, "
-    "architectural form.",
+    "The flagship expression of Chrysler design — composed, commanding, never "
+    "excessive.",
     "Rebirth of Chrysler",
     "Commanding, composed proportion — presence without excess.",
-    "A calm, crafted sanctuary — technology that recedes.")
+    "An interior sanctuary — crafted, composed, human in scale.",
+    ext_innov=[("Commanding Presence", "Architectural proportion, balanced and tailored."),
+               ("Quiet Power", "Confidence expressed through restraint."),
+               ("Timeless Craftsmanship", "Authentic American design, refined.")],
+    int_innov=[("Crafted Sanctuary", "Calm materials, composed and human in scale."),
+               ("Quiet Technology", "Intelligence that recedes into the cabin."),
+               ("Tailored Detail", "Restraint expressed through craft.")])
 concept_block(
     2, "Pacifica Pinnacle",
-    "Effortless family luxury — technology that simplifies every journey.",
+    "The evolution of the modern family vehicle — flexible, sophisticated, and "
+    "designed around people.",
     "Technology through simplicity",
     "Refined, confident family form — familiar, elevated.",
-    "A serene lounge — comfort and control, made simple.")
+    "A family sanctuary — flexible, comfortable, designed around people.",
+    ext_innov=[("Flexible by Design", "Space that adapts to every journey."),
+               ("Sophisticated Comfort", "Refined, calm, effortlessly livable."),
+               ("Technology Around People", "Intelligence that serves the family.")],
+    int_innov=[("Serene Lounge", "Comfort and control, made simple."),
+               ("Adaptive Space", "Flexible seating for real family life."),
+               ("Effortless Control", "Technology that quietly serves.")])
 concept_block(
     3, "Pacifica Grizzly Peak",
     "Capable family adventure — attainable capability, thoughtfully packaged.",
@@ -530,11 +607,17 @@ concept_block(
     "A flexible, thoughtful interior — space made simple.")
 concept_block(
     6, "Airflow",
-    "Chrysler's technology manifesto — intelligence that recedes into the "
-    "experience.",
+    "Airflow introduces Chrysler's philosophy: innovative practicality, "
+    "designed around people.",
     "Chrysler is about technology",
     "Aerodynamic, future-forward silhouette — technology as form.",
-    "An intelligent, connected cabin — calm and effortless.")
+    "Designed around people — flexible, calm, effortlessly useful.",
+    ext_innov=[("Spacious & Adaptive", "Versatile space for everyday life."),
+               ("Technology With Purpose", "Intelligence that serves, then disappears."),
+               ("Confident Simplicity", "Clean, logical, human-centered form.")],
+    int_innov=[("Calm & Connected", "An intelligent cabin that stays quiet."),
+               ("Effortless Interface", "Technology that recedes into use."),
+               ("Human-Centered Space", "Designed around people, not features.")])
 
 OUT = "/home/user/CLAUDE/Chrysler_CES_Concept_Portfolio.pptx"
 prs.save(OUT)
