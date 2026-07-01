@@ -225,7 +225,7 @@ def s_title():
               "color": GRAPHITE}])
     textbox(s, Inches(0.85), Inches(6.95), Inches(11.5), Inches(0.4),
             [{"text": "Chrysler 300 · Pacifica Pinnacle · Pacifica Grizzly Peak "
-                      "· C2U · C2X · Airflow", "size": 10.5, "color": SLATE,
+                      "· C2U · C2X · Airflow (C5U)", "size": 10.5, "color": SLATE,
               "spacing": 0.5}])
     notes(s, "Open the keynote: every concept on the CES floor is one portfolio "
              "telling one story — the rebirth of Chrysler through technology, "
@@ -245,7 +245,7 @@ def s_portfolio():
                       "up to a single Chrysler story.", "size": 13,
               "color": GRAPHITE}])
     names = ["Chrysler 300", "Pacifica Pinnacle", "Pacifica Grizzly Peak",
-             "C2U", "C2X", "Airflow"]
+             "C2U", "C2X", "Airflow (C5U)"]
     for i, name in enumerate(names):
         r, c = divmod(i, 3)
         x, w = col_x(c, 3)
@@ -312,44 +312,117 @@ def s_beat(idx, title, statement):
 
 
 def s_roadmap():
+    """Technology roadmap — domains x horizons matrix (from the tech roadmap)."""
     s = add_slide(); set_bg(s)
-    kicker(s, Inches(0.75), Inches(0.55), "Story & Roadmap")
-    textbox(s, Inches(0.72), Inches(0.9), Inches(11.5), Inches(0.7),
-            [{"text": "Concept Story Meets Technology Roadmap", "size": 24,
+    kicker(s, Inches(0.75), Inches(0.5), "Technology Roadmap")
+    textbox(s, Inches(0.72), Inches(0.85), Inches(11.6), Inches(0.6),
+            [{"text": "The Technology Behind the Story", "size": 24,
               "color": INK, "bold": True, "name": FONT_DISPLAY}])
-    textbox(s, Inches(0.75), Inches(1.6), Inches(11.5), Inches(0.4),
-            [{"text": "How the exterior and interior story lines up with the "
-                      "technology roadmap.", "size": 13, "color": GRAPHITE}])
-    # exterior / interior story rails
-    image_frame(s, Inches(0.75), Inches(2.2), Inches(5.83), Inches(1.7),
-                label="EXTERIOR STORY", note="Replace", icon=False)
-    image_frame(s, Inches(0.75), Inches(4.05), Inches(5.83), Inches(1.7),
-                label="INTERIOR STORY", note="Replace", icon=False)
-    # roadmap timeline (right)
-    rx, rw = Inches(7.0), Inches(5.58)
-    hairline(s, rx, Inches(4.0), rw, color=SILVER, weight=Pt(1.5))
-    phases = ["Today", "Near-Term", "Mid-Term", "Vision"]
-    for i, ph in enumerate(phases):
-        x = Emu(int(rx + (rw / (len(phases) - 1)) * i))
-        rect(s, Emu(int(x - Inches(0.08))), Inches(3.92), Inches(0.16),
-             Inches(0.16), fill=CHRYSLER, shape=MSO_SHAPE.OVAL)
-        textbox(s, Emu(int(x - Inches(0.7))), Inches(3.35), Inches(1.4),
-                Inches(0.3),
-                [{"text": ph, "size": 11, "color": INK, "bold": True,
-                  "align": PP_ALIGN.CENTER}], align=PP_ALIGN.CENTER)
-        textbox(s, Emu(int(x - Inches(0.7))), Inches(4.25), Inches(1.4),
-                Inches(1.0),
-                [{"text": "[ milestone ]", "size": 9, "color": SLATE,
-                  "align": PP_ALIGN.CENTER, "line_spacing": 1.1}],
-                align=PP_ALIGN.CENTER)
-    textbox(s, Inches(7.0), Inches(2.35), Inches(5.4), Inches(0.8),
-            [{"text": "Each concept plots against the roadmap — showing how "
-                      "design intent and technology maturity advance together.",
-              "size": 12, "color": GRAPHITE, "line_spacing": 1.25}])
-    notes(s, "Tie the design narrative to the technology roadmap: the exterior "
-             "and interior stories are not styling exercises — they visualize "
-             "where the technology is heading and when. Plot each concept along "
-             "Today → Vision.")
+    textbox(s, Inches(0.75), Inches(1.5), Inches(11.6), Inches(0.35),
+            [{"text": "Maturing technology is what makes simplicity, "
+                      "affordability, and attainability possible.", "size": 12.5,
+              "color": GRAPHITE}])
+    # matrix geometry
+    lx, lw = Inches(0.75), Inches(2.55)
+    col0 = Inches(3.4)
+    ncol = 3
+    cgap = Inches(0.12)
+    cw = Emu(int((Inches(12.58) - col0 - cgap * (ncol - 1)) / ncol))
+    top = Inches(2.05)
+    hh = Inches(0.4)
+    rh = Inches(0.62)
+    horizons = ["NOW  ·  '25–'27", "NEXT  ·  '28–'30", "VISION  ·  '31+"]
+    for c, hz in enumerate(horizons):
+        x = Emu(int(col0 + (cw + cgap) * c))
+        rect(s, x, top, cw, hh, fill=CHRYSLER)
+        textbox(s, x, top, cw, hh,
+                [{"text": hz, "size": 10, "color": WHITE, "bold": True,
+                  "spacing": 0.8, "align": PP_ALIGN.CENTER}],
+                align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+    rows = [
+        ("Electrification & Energy",
+         "LFP / NMC packs", "Semi-solid-state packs", "Solid-state, long-life"),
+        ("Efficient Propulsion",
+         "Heat-pump thermal", "AI-designed, high-speed eMotors", "Rare-earth-free motors"),
+        ("Software-Defined Vehicle",
+         "5G, domain controllers", "Centralized compute, Fusion SoC", "Zero-edge E/E, 6G & satellite"),
+        ("Autonomy & Safety",
+         "ADAS L2+ active safety", "L3 hands-off, ODD expansion", "L4 AD-ready (robotaxi)"),
+        ("Simplified Architecture",
+         "e-pedal, active aero", "Brake-by-wire, digital mirrors", "Steer-by-wire, active susp."),
+        ("Cabin & Materials",
+         "Integrated displays, recycled trim", "Hidden/flexible displays, smart seats",
+         "AR-HUD, CO₂-neutral, bio"),
+    ]
+    for r, (label, *cells) in enumerate(rows):
+        y = Emu(int(top + hh + Inches(0.06) + (rh + Inches(0.06)) * r))
+        rect(s, lx, y, lw, rh, fill=CLOUD, line=PLATINUM, line_w=Pt(0.5))
+        rect(s, lx, y, Inches(0.06), rh, fill=CHRYSLER)
+        textbox(s, Emu(int(lx + Inches(0.22))), y, Emu(int(lw - Inches(0.3))), rh,
+                [{"text": label, "size": 10.5, "color": INK, "bold": True,
+                  "line_spacing": 1.0}], anchor=MSO_ANCHOR.MIDDLE)
+        for c, cell in enumerate(cells):
+            x = Emu(int(col0 + (cw + cgap) * c))
+            rect(s, x, y, cw, rh, fill=MIST, line=PLATINUM, line_w=Pt(0.5))
+            textbox(s, Emu(int(x + Inches(0.14))), y,
+                    Emu(int(cw - Inches(0.24))), rh,
+                    [{"text": cell, "size": 9, "color": GRAPHITE,
+                      "line_spacing": 1.0}], anchor=MSO_ANCHOR.MIDDLE)
+    textbox(s, Inches(0.75), Inches(6.95), Inches(11), Inches(0.3),
+            [{"text": "Source: Executive Technology Roadmap 2025 S2 (PDT · PSCE "
+                      "· PUR) — horizons summarized for keynote.", "size": 7.5,
+              "color": PLATINUM, "spacing": 0.3}])
+    notes(s, "The technology roadmap in one view: six domains across three "
+             "horizons. The point for the keynote — the maturity curve is what "
+             "lets us simplify the vehicle, remove complexity, and bring the "
+             "price down. Each concept draws from a different point on this map. "
+             "(Confidential — summarized from the 2025 S2 Executive Technology "
+             "Roadmap; keep detail at this altitude.)")
+    footer(s, page())
+    return s
+
+
+def s_tech_simplicity():
+    """How the roadmap enables the keynote theme: simpler, fewer, attainable."""
+    s = add_slide(); set_bg(s)
+    kicker(s, Inches(0.75), Inches(0.6), "Technology · Simplicity")
+    textbox(s, Inches(0.72), Inches(0.95), Inches(11.5), Inches(0.7),
+            [{"text": "Technology in Service of Simplicity", "size": 24,
+              "color": INK, "bold": True, "name": FONT_DISPLAY}])
+    textbox(s, Inches(0.75), Inches(1.65), Inches(11.5), Inches(0.4),
+            [{"text": "Technology lets us remove things from the vehicle — "
+                      "making it simpler, cleaner, and more attainable.",
+              "size": 13, "color": GRAPHITE}])
+    proof = [
+        ("Fewer Parts, By Wire",
+         "Steer- and brake-by-wire remove mechanical links — lighter, simpler, safer."),
+        ("One Brain, Not Many",
+         "Centralized compute turns ~80% of ECUs into smart sensors."),
+        ("Clean, Integrated Surfaces",
+         "Flush exteriors, hidden displays, invisible vents — complexity removed."),
+        ("Responsible by Default",
+         "Recycled and bio materials, CO₂-neutral seats, low-carbon process."),
+    ]
+    for i, (h, sub) in enumerate(proof):
+        x, w = col_x(i, 4)
+        icon_chip(s, x, Inches(2.5), Inches(0.5))
+        hairline(s, x, Inches(3.3), Emu(int(w)))
+        textbox(s, x, Inches(3.45), w, Inches(2.4),
+                [{"text": f"0{i+1}", "size": 11, "color": SILVER, "bold": True,
+                  "spacing": 1.5, "space_after": 5},
+                 {"text": h, "size": 14, "color": INK, "bold": True,
+                  "space_after": 5},
+                 {"text": sub, "size": 10.5, "color": SLATE, "line_spacing": 1.2}])
+    rect(s, Inches(0.75), Inches(6.1), Inches(11.83), Inches(0.65), fill=CLOUD)
+    textbox(s, Inches(1.0), Inches(6.1), Inches(11.3), Inches(0.65),
+            [{"text": "Removing complexity is what makes Chrysler technology "
+                      "attainable.", "size": 13, "color": CHRYSLER,
+              "italic": True, "align": PP_ALIGN.CENTER}],
+            anchor=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.CENTER)
+    notes(s, "Connect the roadmap to the customer promise: advanced technology "
+             "is not about adding — it is about removing. Fewer parts, one "
+             "compute brain, cleaner surfaces, responsible materials. That is "
+             "how simplicity becomes affordability.")
     footer(s, page())
     return s
 
@@ -559,6 +632,7 @@ s_statement(
      ("More attainable", "Premium experience, accessible price."),
      ("Designed for real life", "Technology that quietly serves people.")])
 s_roadmap()
+s_tech_simplicity()
 
 # Concept expansions (intro / ext / ext innovations / int / int innovations / ACM)
 concept_block(
@@ -595,29 +669,44 @@ concept_block(
     "A durable, flexible cabin — built for real life.")
 concept_block(
     4, "C2U",
-    "[ Concept role placeholder ] — accessible, urban, and design-led.",
+    "A right-sized utility gateway to Chrysler — dependable, practical, and easy "
+    "on the wallet. For leading-edge Boomers and matures.",
     "Simplicity & affordability",
-    "Compact, confident urban form — approachable design.",
-    "A smart, uncluttered cabin — attainable by design.")
+    "Approachable, right-sized utility — confident and uncomplicated.",
+    "A dependable, comfortable cabin — everyday ease, thoughtfully priced.",
+    ext_innov=[("True Affordability", "Attainable entry, low cost of ownership."),
+               ("Functional & Practical", "Right-sized utility for everyday life."),
+               ("Quality & Reliability", "Dependable, safe, built to last.")],
+    int_innov=[("Everyday Comfort", "Comfortable, safe, easy to live with."),
+               ("Simple by Design", "Intuitive, uncluttered, low-effort."),
+               ("Low Cost of Ownership", "Value that lasts beyond purchase.")])
 concept_block(
     5, "C2X",
-    "[ Concept role placeholder ] — versatile, attainable, and modern.",
+    "The gateway that builds early loyalty — right-sized, affordable, and "
+    "design-led. For Gen Z and Millennials.",
     "Simplicity & affordability",
-    "Versatile crossover form — capable and clean.",
-    "A flexible, thoughtful interior — space made simple.")
+    "Youthful, right-sized utility — modern and attainable.",
+    "A smart, uncluttered cabin — attainable design for a new generation.",
+    ext_innov=[("Gateway to Chrysler", "A right-sized entry that builds early loyalty."),
+               ("True Affordability", "Attainable from around $24K."),
+               ("Design-Led", "Modern, functional, unmistakably Chrysler.")],
+    int_innov=[("Made for a New Generation", "Practical, connected, easy to live with."),
+               ("Simple & Smart", "Uncluttered, intuitive, everyday-ready."),
+               ("Dependable Value", "Safe, reliable, easy on the wallet.")])
 concept_block(
-    6, "Airflow",
-    "Airflow introduces Chrysler's philosophy: innovative practicality, "
-    "designed around people.",
+    6, "Airflow (C5U)",
+    "Chrysler's true middle-ground utility — filling the gap between compact SUV "
+    "and minivan with elevated design, technology, and real affordability.",
     "Chrysler is about technology",
-    "Aerodynamic, future-forward silhouette — technology as form.",
+    "Right-sized, confident utility — the space between compact SUV and minivan, "
+    "resolved.",
     "Designed around people — flexible, calm, effortlessly useful.",
-    ext_innov=[("Spacious & Adaptive", "Versatile space for everyday life."),
-               ("Technology With Purpose", "Intelligence that serves, then disappears."),
-               ("Confident Simplicity", "Clean, logical, human-centered form.")],
-    int_innov=[("Calm & Connected", "An intelligent cabin that stays quiet."),
-               ("Effortless Interface", "Technology that recedes into use."),
-               ("Human-Centered Space", "Designed around people, not features.")])
+    ext_innov=[("Right-Sized Utility", "The versatile middle-ground buyers are missing."),
+               ("Elevated, Affordable", "Premium design and technology, within reach."),
+               ("Core Identity", "Reignites what Chrysler stands for.")],
+    int_innov=[("Everyday Practicality", "Space and comfort for real life."),
+               ("Attainable Technology", "Meaningful features, low cost of ownership."),
+               ("Confident Simplicity", "Clean, human-centered, uncomplicated.")])
 
 OUT = "/home/user/CLAUDE/Chrysler_CES_Concept_Portfolio.pptx"
 prs.save(OUT)
