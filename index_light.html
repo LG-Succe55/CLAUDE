@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Design Amplified — Executive Presentation</title>
+<style>
+/* ============================================================
+   DESIGN AMPLIFIED · Animated Executive Presentation
+   Self-contained. No external assets. Keyboard + click driven.
+   Brand palette carried from the source deck for consistency.
+   ============================================================ */
+:root{
+  /* ink + neutrals */
+  --ink:#141E3D;         /* deep navy — primary ink */
+  --ink-2:#2A3150;
+  --body:#3A3F52;
+  --muted:#6C7284;
+  --faint:#9AA0B0;
+  --line:#E4E7EF;
+  --line-2:#D3D8E4;
+  --bg:#FBFCFE;
+  --panel:#F4F6FB;
+  --panel-2:#FFFFFF;
+  --white:#FFFFFF;
+
+  /* strategy accents */
+  --s1:#007060;  --s1-tint:#E6F2F0;  --s1-soft:#B9DED7;   /* Scale Now  (teal)   */
+  --s2:#B35C27;  --s2-tint:#FAF1EA;  --s2-soft:#EBCBB3;   /* Develop    (rust)   */
+  --s3:#514B91;  --s3-tint:#ECEBF5;  --s3-soft:#C8C5E4;   /* Connect    (violet) */
+
+  --shadow-sm:0 1px 3px rgba(20,30,61,.06), 0 6px 18px -8px rgba(20,30,61,.10);
+  --shadow:0 10px 30px -12px rgba(20,30,61,.18), 0 2px 8px -4px rgba(20,30,61,.10);
+  --shadow-lg:0 40px 90px -30px rgba(20,30,61,.30);
+
+  --sans:"Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--body);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow:hidden;
+  line-height:1.5;
+}
+::selection{background:var(--ink);color:#fff}
+
+/* ───────────────── Deck shell ───────────────── */
+#deck{position:fixed;inset:0}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  padding:clamp(38px,5.2vh,70px) clamp(40px,6vw,110px) clamp(64px,8vh,96px);
+  opacity:0;visibility:hidden;
+  transform:scale(.985);
+  transition:opacity .55s var(--ease), transform .7s var(--ease), visibility 0s linear .6s;
+  overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 88% -10%, rgba(0,112,96,.045), transparent 55%),
+    radial-gradient(90% 70% at -8% 108%, rgba(81,75,145,.05), transparent 55%),
+    var(--bg);
+}
+.slide.active{
+  opacity:1;visibility:visible;transform:none;
+  transition:opacity .6s var(--ease), transform .8s var(--ease-out), visibility 0s;
+  z-index:2;
+}
+.slide.past{transform:scale(1.01)}
+
+/* ───────────────── Persistent chrome ───────────────── */
+.chrome-top{
+  position:absolute;top:clamp(26px,3.4vh,40px);left:clamp(40px,6vw,110px);right:clamp(40px,6vw,110px);
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:5;pointer-events:none;
+}
+.brandmark{display:flex;align-items:center;gap:11px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.brandmark .dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,var(--s1),var(--s3));box-shadow:0 0 0 4px rgba(0,112,96,.10)}
+.brandmark b{color:var(--ink);font-weight:700}
+.kicker-chip{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+.chrome-bot{
+  position:absolute;bottom:clamp(24px,3.2vh,34px);left:clamp(40px,6vw,110px);right:clamp(40px,6vw,110px);
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;letter-spacing:.05em;color:var(--faint);z-index:5;pointer-events:none;
+}
+.chrome-bot .foot-l{font-weight:600;color:var(--muted)}
+
+/* progress rail */
+#rail{position:fixed;left:0;top:0;height:3px;z-index:60;width:0;
+  background:linear-gradient(90deg,var(--s1),var(--s2) 55%,var(--s3));
+  transition:width .6s var(--ease-out);box-shadow:0 0 12px rgba(81,75,145,.4)}
+
+/* dot nav */
+#dots{position:fixed;right:clamp(20px,2.4vw,34px);top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:11px;z-index:55}
+#dots button{width:9px;height:9px;border-radius:50%;border:0;padding:0;cursor:pointer;
+  background:var(--line-2);transition:all .35s var(--ease);position:relative}
+#dots button:hover{background:var(--faint);transform:scale(1.25)}
+#dots button.on{background:var(--ink);transform:scale(1.15)}
+#dots button.on::after{content:attr(data-label);position:absolute;right:20px;top:50%;transform:translateY(-50%);
+  white-space:nowrap;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;
+  background:var(--white);padding:4px 9px;border-radius:6px;box-shadow:var(--shadow-sm);opacity:0;transition:opacity .3s}
+#dots button.on:hover::after{opacity:1}
+
+/* arrow nav */
+.arrow{position:fixed;bottom:clamp(22px,3vh,32px);z-index:56;width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--line-2);background:var(--white);color:var(--ink);cursor:pointer;
+  display:grid;place-items:center;box-shadow:var(--shadow-sm);transition:all .25s var(--ease)}
+.arrow:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:var(--shadow)}
+.arrow:disabled{opacity:.3;cursor:default;transform:none}
+.arrow svg{width:17px;height:17px}
+#prev{right:calc(clamp(40px,6vw,110px) + 52px)}
+#next{right:clamp(40px,6vw,110px)}
+.hint{position:fixed;bottom:clamp(28px,3.6vh,40px);left:50%;transform:translateX(-50%);z-index:56;
+  font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  display:flex;align-items:center;gap:8px;transition:opacity .5s}
+.hint kbd{font-family:var(--sans);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;
+  padding:2px 7px;font-size:10px;color:var(--muted);background:var(--white)}
+
+/* ───────────────── Reveal system ───────────────── */
+.r{opacity:0;transform:translateY(22px);transition:opacity .7s var(--ease-out), transform .8s var(--ease-out)}
+.slide.active .r{opacity:1;transform:none;transition-delay:calc(var(--d,0)*1ms)}
+.r.blur{filter:blur(6px)}.slide.active .r.blur{filter:none}
+
+/* ───────────────── Typography helpers ───────────────── */
+.eyebrow{font-size:clamp(11px,1.05vw,13px);letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.eyebrow.s1{color:var(--s1)}.eyebrow.s2{color:var(--s2)}.eyebrow.s3{color:var(--s3)}
+h1.title{font-size:clamp(30px,4.4vw,64px);line-height:1.02;letter-spacing:-.02em;color:var(--ink);font-weight:700}
+h2.head{font-size:clamp(24px,3vw,42px);line-height:1.06;letter-spacing:-.015em;color:var(--ink);font-weight:700}
+.sub{font-size:clamp(14px,1.35vw,18px);color:var(--muted);font-weight:400;max-width:60ch}
+.lead{font-size:clamp(15px,1.5vw,20px);line-height:1.55;color:var(--body)}
+
+.slide-head{margin-bottom:clamp(20px,3vh,34px)}
+.slide-head .eyebrow{margin-bottom:12px}
+.slide-head h2{margin-bottom:10px}
+
+.stage-body{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+
+/* pill / tag */
+.tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.04em;
+  padding:5px 11px;border-radius:999px;text-transform:uppercase}
+.tag .sq{width:8px;height:8px;border-radius:2px}
+.tag.t1{background:var(--s1-tint);color:var(--s1)}.tag.t1 .sq{background:var(--s1)}
+.tag.t2{background:var(--s2-tint);color:var(--s2)}.tag.t2 .sq{background:var(--s2)}
+.tag.t3{background:var(--s3-tint);color:var(--s3)}.tag.t3 .sq{background:var(--s3)}
+
+/* ============================================================
+   SLIDE 1 — TITLE
+   ============================================================ */
+#s-title{justify-content:center;
+  background:
+    radial-gradient(130% 90% at 92% 8%, rgba(0,112,96,.10), transparent 50%),
+    radial-gradient(120% 90% at 6% 96%, rgba(81,75,145,.12), transparent 52%),
+    radial-gradient(80% 60% at 50% 40%, rgba(179,92,39,.045), transparent 60%),
+    var(--bg);
+}
+.title-wrap{max-width:1000px}
+.title-wrap .eyebrow{margin-bottom:26px}
+.title-wrap h1{margin:0 0 26px;font-size:clamp(44px,8vw,120px);letter-spacing:-.03em;line-height:.94;color:var(--ink);font-weight:700}
+.title-wrap h1 .amp{
+  background:linear-gradient(115deg,var(--s1) 0%,var(--s2) 52%,var(--s3) 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.title-core{font-size:clamp(16px,1.9vw,25px);line-height:1.5;color:var(--ink-2);max-width:60ch;font-weight:400;margin-bottom:14px}
+.title-core b{color:var(--ink);font-weight:700}
+.title-quote{font-family:var(--serif);font-style:italic;font-size:clamp(15px,1.6vw,20px);color:var(--muted);
+  padding-left:20px;border-left:3px solid var(--line-2);margin-top:26px;max-width:52ch}
+.title-meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:38px;font-size:12.5px;color:var(--muted)}
+.title-meta span{display:inline-flex;align-items:center;gap:8px}
+.title-meta .k{width:6px;height:6px;border-radius:50%;background:var(--s1)}
+.title-audience{margin-top:20px;font-size:12px;letter-spacing:.06em;color:var(--faint)}
+.title-audience b{color:var(--ink-2);font-weight:600}
+
+/* ============================================================
+   SLIDE 2 — VISION & MISSION
+   ============================================================ */
+.vm-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(22px,2.6vw,44px);align-items:stretch}
+.vm-card{background:var(--panel-2);border:1px solid var(--line);border-radius:20px;padding:clamp(26px,2.6vw,40px);
+  box-shadow:var(--shadow-sm);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.vm-card::before{content:"";position:absolute;top:0;left:0;width:100%;height:4px}
+.vm-card.vision::before{background:linear-gradient(90deg,var(--s1),var(--s1-soft))}
+.vm-card.mission::before{background:linear-gradient(90deg,var(--s3),var(--s3-soft))}
+.vm-label{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.vm-label .num{font-family:var(--serif);font-size:34px;line-height:1;color:var(--line-2);font-weight:700}
+.vm-label .t{font-size:13px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
+.vm-card.vision .vm-label .t{color:var(--s1)}
+.vm-card.mission .vm-label .t{color:var(--s3)}
+.vm-statement{font-size:clamp(15px,1.55vw,21px);line-height:1.5;color:var(--ink);font-weight:500;letter-spacing:-.01em}
+.vm-statement b{font-weight:700}
+.vm-note{margin-top:auto;padding-top:20px;font-family:var(--serif);font-style:italic;font-size:clamp(13.5px,1.25vw,16px);
+  color:var(--muted);line-height:1.5;border-top:1px solid var(--line)}
+
+/* ============================================================
+   SLIDE 3 — WHY THIS MATTERS (friction)
+   ============================================================ */
+.why-lead{font-size:clamp(18px,2.2vw,30px);line-height:1.3;color:var(--ink);font-weight:600;letter-spacing:-.01em;max-width:22ch;margin-bottom:6px}
+.why-lead .hi{color:var(--s2)}
+.friction-stage{display:grid;grid-template-columns:minmax(200px,300px) 1fr;gap:clamp(26px,3.4vw,60px);align-items:center;flex:1;min-height:0}
+.core-node{position:relative;display:grid;place-items:center;aspect-ratio:1;max-width:280px;margin:auto;
+  border-radius:50%;background:radial-gradient(circle at 50% 42%, var(--white), var(--panel));
+  border:1px solid var(--line);box-shadow:var(--shadow);}
+.core-node::before,.core-node::after{content:"";position:absolute;inset:-1px;border-radius:50%;
+  border:1px solid var(--s1);opacity:.18;animation:pulse 3.4s var(--ease-out) infinite}
+.core-node::after{animation-delay:1.7s}
+@keyframes pulse{0%{transform:scale(.86);opacity:.35}70%{opacity:0}100%{transform:scale(1.28);opacity:0}}
+.core-node .cn-in{text-align:center}
+.core-node .cn-in b{display:block;font-size:clamp(16px,1.7vw,23px);color:var(--ink);letter-spacing:-.01em;font-weight:700;line-height:1.1}
+.core-node .cn-in span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--s1);font-weight:700}
+.friction-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.friction-item{background:var(--panel-2);border:1px solid var(--line);border-radius:13px;padding:16px 16px 15px;
+  box-shadow:var(--shadow-sm);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.friction-item:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.friction-item .fi-dot{width:9px;height:9px;border-radius:3px;background:var(--s2);margin-bottom:11px;opacity:.85}
+.friction-item p{font-size:clamp(12.5px,1.15vw,15px);color:var(--ink-2);font-weight:600;line-height:1.3}
+.why-foot{margin-top:clamp(18px,2.4vh,28px);font-size:clamp(14px,1.35vw,18px);color:var(--body)}
+.why-foot b{color:var(--s1);font-weight:700}
+
+/* ============================================================
+   SLIDE 4 — STRATEGIC ARCHITECTURE (all strategies)
+   ============================================================ */
+.arch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,1.8vw,26px);flex:1;min-height:0;align-items:stretch}
+.strat-card{position:relative;border-radius:20px;padding:clamp(22px,2.2vw,32px);display:flex;flex-direction:column;
+  background:var(--panel-2);border:1px solid var(--line);box-shadow:var(--shadow-sm);overflow:hidden;
+  transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.strat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.strat-card .band{position:absolute;top:0;left:0;right:0;height:6px}
+.strat-card.c1 .band{background:linear-gradient(90deg,var(--s1),var(--s1-soft))}
+.strat-card.c2 .band{background:linear-gradient(90deg,var(--s2),var(--s2-soft))}
+.strat-card.c3 .band{background:linear-gradient(90deg,var(--s3),var(--s3-soft))}
+.strat-card .snum{font-family:var(--serif);font-size:clamp(40px,4vw,58px);line-height:.8;font-weight:700;margin:6px 0 16px;color:var(--line-2)}
+.strat-card.c1 .snum{color:var(--s1-soft)}.strat-card.c2 .snum{color:var(--s2-soft)}.strat-card.c3 .snum{color:var(--s3-soft)}
+.strat-card h3{font-size:clamp(17px,1.7vw,24px);line-height:1.14;letter-spacing:-.01em;color:var(--ink);font-weight:700;margin-bottom:12px}
+.strat-card .phase{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;margin-bottom:14px}
+.strat-card.c1 .phase{color:var(--s1)}.strat-card.c2 .phase{color:var(--s2)}.strat-card.c3 .phase{color:var(--s3)}
+.strat-card .intent{font-size:clamp(13px,1.2vw,15.5px);line-height:1.5;color:var(--muted)}
+.strat-card .count{margin-top:auto;padding-top:18px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--faint);font-weight:600}
+.strat-card .count b{font-size:22px;font-family:var(--serif)}
+.strat-card.c1 .count b{color:var(--s1)}.strat-card.c2 .count b{color:var(--s2)}.strat-card.c3 .count b{color:var(--s3)}
+.arch-flow{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:clamp(18px,2.4vh,26px);
+  font-size:clamp(12.5px,1.2vw,15px);color:var(--muted);flex-wrap:wrap}
+.arch-flow .step{display:inline-flex;align-items:center;gap:9px;font-weight:600;color:var(--ink-2)}
+.arch-flow .step .d{width:9px;height:9px;border-radius:50%}
+.arch-flow .a1 .d{background:var(--s1)}.arch-flow .a2 .d{background:var(--s2)}.arch-flow .a3 .d{background:var(--s3)}
+.arch-flow .arw{color:var(--line-2);font-size:18px}
+
+/* ============================================================
+   SLIDE 5 — ALL SEVEN INITIATIVES
+   ============================================================ */
+.init-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:clamp(16px,2vh,22px)}
+.init-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:13px;flex:1;min-height:0}
+.init-card{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:14px;
+  padding:16px 17px 15px;display:flex;flex-direction:column;box-shadow:var(--shadow-sm);overflow:hidden;
+  border-left-width:4px;transition:transform .32s var(--ease),box-shadow .32s var(--ease)}
+.init-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.init-card.i1{border-left-color:var(--s1)}
+.init-card.i2{border-left-color:var(--s2)}
+.init-card.i3{border-left-color:var(--s3)}
+.init-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.init-num{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;font-family:var(--serif)}
+.init-card.i1 .init-num{background:var(--s1)}
+.init-card.i2 .init-num{background:var(--s2)}
+.init-card.i3 .init-num{background:var(--s3)}
+.init-strat{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:999px}
+.init-card.i1 .init-strat{background:var(--s1-tint);color:var(--s1)}
+.init-card.i2 .init-strat{background:var(--s2-tint);color:var(--s2)}
+.init-card.i3 .init-strat{background:var(--s3-tint);color:var(--s3)}
+.init-card h4{font-size:clamp(13.5px,1.15vw,16px);line-height:1.18;color:var(--ink);font-weight:700;letter-spacing:-.01em;margin-bottom:8px}
+.init-card p{font-size:clamp(11.5px,1vw,13px);line-height:1.4;color:var(--muted)}
+.init-workstreams{margin-top:auto;padding-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.init-workstreams span{font-size:9.5px;font-weight:700;color:var(--s3);background:var(--s3-tint);border-radius:6px;padding:3px 7px}
+.init-foot{margin-top:clamp(14px,1.8vh,20px);font-size:clamp(12.5px,1.2vw,15px);color:var(--muted);text-align:center}
+.init-foot b{color:var(--ink);font-weight:700}
+
+/* ============================================================
+   SLIDE 6 — ROADMAP (interactive swimlane)
+   ============================================================ */
+#s-roadmap .slide-head{margin-bottom:clamp(14px,2vh,22px)}
+.rm-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.rm-controls .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-right:2px}
+.chip{border:1px solid var(--line-2);background:var(--white);border-radius:999px;padding:7px 15px;font-size:12px;font-weight:700;
+  color:var(--muted);cursor:pointer;transition:all .25s var(--ease);display:inline-flex;align-items:center;gap:8px}
+.chip .sq{width:9px;height:9px;border-radius:3px;background:var(--faint)}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip[data-f="all"].on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip[data-f="all"].on .sq{background:#fff}
+.chip[data-f="1"] .sq{background:var(--s1)}.chip[data-f="2"] .sq{background:var(--s2)}.chip[data-f="3"] .sq{background:var(--s3)}
+.chip[data-f="1"].on{background:var(--s1-tint);color:var(--s1);border-color:var(--s1)}
+.chip[data-f="2"].on{background:var(--s2-tint);color:var(--s2);border-color:var(--s2)}
+.chip[data-f="3"].on{background:var(--s3-tint);color:var(--s3);border-color:var(--s3)}
+
+.roadmap{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:18px;
+  background:var(--panel-2);box-shadow:var(--shadow-sm);overflow:hidden}
+.rm-cols{display:grid;grid-template-columns:150px repeat(4,1fr);border-bottom:1px solid var(--line)}
+.rm-cols .rc{padding:14px 16px;border-left:1px solid var(--line)}
+.rm-cols .rc:first-child{border-left:0;background:var(--panel)}
+.rm-cols .stg{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:4px}
+.rm-cols .stg-l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.rm-cols .stg-d{font-size:11px;color:var(--faint);margin-top:3px}
+.rm-lanes{flex:1;display:flex;flex-direction:column;min-height:0}
+.lane{flex:1;display:grid;grid-template-columns:150px repeat(4,1fr);border-top:1px solid var(--line);position:relative;min-height:0;
+  transition:opacity .4s var(--ease),filter .4s var(--ease)}
+.lane:first-child{border-top:0}
+.lane .lane-h{padding:12px 14px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:5px}
+.lane .lane-h .lh-t{font-size:12px;font-weight:800;line-height:1.15;letter-spacing:-.01em}
+.lane .lane-h .lh-s{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--faint)}
+.lane.l1 .lane-h .lh-t{color:var(--s1)} .lane.l2 .lane-h .lh-t{color:var(--s2)} .lane.l3 .lane-h .lh-t{color:var(--s3)}
+.lane-track{position:relative;grid-column:2 / 6;display:grid;grid-template-columns:repeat(4,1fr)}
+.lane-track .cellline{border-left:1px dashed var(--line)}
+.lane-track .cellline:first-child{border-left:0}
+.bars{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px 10px}
+.bar{position:relative;height:30px;border-radius:8px;display:flex;align-items:center;padding:0 13px;
+  font-size:11.5px;font-weight:700;color:#fff;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;
+  box-shadow:0 3px 10px -3px rgba(20,30,61,.28);transform-origin:left center;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.bar:hover{transform:translateY(-1px) scale(1.008);box-shadow:0 8px 20px -5px rgba(20,30,61,.4);z-index:3}
+.bar .bdot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.9);margin-right:9px;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.l1 .bar{background:linear-gradient(100deg,var(--s1),#00907c)}
+.l2 .bar{background:linear-gradient(100deg,var(--s2),#c96e34)}
+.l3 .bar{background:linear-gradient(100deg,var(--s3),#635cae)}
+.bar.ghost{background:none;color:var(--muted);border:1.5px dashed currentColor;box-shadow:none;font-weight:600}
+.l2 .bar.ghost{color:var(--s2)}
+/* focus states */
+.roadmap.focus-1 .lane:not(.l1),.roadmap.focus-2 .lane:not(.l2),.roadmap.focus-3 .lane:not(.l3){opacity:.28;filter:grayscale(.55)}
+.rm-foot{font-size:clamp(11.5px,1.1vw,14px);color:var(--muted);margin-top:12px;display:flex;align-items:center;gap:10px}
+.rm-foot .lock{flex:none;width:15px;height:15px;color:var(--faint)}
+.rm-foot b{color:var(--ink-2);font-weight:700}
+
+/* bar entrance */
+.slide.active .bar{animation:barIn .7s var(--ease-out) both}
+.slide.active .lane.l1 .bar{animation-delay:.15s}
+.slide.active .lane.l2 .bar{animation-delay:.35s}
+.slide.active .lane.l3 .bar{animation-delay:.55s}
+@keyframes barIn{from{transform:scaleX(.2);opacity:0}to{transform:scaleX(1);opacity:1}}
+
+/* ============================================================
+   SLIDE 7 — AITO TRANSLATION
+   ============================================================ */
+.aito-lead{font-size:clamp(15px,1.5vw,20px);color:var(--body);max-width:70ch;margin-bottom:clamp(18px,2.4vh,28px)}
+.aito-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;flex:1;min-height:0}
+.aito-card{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;
+  box-shadow:var(--shadow-sm);position:relative;overflow:hidden;transition:transform .32s var(--ease),box-shadow .32s var(--ease)}
+.aito-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.aito-card::before{content:"";position:absolute;top:0;left:0;bottom:0;width:4px;background:linear-gradient(var(--s1),var(--s3))}
+.aito-q{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--ink);margin-bottom:6px}
+.aito-arrow{color:var(--faint);font-size:20px;margin:2px 0 12px;line-height:1}
+.aito-op{font-size:clamp(14px,1.35vw,17px);font-weight:700;color:var(--ink);letter-spacing:-.01em;margin-bottom:9px;line-height:1.2}
+.aito-op .em{display:block;font-size:11px;letter-spacing:.06em;font-weight:700;text-transform:uppercase;margin-bottom:8px}
+.aito-c1 .aito-op .em{color:var(--s1)}.aito-c2 .aito-op .em{color:var(--s2)}.aito-c3 .aito-op .em{color:var(--s3)}.aito-c4 .aito-op .em{color:var(--ink)}
+.aito-card p{font-size:clamp(11.5px,1.05vw,13.5px);line-height:1.45;color:var(--muted)}
+.aito-foot{margin-top:clamp(16px,2.2vh,24px);font-size:clamp(13px,1.25vw,16px);color:var(--body);text-align:center}
+.aito-foot b{color:var(--ink);font-weight:700}
+
+/* ============================================================
+   SLIDE 8 — POSITIONING + NEXT STEPS
+   ============================================================ */
+.close-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:clamp(28px,3.6vw,60px);flex:1;min-height:0;align-items:center}
+.pos-block .talk{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.talk-item{display:flex;gap:15px;align-items:flex-start}
+.talk-item .tk{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-family:var(--serif);
+  font-weight:700;font-size:15px;color:#fff}
+.talk-item:nth-child(1) .tk{background:var(--s1)}
+.talk-item:nth-child(2) .tk{background:var(--s2)}
+.talk-item:nth-child(3) .tk{background:var(--s3)}
+.talk-item:nth-child(4) .tk{background:var(--ink)}
+.talk-item .tt{font-size:clamp(13.5px,1.25vw,16px);line-height:1.4;color:var(--ink-2)}
+.talk-item .tt b{color:var(--ink);font-weight:700}
+.pos-quote{margin-top:22px;font-family:var(--serif);font-style:italic;font-size:clamp(14px,1.4vw,18px);
+  line-height:1.5;color:var(--muted);padding-left:18px;border-left:3px solid var(--s3)}
+.steps-panel{background:var(--ink);border-radius:22px;padding:clamp(26px,2.8vw,40px);color:#fff;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+.steps-panel::after{content:"";position:absolute;right:-40px;bottom:-40px;width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,112,96,.4),transparent 70%);opacity:.5}
+.steps-panel h3{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#9AA6C8;font-weight:700;margin-bottom:20px;position:relative}
+.step-row{display:flex;gap:14px;align-items:baseline;padding:11px 0;border-top:1px solid rgba(255,255,255,.10);position:relative}
+.step-row:first-of-type{border-top:0}
+.step-row .n{font-family:var(--serif);font-size:15px;color:#5FD0BE;font-weight:700;flex:none;width:22px}
+.step-row .st b{display:block;font-size:clamp(13px,1.2vw,15.5px);color:#fff;font-weight:700;line-height:1.25;letter-spacing:-.01em}
+.step-row .st span{font-size:11.5px;color:#9AA6C8;line-height:1.35}
+.close-final{position:relative;margin-top:22px;font-size:clamp(12.5px,1.15vw,15px);color:#C5CBDE;line-height:1.45}
+.close-final b{color:#fff}
+
+/* ============================================================
+   APPENDIX SLIDES 9-10
+   ============================================================ */
+.apx-flag{display:inline-flex;align-items:center;gap:9px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  font-weight:700;color:var(--faint);border:1px solid var(--line-2);border-radius:999px;padding:5px 13px;margin-bottom:14px}
+.apx-flag .sq{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+
+/* team */
+.team-wrap{display:flex;flex-direction:column;gap:clamp(18px,2.4vh,28px);flex:1;min-height:0;justify-content:center}
+.team-lead{background:linear-gradient(120deg,var(--ink),#232C4E);color:#fff;border-radius:16px;padding:20px 26px;
+  display:flex;align-items:center;gap:20px;box-shadow:var(--shadow);max-width:520px}
+.team-lead .tl-badge{font-family:var(--serif);font-size:26px;font-weight:700;color:#5FD0BE;line-height:1;flex:none}
+.team-lead .tl-txt b{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.team-lead .tl-txt span{font-size:12px;color:#9AA6C8}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.role-card{background:var(--panel-2);border:1px solid var(--line);border-radius:13px;padding:16px 16px 15px;
+  box-shadow:var(--shadow-sm);border-top:3px solid var(--line-2);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.role-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.role-card:nth-child(4n+1){border-top-color:var(--s1)}
+.role-card:nth-child(4n+2){border-top-color:var(--s2)}
+.role-card:nth-child(4n+3){border-top-color:var(--s3)}
+.role-card:nth-child(4n+4){border-top-color:var(--ink)}
+.role-card b{display:block;font-size:13.5px;color:var(--ink);font-weight:700;line-height:1.2;margin-bottom:7px;letter-spacing:-.01em}
+.role-card p{font-size:11px;line-height:1.4;color:var(--muted)}
+.team-note{font-size:clamp(12.5px,1.2vw,15px);color:var(--muted);text-align:center}
+.team-note b{color:var(--ink);font-weight:700}
+
+/* measurement */
+.meas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,26px);flex:1;min-height:0;align-items:stretch}
+.meas-col{background:var(--panel-2);border:1px solid var(--line);border-radius:18px;padding:clamp(22px,2.2vw,32px);
+  display:flex;flex-direction:column;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.meas-col .band{position:absolute;top:0;left:0;right:0;height:5px}
+.meas-col.m1 .band{background:var(--s1)}.meas-col.m2 .band{background:var(--s2)}.meas-col.m3 .band{background:var(--s3)}
+.meas-col .mstage{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.meas-col .mstage .mn{font-family:var(--serif);font-size:30px;font-weight:700;line-height:1}
+.meas-col.m1 .mstage .mn{color:var(--s1)}.meas-col.m2 .mstage .mn{color:var(--s2)}.meas-col.m3 .mstage .mn{color:var(--s3)}
+.meas-col .mstage b{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);font-weight:700}
+.meas-col .mdesc{font-size:12px;color:var(--faint);margin-bottom:18px}
+.meas-col ul{list-style:none;display:flex;flex-direction:column;gap:11px;margin-top:auto}
+.meas-col li{display:flex;align-items:center;gap:11px;font-size:clamp(12.5px,1.15vw,15px);color:var(--ink-2);font-weight:500}
+.meas-col li::before{content:"";width:7px;height:7px;border-radius:50%;flex:none}
+.meas-col.m1 li::before{background:var(--s1)}.meas-col.m2 li::before{background:var(--s2)}.meas-col.m3 li::before{background:var(--s3)}
+.meas-foot{margin-top:clamp(14px,2vh,22px);font-size:clamp(12.5px,1.2vw,15px);color:var(--muted);text-align:center}
+.meas-foot b{color:var(--ink);font-weight:700}
+
+/* ───────────────── Responsive ───────────────── */
+@media (max-width:1080px){
+  .init-grid{grid-template-columns:repeat(3,1fr)}
+  .aito-grid,.team-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:820px){
+  .vm-grid,.arch-grid,.close-grid,.friction-stage,.meas-grid{grid-template-columns:1fr;overflow-y:auto}
+  .init-grid{grid-template-columns:repeat(2,1fr)}
+  .friction-grid{grid-template-columns:repeat(2,1fr)}
+  #dots{display:none}
+  .core-node{max-width:180px}
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important}
+  .r{transition:opacity .3s!important;transform:none!important}
+}
+</style>
+</head>
+<body>
+
+<div id="rail"></div>
+
+<div id="deck">
+
+  <!-- ══════════ SLIDE 1 · TITLE ══════════ -->
+  <section class="slide" id="s-title" data-label="Title">
+    <div class="title-wrap">
+      <div class="eyebrow r" style="--d:0">Stellantis · AI Transformation Office</div>
+      <h1 class="title r" style="--d:120">Design <span class="amp">Amplified</span></h1>
+      <p class="title-core r" style="--d:260">Design Amplified begins by helping people <b>work better today</b>, develops intelligence inside <b>critical workflows</b> next, and ultimately connects those capabilities into a globally reusable <b>Design-development system</b>.</p>
+      <p class="title-quote r" style="--d:400">AI does not author the vehicle. It expands the designer's capacity to explore, understand, communicate, and decide.</p>
+      <div class="title-meta r" style="--d:520">
+        <span><i class="k"></i> Vision → Strategies → Initiatives → Roadmap → AITO evidence</span>
+      </div>
+      <div class="title-audience r" style="--d:600">Draft for alignment &nbsp;·&nbsp; <b>Ralph Gilles</b>, <b>Scott Krugger</b>, <b>Scott Thiele</b> and the AI Transformation Office</div>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 2 · VISION & MISSION ══════════ -->
+  <section class="slide" id="s-vision" data-label="Vision &amp; Mission">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="eyebrow r" style="--d:0">The North Star</div>
+        <h2 class="head r" style="--d:80">Vision &amp; Mission</h2>
+        <p class="sub r" style="--d:140">What future Design organization we are building — and how we move from today to that future.</p>
+      </div>
+      <div class="vm-grid">
+        <div class="vm-card vision r" style="--d:220">
+          <div class="vm-label"><span class="num">01</span><span class="t">Vision</span></div>
+          <p class="vm-statement">Create a <b>globally connected, AI-enabled Design organization</b> that expands human creativity, accelerates learning and decision-making, preserves Design intelligence, and connects creative intent with trusted product information.</p>
+          <p class="vm-note">So Stellantis can create more distinctive, feasible, and valuable products — with greater speed and confidence.</p>
+        </div>
+        <div class="vm-card mission r" style="--d:340">
+          <div class="vm-label"><span class="num">02</span><span class="t">Mission</span></div>
+          <p class="vm-statement">Transform the highest-value Design workflows by <b>scaling proven AI capabilities</b>, developing <b>targeted workflow intelligence</b>, and progressively <b>connecting</b> Design knowledge, geometry, package, engineering, and cost information into trusted, reusable global capabilities.</p>
+          <p class="vm-note">The roadmap turns Design ambition into portfolio discipline, value measurement, adoption, and reusable enterprise capability.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 3 · WHY THIS MATTERS ══════════ -->
+  <section class="slide" id="s-why" data-label="Why It Matters">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="eyebrow s2 r" style="--d:0">Why This Matters</div>
+        <h2 class="head r" style="--d:80">The friction is hidden — in information, repetition, and late constraints</h2>
+      </div>
+      <p class="why-lead r" style="--d:150">The problem is not a lack of creativity. <span class="hi">The problem is lost capacity.</span></p>
+      <div class="friction-stage">
+        <div class="core-node r blur" style="--d:260">
+          <div class="cn-in"><span>Protect</span><b>Design<br>Judgment</b></div>
+        </div>
+        <div class="friction-grid">
+          <div class="friction-item r" style="--d:340"><div class="fi-dot"></div><p>Searching for knowledge</p></div>
+          <div class="friction-item r" style="--d:390"><div class="fi-dot"></div><p>Preparing communication</p></div>
+          <div class="friction-item r" style="--d:440"><div class="fi-dot"></div><p>Late package constraints</p></div>
+          <div class="friction-item r" style="--d:490"><div class="fi-dot"></div><p>Repeating geometry tasks</p></div>
+          <div class="friction-item r" style="--d:540"><div class="fi-dot"></div><p>BOM &amp; cost implications</p></div>
+          <div class="friction-item r" style="--d:590"><div class="fi-dot"></div><p>Regional reuse gaps</p></div>
+        </div>
+      </div>
+      <p class="why-foot r" style="--d:680">Design Amplified gives <b>time and context</b> back to the people making the vehicle.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 4 · STRATEGIC ARCHITECTURE ══════════ -->
+  <section class="slide" id="s-arch" data-label="Strategies">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="eyebrow r" style="--d:0">Strategic Architecture · Breadth-first view</div>
+        <h2 class="head r" style="--d:80">Three strategies, one progression</h2>
+        <p class="sub r" style="--d:140">Each layer fulfills the one above it — from immediate capability, to targeted development, to long-term transformation.</p>
+      </div>
+      <div class="arch-grid">
+        <div class="strat-card c1 r" style="--d:220">
+          <div class="band"></div>
+          <div class="snum">01</div>
+          <div class="phase">Scale Now</div>
+          <h3>Scale Proven Creative Enablement</h3>
+          <p class="intent">Expand the capabilities already demonstrating value and turn them into repeatable, approved, measurable ways of working.</p>
+          <div class="count"><b>2</b> initiatives</div>
+        </div>
+        <div class="strat-card c2 r" style="--d:330">
+          <div class="band"></div>
+          <div class="snum">02</div>
+          <div class="phase">Develop Next</div>
+          <h3>Develop Intelligence in Critical Design Workflows</h3>
+          <p class="intent">Use structured discovery to convert high-potential opportunity areas into evidence-based products.</p>
+          <div class="count"><b>3</b> initiatives</div>
+        </div>
+        <div class="strat-card c3 r" style="--d:440">
+          <div class="band"></div>
+          <div class="snum">03</div>
+          <div class="phase">Strategic Horizon</div>
+          <h3>Build Connected Design Intelligence &amp; Optimization</h3>
+          <p class="intent">Connect trusted information and feedback loops across Design and adjacent enterprise systems.</p>
+          <div class="count"><b>2</b> initiatives</div>
+        </div>
+      </div>
+      <div class="arch-flow r" style="--d:560">
+        <span class="step a1"><i class="d"></i> Scale capability now</span>
+        <span class="arw">→</span>
+        <span class="step a2"><i class="d"></i> Define the next wave through discovery</span>
+        <span class="arw">→</span>
+        <span class="step a3"><i class="d"></i> Connect intelligence across the product system</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 5 · ALL SEVEN INITIATIVES ══════════ -->
+  <section class="slide" id="s-init" data-label="Initiatives">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="eyebrow r" style="--d:0">The Portfolio · All initiatives, colored to their strategy</div>
+        <h2 class="head r" style="--d:80">Seven initiatives across the three strategies</h2>
+      </div>
+      <div class="init-legend r" style="--d:150">
+        <span class="tag t1"><i class="sq"></i>Scale Proven Creative Enablement</span>
+        <span class="tag t2"><i class="sq"></i>Develop Intelligence in Critical Workflows</span>
+        <span class="tag t3"><i class="sq"></i>Build Connected Design Intelligence</span>
+      </div>
+      <div class="init-grid">
+        <div class="init-card i1 r" style="--d:230">
+          <div class="init-top"><span class="init-num">1</span><span class="init-strat">Strategy 1</span></div>
+          <h4>AI-Supported Visualization &amp; Concept Development</h4>
+          <p>Shorten the distance from a designer's idea to organizational understanding — explore and communicate more high-quality alternatives, earlier.</p>
+        </div>
+        <div class="init-card i1 r" style="--d:280">
+          <div class="init-top"><span class="init-num">2</span><span class="init-strat">Strategy 1</span></div>
+          <h4>Workflow-Based AI Training &amp; Adoption</h4>
+          <p>Build practical AI proficiency inside real Design work — turning tool access into lasting behavior change, not just licenses.</p>
+        </div>
+        <div class="init-card i2 r" style="--d:330">
+          <div class="init-top"><span class="init-num">3</span><span class="init-strat">Strategy 2</span></div>
+          <h4>Design Knowledge Capture &amp; Retrieval</h4>
+          <p>A governed, searchable memory for Design — preserving the reasoning behind reviews, decisions, and historical programs.</p>
+        </div>
+        <div class="init-card i2 r" style="--d:380">
+          <div class="init-top"><span class="init-num">4</span><span class="init-strat">Strategy 2</span></div>
+          <h4>AI Vehicle Packaging Intelligence</h4>
+          <p>Earlier access to trusted package knowledge, comparable architectures, and constraints — while the Design is still flexible.</p>
+        </div>
+        <div class="init-card i2 r" style="--d:430">
+          <div class="init-top"><span class="init-num">5</span><span class="init-strat">Strategy 2</span></div>
+          <h4>3D Surface Geometry Automation</h4>
+          <p>Automate selected repetitive geometry tasks under expert control — freeing sculptors for visible Design quality.</p>
+        </div>
+        <div class="init-card i3 r" style="--d:480">
+          <div class="init-top"><span class="init-num">6</span><span class="init-strat">Strategy 3</span></div>
+          <h4>Design-to-BOM &amp; Cost-of-Change Intelligence</h4>
+          <p>Earlier visibility into how a Design change ripples into parts, engineering, tooling, suppliers, cost, and timing.</p>
+        </div>
+        <div class="init-card i3 r" style="--d:530">
+          <div class="init-top"><span class="init-num">7</span><span class="init-strat">Strategy 3</span></div>
+          <h4>Connected Design Intelligence &amp; Optimization</h4>
+          <p>One executive initiative, two execution workstreams — trusted information, and earlier feedback on alternatives.</p>
+          <div class="init-workstreams"><span>7A · Design Intelligence Fabric</span><span>7B · Closed-Loop Optimization</span></div>
+        </div>
+      </div>
+      <p class="init-foot r" style="--d:600">Every initiative traces to a strategy — and every strategy to the <b>vision</b>. No isolated pilots.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 6 · ROADMAP ══════════ -->
+  <section class="slide" id="s-roadmap" data-label="Roadmap">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="eyebrow r" style="--d:0">The A · B · C · D Roadmap</div>
+        <h2 class="head r" style="--d:80">One integrated view of the progression</h2>
+        <p class="sub r" style="--d:140">Strategy lanes flow left-to-right as capability grows. Focus a single strategy on demand — or keep the whole system in view.</p>
+      </div>
+
+      <div class="rm-controls r" style="--d:200">
+        <span class="lbl">View</span>
+        <button class="chip on" data-f="all"><i class="sq"></i>All strategies</button>
+        <button class="chip" data-f="1"><i class="sq"></i>Scale Now</button>
+        <button class="chip" data-f="2"><i class="sq"></i>Develop Next</button>
+        <button class="chip" data-f="3"><i class="sq"></i>Strategic Horizon</button>
+      </div>
+
+      <div class="roadmap r" style="--d:280" id="roadmap">
+        <div class="rm-cols">
+          <div class="rc"></div>
+          <div class="rc"><div class="stg">A</div><div class="stg-l">Now</div><div class="stg-d">Scale &amp; establish control</div></div>
+          <div class="rc"><div class="stg">B</div><div class="stg-l">Bridge</div><div class="stg-d">Discover, prove, build</div></div>
+          <div class="rc"><div class="stg">C</div><div class="stg-l">2–4 Years</div><div class="stg-d">Connect &amp; scale</div></div>
+          <div class="rc"><div class="stg">D</div><div class="stg-l">Horizon</div><div class="stg-d">Amplified end state</div></div>
+        </div>
+        <div class="rm-lanes">
+          <!-- Lane 1 -->
+          <div class="lane l1">
+            <div class="lane-h"><span class="lh-t">Scale Proven Creative Enablement</span><span class="lh-s">Strategy 1</span></div>
+            <div class="lane-track">
+              <div class="cellline"></div><div class="cellline"></div><div class="cellline"></div><div class="cellline"></div>
+              <div class="bars">
+                <div class="bar" style="margin-left:0%;width:74%"><i class="bdot"></i>Visualization + concept development</div>
+                <div class="bar" style="margin-left:0%;width:74%"><i class="bdot"></i>Workflow AI training + adoption &nbsp;·&nbsp; portfolio control</div>
+              </div>
+            </div>
+          </div>
+          <!-- Lane 2 -->
+          <div class="lane l2">
+            <div class="lane-h"><span class="lh-t">Develop Intelligence in Critical Workflows</span><span class="lh-s">Strategy 2</span></div>
+            <div class="lane-track">
+              <div class="cellline"></div><div class="cellline"></div><div class="cellline"></div><div class="cellline"></div>
+              <div class="bars">
+                <div class="bar ghost" style="margin-left:12%;width:12%"><i class="bdot"></i>Discovery charters</div>
+                <div class="bar" style="margin-left:25%;width:50%"><i class="bdot"></i>Knowledge capture · Packaging intelligence · 3D geometry</div>
+              </div>
+            </div>
+          </div>
+          <!-- Lane 3 -->
+          <div class="lane l3">
+            <div class="lane-h"><span class="lh-t">Build Connected Design Intelligence</span><span class="lh-s">Strategy 3</span></div>
+            <div class="lane-track">
+              <div class="cellline"></div><div class="cellline"></div><div class="cellline"></div><div class="cellline"></div>
+              <div class="bars">
+                <div class="bar" style="margin-left:50%;width:50%"><i class="bdot"></i>Design-to-BOM · Design Intelligence Fabric · optimization pilots</div>
+                <div class="bar" style="margin-left:75%;width:25%"><i class="bdot"></i>Connected Design-development system</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="rm-foot r" style="--d:360"><svg class="lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>The executive roadmap <b>stops at strategy &amp; initiative level.</b> Stage-gates, data readiness, owners, and metrics move to the AITO execution review.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 7 · AITO TRANSLATION ══════════ -->
+  <section class="slide" id="s-aito" data-label="AITO Evidence">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="eyebrow r" style="--d:0">Translation for the AI Transformation Office</div>
+        <h2 class="head r" style="--d:80">The same story becomes operating evidence</h2>
+      </div>
+      <p class="aito-lead r" style="--d:150">Four executive questions map cleanly to the operational evidence AITO uses to judge readiness — the deck and the portfolio review are one narrative at two altitudes.</p>
+      <div class="aito-grid">
+        <div class="aito-card aito-c1 r" style="--d:230">
+          <div class="aito-q">Why?</div>
+          <div class="aito-arrow">↓</div>
+          <div class="aito-op"><span class="em">Portfolio rationale</span>Business problem, strategic fit, priority logic</div>
+          <p>Why it matters, why AI is relevant, and why it deserves priority.</p>
+        </div>
+        <div class="aito-card aito-c2 r" style="--d:290">
+          <div class="aito-q">Goals</div>
+          <div class="aito-arrow">↓</div>
+          <div class="aito-op"><span class="em">Roadmap commitments</span>Milestones, owners, resources, dependencies</div>
+          <p>Decision gates, timing, and scope boundaries.</p>
+        </div>
+        <div class="aito-card aito-c3 r" style="--d:350">
+          <div class="aito-q">Outcomes</div>
+          <div class="aito-arrow">↓</div>
+          <div class="aito-op"><span class="em">Value + adoption</span>Cycle time, active use, cost avoided, reuse</div>
+          <p>Operational KPIs and financial outcomes measured against the business case.</p>
+        </div>
+        <div class="aito-card aito-c4 r" style="--d:410">
+          <div class="aito-q">Scope</div>
+          <div class="aito-arrow">↓</div>
+          <div class="aito-op"><span class="em">Delivery definition</span>Users, workflows, data, governance, regions</div>
+          <p>Architecture, regional implications, and production support.</p>
+        </div>
+      </div>
+      <p class="aito-foot r" style="--d:490">AITO sees a <b>governed portfolio</b> that moves from discovery → pilot → scale, with measurable value and adoption at every maturity level.</p>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 8 · POSITIONING + NEXT STEPS ══════════ -->
+  <section class="slide" id="s-close" data-label="Positioning &amp; Next">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="eyebrow r" style="--d:0">Leadership Positioning &amp; Next Steps</div>
+        <h2 class="head r" style="--d:80">Ready to move with purpose</h2>
+      </div>
+      <div class="close-grid">
+        <div class="pos-block">
+          <div class="talk">
+            <div class="talk-item r" style="--d:180"><span class="tk">A</span><span class="tt">We will <b>scale</b> where evidence already exists.</span></div>
+            <div class="talk-item r" style="--d:240"><span class="tk">B</span><span class="tt">We will run <b>disciplined discovery</b> where the opportunity is strong but the problem, data, or solution needs definition.</span></div>
+            <div class="talk-item r" style="--d:300"><span class="tk">C</span><span class="tt">We will build the strategic foundation <b>incrementally</b>, as trusted data and validated use cases become available.</span></div>
+            <div class="talk-item r" style="--d:360"><span class="tk">D</span><span class="tt">The roadmap becomes <b>more precise as evidence grows</b>.</span></div>
+          </div>
+          <p class="pos-quote r" style="--d:430">This is not uncertainty without direction. It is an intentional transformation model that protects investment, accelerates learning, and directs resources toward the opportunities most capable of changing how Design works.</p>
+        </div>
+        <div class="steps-panel r" style="--d:300">
+          <h3>Decisions to move from alignment to execution</h3>
+          <div class="step-row"><span class="n">1</span><span class="st"><b>Confirm portfolio framing</b><span>Scale now · develop next · strategic horizon</span></span></div>
+          <div class="step-row"><span class="n">2</span><span class="st"><b>Activate core Hub roles</b><span>Portfolio, product, data, engineering, analyst, regional</span></span></div>
+          <div class="step-row"><span class="n">3</span><span class="st"><b>Approve discovery gates</b><span>Workflow · data · feasibility · value · scale-or-stop</span></span></div>
+          <div class="step-row"><span class="n">4</span><span class="st"><b>Align with AITO cadence</b><span>Roadmap · KPI · maturity · budget · governance</span></span></div>
+          <div class="step-row"><span class="n">5</span><span class="st"><b>Begin regional validation</b><span>Europe, Brazil, China &amp; regional constraints</span></span></div>
+          <div class="step-row"><span class="n">6</span><span class="st"><b>Define 2027 needs</b><span>Capacity, platforms, data products, partners</span></span></div>
+          <p class="close-final">Scale what works, discover what matters, and build the connected intelligence foundation <b>incrementally</b>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 9 · APPENDIX — TEAM ══════════ -->
+  <section class="slide" id="s-team" data-label="Appendix · Team">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="apx-flag r" style="--d:0"><i class="sq"></i>Appendix · AITO follow-up</div>
+        <h2 class="head r" style="--d:80">The capability system behind the roadmap</h2>
+        <p class="sub r" style="--d:140">The team is the execution engine. With the ICT Functional Lead identified, the next hires build portfolio discipline, product depth, and regional deployment.</p>
+      </div>
+      <div class="team-wrap">
+        <div class="team-lead r" style="--d:210">
+          <span class="tl-badge">◆</span>
+          <span class="tl-txt"><b>Design AI Hub Leader</b><span>Owns the roadmap, value, adoption, and contribution beyond Design</span></span>
+        </div>
+        <div class="team-grid">
+          <div class="role-card r" style="--d:270"><b>Portfolio + Execution Lead</b><p>Intake, prioritization, stage gates, maturity &amp; value tracking, governance cadence.</p></div>
+          <div class="role-card r" style="--d:310"><b>AI Product Owners</b><p>Workflow discovery, requirements, product roadmaps, pilot definition, scale calls.</p></div>
+          <div class="role-card r" style="--d:350"><b>AI + Data Manager</b><p>Trusted-data strategy, semantic consistency, certification, traceability, readiness.</p></div>
+          <div class="role-card r" style="--d:390"><b>AI Engineers</b><p>Prototyping, solution engineering, integration, reusable components, deployable assets.</p></div>
+          <div class="role-card r" style="--d:430"><b>Senior Data Engineers</b><p>Data models, pipelines, transformation logic, lineage, reusable data assets.</p></div>
+          <div class="role-card r" style="--d:470"><b>Data + AI Analyst</b><p>Workflow baselines, adoption metrics, scorecards, value tracking, outcome reporting.</p></div>
+          <div class="role-card r" style="--d:510"><b>Regional AI + Data Leads</b><p>Local validation, regional priorities, pilot support, adoption, reuse, feedback.</p></div>
+          <div class="role-card r" style="--d:550"><b>ICT AI Functional Lead</b><p>Connects the portfolio to enterprise architecture, platforms, cybersecurity, support.</p></div>
+        </div>
+        <p class="team-note r" style="--d:610">These roles convert opportunity areas into <b>defined products, trusted data, prototypes, value evidence, and regional scale.</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ SLIDE 10 · APPENDIX — MEASUREMENT ══════════ -->
+  <section class="slide" id="s-meas" data-label="Appendix · Measurement">
+    <div class="stage-body">
+      <div class="slide-head">
+        <div class="apx-flag r" style="--d:0"><i class="sq"></i>Appendix · AITO follow-up</div>
+        <h2 class="head r" style="--d:80">Measurement model by maturity stage</h2>
+        <p class="sub r" style="--d:140">Different evidence is required as an initiative matures — the value claim strengthens from estimate, to validation, to realized outcome.</p>
+      </div>
+      <div class="meas-grid">
+        <div class="meas-col m1 r" style="--d:230">
+          <div class="band"></div>
+          <div class="mstage"><span class="mn">1</span><b>Discovery</b></div>
+          <div class="mdesc">Size the problem &amp; the opportunity</div>
+          <ul>
+            <li>Problem size</li><li>Workflow baseline</li><li>Data readiness</li><li>Feasibility confidence</li>
+          </ul>
+        </div>
+        <div class="meas-col m2 r" style="--d:320">
+          <div class="band"></div>
+          <div class="mstage"><span class="mn">2</span><b>Pilot</b></div>
+          <div class="mdesc">Validate value with real users</div>
+          <ul>
+            <li>Task time</li><li>Output quality</li><li>User validation</li><li>Technical reliability</li>
+          </ul>
+        </div>
+        <div class="meas-col m3 r" style="--d:410">
+          <div class="band"></div>
+          <div class="mstage"><span class="mn">3</span><b>Scale</b></div>
+          <div class="mdesc">Realize outcomes with Finance</div>
+          <ul>
+            <li>Active use</li><li>Cycle-time reduction</li><li>Rework avoided</li><li>Financial value</li>
+          </ul>
+        </div>
+      </div>
+      <p class="meas-foot r" style="--d:490">Estimate → validate → <b>realize.</b> The value claim becomes stronger as evidence matures.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- chrome (cloned into every slide via JS) -->
+<template id="chrome-tpl">
+  <div class="chrome-top">
+    <div class="brandmark"><i class="dot"></i><b>DESIGN AMPLIFIED</b> · AI Transformation Office</div>
+    <div class="kicker-chip"></div>
+  </div>
+  <div class="chrome-bot">
+    <span class="foot-l">Design Amplified &nbsp;|&nbsp; Draft for alignment</span>
+    <span class="foot-r"></span>
+  </div>
+</template>
+
+<!-- nav -->
+<div id="dots"></div>
+<button class="arrow" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button>
+<button class="arrow" id="next" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg></button>
+<div class="hint" id="hint"><kbd>←</kbd><kbd>→</kbd> to navigate</div>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const total=slides.length;
+  const dotsWrap=document.getElementById('dots');
+  const rail=document.getElementById('rail');
+  const prev=document.getElementById('prev');
+  const next=document.getElementById('next');
+  const hint=document.getElementById('hint');
+  const tpl=document.getElementById('chrome-tpl');
+  let cur=0;
+
+  // inject chrome + dots
+  slides.forEach((s,i)=>{
+    const c=tpl.content.cloneNode(true);
+    c.querySelector('.kicker-chip').innerHTML=(s.dataset.label||'');
+    c.querySelector('.foot-r').textContent=String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+    s.appendChild(c);
+    const b=document.createElement('button');
+    b.dataset.label=(s.dataset.label||('Slide '+(i+1))).replace(/&amp;/g,'&');
+    b.addEventListener('click',()=>go(i));
+    dotsWrap.appendChild(b);
+  });
+  const dots=[...dotsWrap.children];
+
+  function go(n){
+    n=Math.max(0,Math.min(total-1,n));
+    slides.forEach((s,i)=>{
+      s.classList.toggle('active',i===n);
+      s.classList.toggle('past',i<n);
+    });
+    dots.forEach((d,i)=>d.classList.toggle('on',i===n));
+    rail.style.width=(n/(total-1)*100)+'%';
+    prev.disabled=n===0; next.disabled=n===total-1;
+    cur=n;
+    if(n>0) hint.style.opacity='0';
+  }
+
+  prev.addEventListener('click',()=>go(cur-1));
+  next.addEventListener('click',()=>go(cur+1));
+  window.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();go(cur+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(cur-1);}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(total-1);}
+  });
+
+  // touch swipe
+  let tx=0;
+  window.addEventListener('touchstart',e=>tx=e.changedTouches[0].clientX,{passive:true});
+  window.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>60) go(cur+(dx<0?1:-1));
+  },{passive:true});
+
+  // roadmap focus filter
+  const roadmap=document.getElementById('roadmap');
+  document.querySelectorAll('#s-roadmap .chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      document.querySelectorAll('#s-roadmap .chip').forEach(c=>c.classList.remove('on'));
+      chip.classList.add('on');
+      roadmap.classList.remove('focus-1','focus-2','focus-3');
+      const f=chip.dataset.f;
+      if(f!=='all') roadmap.classList.add('focus-'+f);
+    });
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>
