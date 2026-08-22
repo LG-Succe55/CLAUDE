@@ -148,6 +148,67 @@ button.ctl svg{width:12px;height:12px;fill:currentColor}
   .hint{display:none}
 }
 
+/* ---------- 3D callout markers ---------- */
+.markers{position:fixed;inset:0;z-index:6;pointer-events:none}
+.marker{position:absolute;transform:translate(-50%,-50%);display:none;
+  align-items:center;gap:7px;pointer-events:auto;cursor:pointer;
+  padding:4px 10px 4px 4px;border:1px solid var(--line-2);border-radius:100px;
+  background:rgba(8,11,18,.66);backdrop-filter:blur(5px);white-space:nowrap;
+  transition:border-color .2s,background .2s,opacity .25s}
+.marker:hover{border-color:var(--led);background:rgba(10,16,26,.85)}
+.marker .mn{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;
+  background:var(--led);color:var(--void);font-family:var(--mono);font-size:11px;font-weight:500}
+.marker .mt{font-family:var(--hud);font-size:12px;letter-spacing:.02em;color:var(--ink)}
+.marker.dim{opacity:.35}
+.marker.sel{border-color:var(--led);background:rgba(12,20,32,.9);box-shadow:0 0 22px rgba(94,200,255,.35)}
+.marker.sel .mn{box-shadow:0 0 14px var(--led)}
+
+/* ---------- layer navigator (bottom of page) ---------- */
+.laynav{position:fixed;left:0;right:0;z-index:7;bottom:calc(clamp(14px,2vw,22px) + 66px);
+  display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:0 clamp(16px,2.4vw,34px);
+  pointer-events:none}
+.laynav .ln-btn{pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:9px;
+  padding:7px 13px 7px 7px;border:1px solid var(--line-2);border-radius:100px;
+  background:rgba(12,16,24,.72);backdrop-filter:blur(6px);transition:.2s;font-family:var(--hud)}
+.laynav .ln-btn:hover{border-color:var(--led);transform:translateY(-1px)}
+.laynav .ln-btn:focus-visible{outline:2px solid var(--led);outline-offset:2px}
+.laynav .ln-btn .n{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;
+  background:rgba(94,200,255,.14);color:var(--led-soft);font-family:var(--mono);font-size:11px}
+.laynav .ln-btn .t{font-size:12.5px;color:var(--ink-dim);letter-spacing:.02em}
+.laynav .ln-btn.sel{border-color:var(--led);background:rgba(16,26,40,.92)}
+.laynav .ln-btn.sel .n{background:var(--led);color:var(--void)}
+.laynav .ln-btn.sel .t{color:var(--ink)}
+@media (max-width:820px){.laynav .ln-btn .t{display:none}.laynav{bottom:calc(clamp(14px,2vw,22px) + 60px)}}
+
+/* ---------- explanation panel ---------- */
+.explain{position:fixed;z-index:8;left:clamp(16px,2.4vw,34px);top:50%;
+  width:min(340px,80vw);transform:translateY(-50%) translateX(-14px);
+  border:1px solid var(--line-2);border-left:3px solid var(--led);border-radius:12px;
+  background:rgba(8,11,18,.82);backdrop-filter:blur(10px);padding:20px 22px;
+  box-shadow:0 30px 70px -20px rgba(0,0,0,.7);
+  opacity:0;visibility:hidden;transition:opacity .4s,transform .4s;pointer-events:none}
+.explain.show{opacity:1;visibility:visible;transform:translateY(-50%) translateX(0);pointer-events:auto}
+.explain .estep{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.explain .enum{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;
+  background:var(--led);color:var(--void);font-family:var(--mono);font-size:15px;font-weight:500;flex:none}
+.explain .everb{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--led-soft)}
+.explain .ename{font-family:var(--display);font-size:18px;margin-top:2px;line-height:1.05}
+.explain .edesc{font-size:13.5px;line-height:1.62;color:var(--ink-dim);font-weight:300}
+.explain .edesc b{color:var(--ink);font-weight:500}
+.explain .espec{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-faint);line-height:1.7}
+.explain .espec b{color:var(--led-soft);font-weight:400}
+.explain .enav{margin-top:16px;display:flex;gap:8px}
+.explain .enav button{pointer-events:auto;cursor:pointer;font-family:var(--hud);font-size:12px;
+  padding:7px 13px;border-radius:7px;border:1px solid var(--line-2);background:rgba(20,26,38,.7);
+  color:var(--ink);transition:.2s}
+.explain .enav button:hover{border-color:var(--led);color:var(--led-soft)}
+.explain .enav button:focus-visible{outline:2px solid var(--led);outline-offset:2px}
+.explain .enav .prev{margin-right:auto}
+@media (max-width:600px){.explain{top:auto;bottom:calc(clamp(14px,2vw,22px) + 130px);transform:none;
+  left:clamp(12px,3vw,20px);right:clamp(12px,3vw,20px);width:auto}
+  .explain.show{transform:none}}
+
 /* fallback */
 #fallback{position:fixed;inset:0;display:none;place-items:center;padding:8vw;
   background:radial-gradient(120% 100% at 50% 10%,var(--void-2),var(--void));z-index:20}
@@ -200,6 +261,27 @@ button.ctl svg{width:12px;height:12px;fill:currentColor}
   <span class="chip" data-c="3">Homologation — FMVSS 108 / ECE R48</span>
 </div>
 
+<div class="markers" id="markers"></div>
+
+<div class="explain" id="explain">
+  <div class="estep">
+    <div class="enum" id="eNum">1</div>
+    <div>
+      <div class="everb" id="eVerb">Finish</div>
+      <div class="ename" id="eName">Body colour</div>
+    </div>
+  </div>
+  <div class="edesc" id="eDesc"></div>
+  <div class="espec" id="eSpec"></div>
+  <div class="enav">
+    <button class="prev" id="ePrev">‹ Prev</button>
+    <button id="eOverview">Overview</button>
+    <button id="eNext">Next ›</button>
+  </div>
+</div>
+
+<div class="laynav" id="laynav"></div>
+
 <div class="controls">
   <div class="timeline" id="timeline">
     <div class="track"></div>
@@ -212,7 +294,7 @@ button.ctl svg{width:12px;height:12px;fill:currentColor}
       <button class="ctl" id="restartBtn" aria-label="Restart"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>Restart</button>
     </div>
     <div class="tc"><b id="tcNow">00:00</b> / <span id="tcEnd">00:34</span> · <span id="tcChap">DEAD-FRONT OFF</span></div>
-    <span class="hint">Drag the timeline to scrub · click a chapter</span>
+    <span class="hint">Drag to scrub · click a chapter · tap a layer to inspect</span>
     <div class="seg" role="group" aria-label="Emblem state">
       <button id="offBtn">OFF</button>
       <button id="litBtn">LIT</button>
@@ -255,6 +337,8 @@ uniform float u_warm;    // ignition warmth 0..1
 uniform float u_exp;     // layer explode 0..1
 uniform float u_hot;     // led hotspot unevenness 0..1
 uniform float u_time;    // seconds (for flake shimmer)
+uniform float u_focus;   // inspected layer, 0=none else 1..5
+uniform float u_focusAmt;// focus transition 0..1
 
 const float PI=3.14159265;
 
@@ -314,7 +398,11 @@ float sdRoundBox(vec3 p,vec3 b,float r){vec3 q=abs(p)-b;return length(max(q,0.0)
 // where layer i (0=body colour .. 4=LED) sits. Compact = one panel; exploded = fanned stack.
 vec3 layerCenter(float f){
   float k=f-2.0;                       // centre the group on the middle layer
-  return vec3(k*u_fanx, -k*u_fany, -k*u_spacing);
+  vec3 c=vec3(k*u_fanx, -k*u_fany, -k*u_spacing);
+  if(u_focus>0.5 && abs((f+1.0)-u_focus)<0.5){        // inspected layer glides to the front, centred
+    c=mix(c, vec3(0.0,0.0,0.85), u_focusAmt);
+  }
+  return c;
 }
 vec2 map(vec3 p){
   float best=1e9; float mat=1.0;
@@ -407,6 +495,10 @@ vec3 shade(vec3 p,vec3 n,vec3 rd,float mat){
       col+=vec3(0.70,0.80,1.0)*rim*0.8;           // board rim
     }
   }
+  if(u_focus>0.5){                                 // dim everything except the inspected layer
+    float sel=step(abs(mat-u_focus),0.5);
+    col*=mix(1.0, mix(0.16,1.18,sel), u_focusAmt);
+  }
   return col;
 }
 
@@ -475,7 +567,7 @@ gl.enableVertexAttribArray(loc);
 gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
 
 const U={};
-["u_res","u_ro","u_ta","u_lit","u_warm","u_exp","u_hot","u_time"].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+["u_res","u_ro","u_ta","u_lit","u_warm","u_exp","u_hot","u_time","u_focus","u_focusAmt"].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
 
 let W=0,H=0;
 function resize(){
@@ -528,15 +620,45 @@ const CH=[
  {p:0.20,no:"02 / 05",t:"The Reveal · Ignition",tc:"IGNITION",layers:[1,5],
   c:"Power the array. Light finds the only path left open — the <b>laser-etched logo</b> — and a crisp graphic resolves out of what looked like solid bodywork."},
  {p:0.44,no:"03 / 05",t:"The Layer Stack",tc:"LAYER STACK",layers:[1,2,3,4,5],
-  c:"Five layers make the trick. <b>The real trick isn't the light</b> — it's the black blockout that stops it everywhere except the logo, so only the etched window glows."},
+  c:"Five layers make the trick. <b>The real trick isn't the light</b> — it's the black blockout that stops it everywhere except the logo. <b>Tap any layer below</b> to fly to it and read the build step."},
  {p:0.68,no:"04 / 05",t:"Engineering the Glow",tc:"ENGINEERING",layers:[3,4,5],
   c:"The effect lives or dies on <b>even illumination and zero light leak</b>. Tune LED pitch and opal diffusion to erase hotspots; balance the dead-front tint and CMF."},
  {p:0.86,no:"05 / 05",t:"Illuminated Body-Side Emblem",tc:"LIT HERO",layers:[1],
   c:"Dead-front done right: <b>invisible off, unmistakable on</b>. A production-intent graphic, ready for FMVSS 108 / ECE R48 homologation."}
 ];
 
+/* ---------------- layers (interactive call-outs) ---------------- */
+// index 0 = outermost (body colour) .. 4 = LED source
+const LAYER=[
+ {verb:"Finish",  name:"Body colour",     short:"Body colour",
+  desc:"Spray the body colour — or apply painted film — across the <b>whole face</b>. This is the only layer you see when the emblem is off: a continuous Class-A surface with no seam and no graphic.",
+  spec:"Order <b>03 · Finish</b>  ·  Class-A paint / film  ·  full-face"},
+ {verb:"Seal",    name:"Black blockout",  short:"Blockout",
+  desc:"Lay an opaque black base — primer or film — directly behind the paint. <b>This is the real trick:</b> it stops light everywhere except the logo, so the graphic can't bleed through the bodywork.",
+  spec:"Order <b>02 · Seal</b>  ·  opaque primer / film  ·  zero light leak"},
+ {verb:"Reveal",  name:"Etched window",   short:"Window",
+  desc:"Laser-ablate <b>only the logo</b>, opening translucent windows down through the paint and blockout to the acrylic. These openings are the single path light is allowed to take.",
+  spec:"Order <b>04 · Reveal</b>  ·  laser-ablated  ·  logo aperture only"},
+ {verb:"Mill",    name:"PMMA light-guide",short:"Light-guide",
+  desc:"CNC the white PMMA (<b>3–4 mm</b>) and set it flush to the Class-A surface. The acrylic spreads the light and carries it evenly across the whole graphic.",
+  spec:"Order <b>01 · Mill</b>  ·  PMMA 3–4 mm  ·  flush to Class-A"},
+ {verb:"Illuminate",name:"LED source",    short:"LED source",
+  desc:"Back-light with a <b>diffusion-tuned LED array</b> or an edge-lit light-guide. Tune LED pitch and opal diffusion to erase hotspots and read as one even glow.",
+  spec:"Order <b>05 · Illuminate</b>  ·  LED array / edge-lit  ·  FMVSS 108 · ECE R48"}
+];
+// mirror of the shader's layerCenter, in JS, for camera + call-out projection
+function jsLayerCenter(i,e,focusLayer,focusAmt){
+  const sp=0.020+(0.52-0.020)*e, fx=0.86*e, fy=0.46*e, k=i-2;
+  let c=[k*fx,-k*fy,-k*sp];
+  if(focusLayer>0 && (i+1)===focusLayer){
+    c=[c[0]*(1-focusAmt), c[1]*(1-focusAmt), c[2]*(1-focusAmt)+1.05*focusAmt];
+  }
+  return c;
+}
+
 /* ---------------- state + DOM ---------------- */
 let progress=0, playing=true, dragging=false, manual=null, last=performance.now();
+let inspect=null, focusAmt=0, focusLayer=0;   // inspect: 0..4 layer index being examined
 const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const el=id=>document.getElementById(id);
@@ -570,11 +692,11 @@ function updateHUD(p,st){
     chapnoE.textContent=c.no;chaptitleE.textContent=c.t;tcChap.textContent=c.tc;
     captextE.style.opacity=0;
     setTimeout(()=>{captextE.innerHTML=c.c;captextE.style.opacity=1;},180);
-    layerEls.forEach(l=>l.classList.toggle("active",c.layers.includes(+l.dataset.l)));
+    if(inspect===null) layerEls.forEach(l=>l.classList.toggle("active",c.layers.includes(+l.dataset.l)));
     tickEls.forEach((t,i)=>{t.classList.toggle("done",i<=ci);t.classList.toggle("cur",i===ci);});
   }
   // engineering chips
-  const eng=p>0.66&&p<0.88;
+  const eng=inspect===null&&p>0.66&&p<0.88;
   chipsE.classList.toggle("show",eng);
   if(eng){const idx=Math.min(3,Math.floor((p-0.66)/0.055)%4);
     chipEls.forEach((ch,i)=>ch.classList.toggle("hot",i===idx));}
@@ -582,68 +704,159 @@ function updateHUD(p,st){
   // on/off state pill
   const on=st.lit>0.5;
   stateE.classList.toggle("on",on);
-  stateTxt.textContent = ci===2 ? "LAYER STACK · EXPLODED"
+  stateTxt.textContent = inspect!==null ? ("INSPECT · "+LAYER[inspect].name.toUpperCase())
+                      : ci===2 ? "LAYER STACK · EXPLODED"
                       : ci===3 ? "ENGINEERING · TUNING"
                       : on ? (st.warm>0.3?"IGNITION · WARM-UP":"DEAD-FRONT · LIT")
                       : "DEAD-FRONT · OFF";
 }
 
 /* ---------------- render ---------------- */
+const FOCAL=2.2;
+function camBasis(st){
+  const {yaw,elev,r,tx,ty}=st, tz=(st.tz!==undefined?st.tz:0.02);
+  const ro=[tx+r*Math.cos(elev)*Math.sin(yaw), ty+r*Math.sin(elev), r*Math.cos(elev)*Math.cos(yaw)];
+  const ta=[tx,ty,tz];
+  return {ro,ta};
+}
 function setUniforms(st){
-  const {yaw,elev,r,tx,ty}=st;
-  const cx=tx + r*Math.cos(elev)*Math.sin(yaw);
-  const cy=ty + r*Math.sin(elev);
-  const cz=      r*Math.cos(elev)*Math.cos(yaw);
+  const {ro,ta}=camBasis(st);
   gl.uniform2f(U.u_res,W,H);
-  gl.uniform3f(U.u_ro,cx,cy,cz);
-  gl.uniform3f(U.u_ta,tx,ty,0.02);
+  gl.uniform3f(U.u_ro,ro[0],ro[1],ro[2]);
+  gl.uniform3f(U.u_ta,ta[0],ta[1],ta[2]);
   gl.uniform1f(U.u_lit,st.lit);
   gl.uniform1f(U.u_warm,st.warm);
   gl.uniform1f(U.u_exp,st.exp);
   gl.uniform1f(U.u_hot,st.hot);
   gl.uniform1f(U.u_time,performance.now()*0.001);
+  gl.uniform1f(U.u_focus, focusAmt>0.002?focusLayer:0);
+  gl.uniform1f(U.u_focusAmt, focusAmt);
+}
+
+// project a world point to CSS pixels using the current camera
+function project(P,ro,ta){
+  const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+  const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  const norm=a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return[a[0]/l,a[1]/l,a[2]/l];};
+  const f=norm(sub(ta,ro)), rr=norm(cross([0,1,0],f)), uu=cross(f,rr);
+  const rel=sub(P,ro), z=dot(rel,f);
+  if(z<=0.05) return {vis:false};
+  const cw=cvs.clientWidth, ch=cvs.clientHeight;
+  const uvx=dot(rel,rr)/z*FOCAL, uvy=dot(rel,uu)/z*FOCAL;
+  return {x:uvx*ch+cw/2, y:ch/2-uvy*ch, vis:true};
+}
+
+function updateMarkers(st){
+  const show = inspect!==null || st.exp>0.42 || focusAmt>0.02;
+  if(!show){ markerEls.forEach(m=>m.style.display="none"); return; }
+  const {ro,ta}=camBasis(st);
+  for(let i=0;i<5;i++){
+    const c=jsLayerCenter(i, st.exp, focusAmt>0.002?focusLayer:0, focusAmt);
+    const anchor=[c[0], c[1]+0.62, c[2]];     // sit just above each plate's centre
+    const pr=project(anchor,ro,ta);
+    const m=markerEls[i];
+    if(!pr.vis || pr.x<40 || pr.x>cvs.clientWidth-40 || pr.y<40 || pr.y>cvs.clientHeight-120){
+      m.style.display="none"; continue;
+    }
+    m.style.display="flex";
+    m.style.left=pr.x+"px"; m.style.top=pr.y+"px";
+    const sel = inspect!==null && (i===inspect);
+    m.classList.toggle("sel", sel);
+    m.classList.toggle("dim", inspect!==null && !sel);
+  }
 }
 
 function frame(now){
-  const dt=(now-last)/1000;last=now;
-  if(playing&&!dragging&&manual===null){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(playing&&!dragging&&manual===null&&inspect===null){
     progress+=dt/DURATION;
     if(progress>=1){progress=0;} // loop
   }
+  // focus transition (time-based so it's fps-independent)
+  const tf=(inspect!==null)?1:0, step=dt/0.32;
+  focusAmt=Math.max(0,Math.min(1, focusAmt + (tf>focusAmt?step:-step)));
   resize();
-  let st;
-  if(manual!==null){
-    // manual OFF/LIT compare: fixed hero framing
+  let st, hudP;
+  if(inspect!==null){
+    // body-colour layer is shown "off" (plain paint); all others lit to show their role
+    st={yaw:-24*D,elev:13*D,r:4.55,tx:0,ty:0.05,tz:0.35,lit:(inspect===0?0:1),warm:0,exp:0.72,hot:0};
+    hudP=0.55;
+  }else if(manual!==null){
     st={yaw:-12*D,elev:5*D,r:2.96,tx:0,ty:0,lit:manual,warm:0,exp:0,hot:0};
+    hudP=manual>0.5?0.90:0.0;
   }else{
     st=sample(progress);
-    // gentle ignition flicker (skipped under reduced motion)
     if(!reduce&&progress>0.20&&progress<0.30){
       st.lit*=0.80+0.20*Math.abs(Math.sin(now*0.045));
     }
+    hudP=progress;
   }
   setUniforms(st);
   gl.drawArrays(gl.TRIANGLES,0,3);
-  updateHUD(manual!==null?(manual>0.5?0.90:0.0):progress, st);
+  updateHUD(hudP, st);
+  updateMarkers(st);
   requestAnimationFrame(frame);
 }
 
 /* ---------------- controls ---------------- */
-function play(){manual=null;playing=true;syncPlayBtn();clearSeg();}
+function play(){manual=null;exitInspect();playing=true;syncPlayBtn();clearSeg();}
 function pause(){playing=false;syncPlayBtn();}
 function syncPlayBtn(){
-  playLbl.textContent=playing&&manual===null?"Pause":"Play";
-  playIco.innerHTML=playing&&manual===null?'<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
+  const p=playing&&manual===null&&inspect===null;
+  playLbl.textContent=p?"Pause":"Play";
+  playIco.innerHTML=p?'<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
 }
-function seek(p){progress=Math.max(0,Math.min(1,p));manual=null;lastChap=-1;clearSeg();}
+function seek(p){progress=Math.max(0,Math.min(1,p));manual=null;exitInspect();lastChap=-1;clearSeg();}
 function clearSeg(){el("offBtn").classList.remove("sel","off");el("litBtn").classList.remove("sel");}
 
 playBtn.addEventListener("click",()=>{if(manual!==null){play();return;}playing=!playing;syncPlayBtn();});
 el("restartBtn").addEventListener("click",()=>{seek(0);play();});
 el("offBtn").addEventListener("click",()=>{manual=0;playing=false;lastChap=-1;
   el("offBtn").classList.add("sel","off");el("litBtn").classList.remove("sel");syncPlayBtn();});
-el("litBtn").addEventListener("click",()=>{manual=1;playing=false;lastChap=-1;
+el("litBtn").addEventListener("click",()=>{manual=1;exitInspect();playing=false;lastChap=-1;
   el("litBtn").classList.add("sel");el("offBtn").classList.remove("sel","off");syncPlayBtn();});
+
+/* ---------------- interactive layer inspector ---------------- */
+const markersWrap=el("markers"), markerEls=[];
+LAYER.forEach((L,i)=>{
+  const m=document.createElement("div");m.className="marker";
+  m.innerHTML='<span class="mn">'+(i+1)+'</span><span class="mt">'+L.name+'</span>';
+  m.addEventListener("click",()=>inspectLayer(i));
+  markersWrap.appendChild(m); markerEls.push(m);
+});
+
+const laynav=el("laynav"), navBtns=[];
+LAYER.forEach((L,i)=>{
+  const b=document.createElement("button");b.className="ln-btn";b.type="button";
+  b.setAttribute("aria-label","Inspect layer "+(i+1)+": "+L.name);
+  b.innerHTML='<span class="n">'+String(i+1).padStart(2,"0")+'</span><span class="t">'+L.short+'</span>';
+  b.addEventListener("click",()=>inspectLayer(i));
+  laynav.appendChild(b); navBtns.push(b);
+});
+// right-side readout is clickable too
+layerEls.forEach(l=>{l.style.cursor="pointer";l.style.pointerEvents="auto";
+  l.addEventListener("click",()=>inspectLayer(+l.dataset.l-1));});
+
+const explainE=el("explain"),eNum=el("eNum"),eVerb=el("eVerb"),eName=el("eName"),eDesc=el("eDesc"),eSpec=el("eSpec");
+function inspectLayer(i){
+  inspect=i; focusLayer=i+1; manual=null; playing=false;
+  const L=LAYER[i];
+  eNum.textContent=i+1; eVerb.textContent=L.verb; eName.textContent=L.name;
+  eDesc.innerHTML=L.desc; eSpec.innerHTML=L.spec;
+  explainE.classList.add("show");
+  navBtns.forEach((b,k)=>b.classList.toggle("sel",k===i));
+  layerEls.forEach(l=>l.classList.toggle("active",+l.dataset.l===i+1));
+  syncPlayBtn();
+}
+function exitInspect(){
+  if(inspect===null && explainE.classList.contains("show")===false) return;
+  inspect=null; explainE.classList.remove("show");
+  navBtns.forEach(b=>b.classList.remove("sel"));
+}
+el("ePrev").addEventListener("click",()=>inspectLayer((inspect+4)%5));
+el("eNext").addEventListener("click",()=>inspectLayer((inspect+1)%5));
+el("eOverview").addEventListener("click",()=>{exitInspect();progress=0.60;manual=null;playing=false;lastChap=-1;syncPlayBtn();});
 
 function tlPos(e){const rct=tl.getBoundingClientRect();
   const x=(e.touches?e.touches[0].clientX:e.clientX)-rct.left;
@@ -655,9 +868,10 @@ tl.addEventListener("mousedown",startDrag);window.addEventListener("mousemove",m
 tl.addEventListener("touchstart",startDrag,{passive:false});window.addEventListener("touchmove",moveDrag,{passive:false});window.addEventListener("touchend",endDrag);
 
 document.addEventListener("keydown",e=>{
-  if(e.code==="Space"){e.preventDefault();if(manual!==null){play();}else{playing=!playing;syncPlayBtn();}}
-  else if(e.code==="ArrowRight")seek(progress+0.02);
-  else if(e.code==="ArrowLeft")seek(progress-0.02);
+  if(e.code==="Space"){e.preventDefault();if(manual!==null||inspect!==null){play();}else{playing=!playing;syncPlayBtn();}}
+  else if(e.code==="Escape"){if(inspect!==null){exitInspect();syncPlayBtn();}}
+  else if(e.code==="ArrowRight"){if(inspect!==null)inspectLayer((inspect+1)%5);else seek(progress+0.02);}
+  else if(e.code==="ArrowLeft"){if(inspect!==null)inspectLayer((inspect+4)%5);else seek(progress-0.02);}
 });
 
 if(reduce){playing=false;progress=0.90;manual=null;} // static lit hero, user can scrub
