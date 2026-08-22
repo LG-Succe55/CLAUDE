@@ -392,15 +392,30 @@ float emblem(vec2 uv){
 }
 
 // ---- scene ----
-float u_spacing, u_fanx, u_fany;
 float sdRoundBox(vec3 p,vec3 b,float r){vec3 q=abs(p)-b;return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0)-r;}
-
-// where layer i (0=body colour .. 4=LED) sits. Compact = one panel; exploded = fanned stack.
+float sdBox2(vec2 p,vec2 b,float r){vec2 d=abs(p)-b+r;return min(max(d.x,d.y),0.0)+length(max(d,0.0))-r;}
+float vnoise(vec2 p){
+  vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+  float a=hash21(i), b=hash21(i+vec2(1.0,0.0)), c=hash21(i+vec2(0.0,1.0)), d=hash21(i+vec2(1.0,1.0));
+  return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);
+}
+// physical half-thickness per layer (real material proportions)
+float layerHZ(float f){
+  if(f<0.5) return 0.022;   // painted sheet-metal panel
+  if(f<1.5) return 0.012;   // black blockout coating
+  if(f<2.5) return 0.016;   // laser-etched coating
+  if(f<3.5) return 0.055;   // PMMA light-guide (thick)
+  return 0.030;             // LED PCB
+}
+// staggered separation so the stack peels apart one sheet at a time
+float layerEase(float f){ return clamp(smoothstep(f*0.11, f*0.11+0.52, u_exp*1.85), 0.0, 1.0); }
+// where layer i (0=body colour .. 4=LED) sits. Compact = one panel; exploded = fanned material stack.
 vec3 layerCenter(float f){
-  float k=f-2.0;                       // centre the group on the middle layer
-  vec3 c=vec3(k*u_fanx, -k*u_fany, -k*u_spacing);
+  float k=f-2.0, ee=layerEase(f);
+  // base z keeps the paint frontmost even when compact; ee adds the big lateral fan when exploded
+  vec3 c=vec3(k*0.94*ee, -k*0.52*ee, -k*(0.030+0.60*ee));
   if(u_focus>0.5 && abs((f+1.0)-u_focus)<0.5){        // inspected layer glides to the front, centred
-    c=mix(c, vec3(0.0,0.0,0.85), u_focusAmt);
+    c=mix(c, vec3(0.0,0.0,0.95), u_focusAmt);
   }
   return c;
 }
@@ -409,8 +424,8 @@ vec2 map(vec3 p){
   for(int i=0;i<5;i++){
     float f=float(i);
     vec3 lp=p-layerCenter(f);
-    lp.z-=(0.050*lp.x*lp.x+0.022*lp.y*lp.y)*(1.0-0.85*u_exp);  // body curve, flattens as it explodes
-    float d=sdRoundBox(lp,vec3(1.42,0.86,0.013),0.055);
+    lp.z-=(0.050*lp.x*lp.x+0.022*lp.y*lp.y)*(1.0-0.9*u_exp);   // body curve, flattens as it explodes
+    float d=sdRoundBox(lp,vec3(1.42,0.86,layerHZ(f)),0.028);
     if(d<best){best=d;mat=f+1.0;}
   }
   return vec2(best,mat);
@@ -424,80 +439,106 @@ vec3 calcNormal(vec3 p){
 }
 
 vec3 ledColor(){ return mix(vec3(0.45,0.72,1.00),vec3(1.00,0.66,0.34),clamp(u_warm,0.0,1.0)); }
-const float EMB=0.44; // emblem scale (smaller = badge sits on panel)
+const float EMB=0.44;                                 // emblem scale (badge sits on panel)
+vec3 envRefl(vec3 r,float rough){ return mix(studio(r), vec3(0.045,0.065,0.10), clamp(rough*0.85,0.0,1.0)); }
+float specGGX(vec3 n,vec3 v,vec3 l,float rough){
+  vec3 h=normalize(v+l);
+  float a=max(rough*rough,0.002);
+  float ndh=max(dot(n,h),0.0), ndv=max(dot(n,v),0.0)+1e-3, ndl=max(dot(n,l),0.0);
+  float dd=a*a/(PI*pow(ndh*ndh*(a*a-1.0)+1.0,2.0));
+  float k=a*0.5, gv=ndv/(ndv*(1.0-k)+k), gl=ndl/(ndl*(1.0-k)+k);
+  return dd*gv*gl/(4.0*ndv*ndl+1e-3)*ndl;
+}
 
 vec3 shade(vec3 p,vec3 n,vec3 rd,float mat){
   vec3 v=-rd;
-  float face=smoothstep(0.10,0.70,n.z);          // geometric facing
-  float fi=mat-1.0;                               // layer index 0..4
+  float fi=mat-1.0;
   vec3 c=layerCenter(fi);
-  vec2 lp=p.xy-c.xy;                              // plate-local coords (emblem stays centred per layer)
+  vec2 lp=p.xy-c.xy;                               // plate-local coords
   vec2 e_uv=lp/EMB;
   float de=emblem(e_uv);
-  float mask=1.0-smoothstep(0.0,0.010,de);
-  float glow=1.0-smoothstep(0.0,0.20,de);
+  float edge=1.0-smoothstep(0.42,0.62,abs(n.z));  // 1 on the side walls (material thickness)
   vec3 led=ledColor();
-  vec3 L=normalize(vec3(-0.55,0.62,0.60));
-  // per-plate edge rim so all five layers read as distinct sheets when exploded
-  vec2 q=abs(lp);
-  float rim=clamp(smoothstep(1.30,1.42,q.x)+smoothstep(0.74,0.86,q.y),0.0,1.0)*u_exp;
-  vec3 col;
 
-  if(mat<1.5){ // ---- body colour (Class-A paint) ----
-    vec3 nb=normalize(n+vec3(0.34*p.x,0.60*p.y,0.0));   // curvature -> sweeping strips
-    float fres=0.04+0.96*pow(clamp(1.0-max(dot(nb,v),0.0),0.0,1.0),5.0);
-    vec3 refl=studio(reflect(rd,nb));
-    float diff=max(dot(nb,L),0.0);
-    vec3 h=normalize(L+v);
-    float spec=pow(max(dot(nb,h),0.0),380.0);
-    float fl=hash21(floor(p.xy*300.0));
-    fl=smoothstep(0.96,1.0,fl)*pow(max(dot(nb,h),0.0),3.0);
-    vec3 baseCol=vec3(0.014,0.034,0.082);
-    col=baseCol*(0.20+0.35*diff);
-    col+=refl*fres*1.35;
-    col+=vec3(1.0)*spec*0.9;
-    col+=vec3(0.55,0.68,1.0)*fl*0.06;
-    float emb=u_lit*(1.0-0.85*u_exp);            // light lives behind -> fades from paint on explode
-    col*=1.0-0.14*glow*(1.0-u_lit)*face;         // dead-front smoke tint (off)
-    col+=led*mask*emb*face*1.65;
-    col+=led*glow*emb*face*0.28;
-    col+=vec3(0.55,0.70,1.0)*rim*0.9;            // cool paint rim
-  } else {
-    float fres=0.04+0.96*pow(clamp(1.0-max(dot(n,v),0.0),0.0,1.0),5.0);
-    vec3 refl=studio(reflect(rd,n));
-    if(mat<2.5){ // ---- black blockout ----
-      col=vec3(0.006,0.008,0.011);
-      col+=refl*0.05;
-      col+=led*mask*u_lit*2.4;                    // light passes only at the logo
-      col+=vec3(0.20,0.24,0.32)*rim*0.9;          // dark grey rim
-    } else if(mat<3.5){ // ---- etched translucent window ----
-      float m2=1.0-smoothstep(0.0,0.024,de);
-      col=vec3(0.04,0.07,0.12)*0.55;
-      col+=refl*fres*0.5;
-      col+=led*m2*u_lit*2.2;
-      col+=led*(1.0-smoothstep(0.0,0.14,de))*u_lit*0.35;
-      col+=led*rim*1.1;                            // bright window rim
-    } else if(mat<4.5){ // ---- PMMA light-guide (frosted acrylic) ----
-      col=vec3(0.10,0.12,0.16);
-      float edge=smoothstep(1.26,1.42,q.x)+smoothstep(0.72,0.86,q.y);
-      col+=vec3(0.42,0.62,1.0)*edge*u_lit*0.9;    // edge-lit glow
-      col+=vec3(0.32,0.52,0.9)*u_lit*0.16;        // faint uniform transmission
-      col+=refl*fres*0.45;
-      col+=vec3(0.55,0.78,1.0)*rim*1.0;           // acrylic edge rim
-    } else { // ---- LED source board ----
-      col=vec3(0.012,0.024,0.026);
-      vec2 g=(lp+vec2(1.42,0.86))*vec2(7.0,4.5);
-      vec2 cell=fract(g)-0.5;
-      float dt=1.0-smoothstep(0.12,0.24,length(cell));
-      float uneven=mix(1.0,0.30+0.70*hash21(floor(g)),clamp(u_hot,0.0,1.0));
-      col+=vec3(0.65,0.82,1.05)*dt*u_lit*uneven*1.6;
-      col+=refl*0.05;
-      col+=vec3(0.70,0.80,1.0)*rim*0.8;           // board rim
-    }
+  // face material params + separate edge (material thickness) params
+  vec3 fA=vec3(0.02); float fR=0.5, fM=0.0; vec3 fE=vec3(0.0);   // face albedo/rough/metal/emissive
+  vec3 gA=vec3(0.03); float gR=0.6, gM=0.0; vec3 gE=vec3(0.0);   // edge params
+
+  if(mat<1.5){ // ---- body colour: Class-A paint on sheet metal ----
+    fA=vec3(0.013,0.032,0.078); fR=0.09; fM=0.85;
+    float fl=smoothstep(0.965,1.0,hash21(floor(p.xy*320.0)));
+    fR+=fl*0.14;                                    // metallic flake sparkle
+    float emb=u_lit*(1.0-0.9*u_exp);               // light lives behind -> fades on explode
+    fE=led*(1.0-smoothstep(0.0,0.010,de))*emb*3.0 + led*(1.0-smoothstep(0.0,0.20,de))*emb*0.35;
+    // brushed sheet-metal edge
+    float br=vnoise(vec2(p.y*150.0,p.x*7.0));
+    gA=vec3(0.40,0.42,0.45); gM=1.0; gR=0.24+0.30*br;
+  } else if(mat<2.5){ // ---- black blockout coating ----
+    fA=vec3(0.014,0.015,0.017)+vnoise(lp*80.0)*0.006; fR=0.72; fM=0.0;
+    float ap=1.0-smoothstep(0.0,0.012,de);         // logo aperture -> light passes only here
+    fA=mix(fA,vec3(0.0),ap);
+    fE=led*ap*u_lit*3.0;
+    gA=vec3(0.02,0.021,0.024); gR=0.8; gM=0.0;
+  } else if(mat<3.5){ // ---- laser-etched window ----
+    fA=vec3(0.03,0.035,0.045); fR=0.34; fM=0.55;   // dark anodized coating
+    float inside=1.0-smoothstep(0.0,0.010,de);
+    float ringp=smoothstep(0.05,0.0,abs(de+0.010));// scorched ring at the ablation edge
+    float frost=vnoise(lp*260.0);
+    fA=mix(fA, vec3(0.16,0.18,0.22)+frost*0.05, inside);  // exposed frosted acrylic in the groove
+    fR=mix(fR, 0.55+frost*0.15, inside);
+    fA=mix(fA, vec3(0.05,0.032,0.022), ringp*0.7); // char / burn ring
+    fE=led*inside*u_lit*2.5;
+    gA=vec3(0.03,0.033,0.04); gR=0.4; gM=0.5;
+  } else if(mat<4.5){ // ---- PMMA light-guide: polished clear acrylic ----
+    fA=vec3(0.05,0.065,0.09); fR=0.05; fM=0.0;     // clear, slightly milky
+    fE=vec3(0.20,0.34,0.62)*u_lit*0.10 + led*(1.0-smoothstep(0.0,0.30,de))*u_lit*0.16;
+    gA=vec3(0.12,0.16,0.22); gR=0.06; gM=0.0;      // polished edge-lit rim glows brightly
+    gE=vec3(0.42,0.64,1.0)*u_lit*1.35 + vec3(0.30,0.46,0.78)*0.10;
+  } else { // ---- LED source: PCB with SMD emitters ----
+    fA=vec3(0.018,0.032,0.028); fR=0.55; fM=0.0;   // dark solder-mask
+    float pitch=0.36; vec2 cp=(fract(lp/pitch)-0.5)*pitch;
+    vec2 cellId=floor(lp/pitch);
+    // copper traces feeding each emitter row
+    float trace=smoothstep(0.012,0.0,abs(cp.y))*step(0.0,1.0);
+    fA=mix(fA, vec3(0.28,0.18,0.08), trace*0.35);
+    // solder pads
+    float pad=min(sdBox2(cp-vec2(0.115,0.0),vec2(0.022,0.055),0.004),
+                  sdBox2(cp+vec2(0.115,0.0),vec2(0.022,0.055),0.004));
+    float inPad=smoothstep(0.006,0.0,pad);
+    fA=mix(fA, vec3(0.62,0.63,0.66), inPad); fM=mix(fM,0.9,inPad); fR=mix(fR,0.28,inPad);
+    // white ceramic package
+    float pkg=sdBox2(cp,vec2(0.10,0.088),0.02);
+    float inPkg=smoothstep(0.006,0.0,pkg);
+    fA=mix(fA, vec3(0.90,0.90,0.86), inPkg); fR=mix(fR,0.34,inPkg);
+    // phosphor emitter dome
+    float phos=length(cp)-0.052;
+    float inPh=smoothstep(0.004,0.0,phos);
+    float unev=mix(1.0,0.32+0.68*hash21(cellId),clamp(u_hot,0.0,1.0));
+    fA=mix(fA, vec3(0.96,0.86,0.46), inPh*0.7);    // yellow phosphor when off
+    fE=mix(vec3(1.0),led,0.55)*inPh*u_lit*unev*4.2;// bright emitter core when lit
+    gA=vec3(0.22,0.24,0.13); gR=0.7; gM=0.0;       // FR4 fibreglass edge
   }
+
+  // blend face/edge by which wall we hit
+  vec3 albedo=mix(fA,gA,edge); float rough=mix(fR,gR,edge), metal=mix(fM,gM,edge);
+  vec3 emis=mix(fE,gE,edge);
+
+  // shading normal: gentle body curvature on faces (helps studio strips sweep), flat when exploded
+  vec3 nn=normalize(n+vec3(0.30*lp.x,0.52*lp.y,0.0)*(1.0-edge)*(1.0-u_exp*0.7));
+  vec3 L1=normalize(vec3(-0.5,0.62,0.62)), c1=vec3(1.0,0.99,0.96)*1.15;   // key
+  vec3 L2=normalize(vec3(0.55,-0.15,0.35)), c2=vec3(0.40,0.52,0.74)*0.55; // cool fill
+  float ndl1=max(dot(nn,L1),0.0), ndl2=max(dot(nn,L2),0.0), ndv=max(dot(nn,v),0.0);
+  vec3 F0=mix(vec3(0.04),albedo,metal);
+  vec3 fres=F0+(max(vec3(1.0-rough),F0)-F0)*pow(1.0-ndv,5.0);
+  vec3 refl=envRefl(reflect(rd,nn),rough);
+  vec3 diffuse=albedo*(1.0-metal)*(0.12+ndl1*c1+ndl2*c2);
+  vec3 spec=refl*fres + (specGGX(nn,v,L1,rough)*c1+specGGX(nn,v,L2,rough)*c2)*F0*5.0;
+  vec3 col=diffuse+spec+emis;
+  col+=vec3(0.5,0.65,0.9)*pow(1.0-ndv,3.0)*edge*u_exp*0.12;   // faint edge catch when exploded
+
   if(u_focus>0.5){                                 // dim everything except the inspected layer
     float sel=step(abs(mat-u_focus),0.5);
-    col*=mix(1.0, mix(0.16,1.18,sel), u_focusAmt);
+    col*=mix(1.0, mix(0.14,1.15,sel), u_focusAmt);
   }
   return col;
 }
@@ -505,10 +546,6 @@ vec3 shade(vec3 p,vec3 n,vec3 rd,float mat){
 vec3 aces(vec3 x){return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0);}
 
 void main(){
-  float e=clamp(u_exp,0.0,1.0);
-  u_spacing=mix(0.020,0.52,e);
-  u_fanx=mix(0.0,0.86,e);
-  u_fany=mix(0.0,0.46,e);
   vec2 uv=(gl_FragCoord.xy-0.5*u_res)/u_res.y;
   vec3 ro=u_ro, ta=u_ta;
   vec3 f=normalize(ta-ro);
@@ -588,10 +625,10 @@ const KF=[
   {p:0.27, yaw:-13, elev:4,  r:2.96, tx:0.0,   ty:0.0,  lit:0.7, warm:0.85,exp:0,   hot:0},
   {p:0.36, yaw:-12, elev:4,  r:2.94, tx:0.0,   ty:0.0,  lit:1,   warm:0.12,exp:0,   hot:0},
   {p:0.42, yaw:-18, elev:6,  r:3.10, tx:0.0,   ty:0.0,  lit:1,   warm:0,   exp:0,   hot:0},
-  {p:0.50, yaw:-34, elev:14, r:5.10, tx:0.30,  ty:-0.10,lit:1,   warm:0,   exp:0.60,hot:0},
-  {p:0.60, yaw:-40, elev:20, r:5.70, tx:0.40,  ty:-0.14,lit:1,   warm:0,   exp:1.0, hot:0},
-  {p:0.67, yaw:-30, elev:17, r:5.55, tx:0.40,  ty:-0.12,lit:1,   warm:0,   exp:1.0, hot:0},
-  {p:0.73, yaw:-34, elev:11, r:3.70, tx:0.05,  ty:0.0,  lit:1,   warm:0,   exp:0.42,hot:1},
+  {p:0.51, yaw:-33, elev:15, r:6.30, tx:0.18,  ty:-0.06,lit:1,   warm:0,   exp:0.72,hot:0},
+  {p:0.60, yaw:-38, elev:19, r:6.95, tx:0.22,  ty:-0.10,lit:1,   warm:0,   exp:1.0, hot:0},
+  {p:0.67, yaw:-30, elev:16, r:6.80, tx:0.20,  ty:-0.08,lit:1,   warm:0,   exp:1.0, hot:0},
+  {p:0.73, yaw:-33, elev:11, r:3.80, tx:0.04,  ty:0.0,  lit:1,   warm:0,   exp:0.42,hot:1},
   {p:0.81, yaw:-28, elev:8,  r:3.25, tx:0.0,   ty:0.0,  lit:1,   warm:0,   exp:0.40,hot:0},
   {p:0.87, yaw:-18, elev:6,  r:3.10, tx:0.0,   ty:0.0,  lit:1,   warm:0,   exp:0.0, hot:0},
   {p:0.94, yaw:-13, elev:5,  r:2.98, tx:0.0,   ty:0.0,  lit:1,   warm:0,   exp:0,   hot:0},
@@ -631,27 +668,28 @@ const CH=[
 // index 0 = outermost (body colour) .. 4 = LED source
 const LAYER=[
  {verb:"Finish",  name:"Body colour",     short:"Body colour",
-  desc:"Spray the body colour — or apply painted film — across the <b>whole face</b>. This is the only layer you see when the emblem is off: a continuous Class-A surface with no seam and no graphic.",
-  spec:"Order <b>03 · Finish</b>  ·  Class-A paint / film  ·  full-face"},
+  desc:"Spray the body colour — or apply painted film — across the <b>whole face</b> of the sheet-metal panel. This is the only layer you see when the emblem is off: a continuous Class-A surface with no seam and no graphic.",
+  spec:"Order <b>03 · Finish</b>  ·  Class-A paint on sheet metal  ·  full-face"},
  {verb:"Seal",    name:"Black blockout",  short:"Blockout",
   desc:"Lay an opaque black base — primer or film — directly behind the paint. <b>This is the real trick:</b> it stops light everywhere except the logo, so the graphic can't bleed through the bodywork.",
   spec:"Order <b>02 · Seal</b>  ·  opaque primer / film  ·  zero light leak"},
  {verb:"Reveal",  name:"Etched window",   short:"Window",
-  desc:"Laser-ablate <b>only the logo</b>, opening translucent windows down through the paint and blockout to the acrylic. These openings are the single path light is allowed to take.",
-  spec:"Order <b>04 · Reveal</b>  ·  laser-ablated  ·  logo aperture only"},
+  desc:"<b>Laser-etch only the logo</b>, ablating translucent windows down through the paint and blockout to the acrylic — burnt-clean edges and all. These openings are the single path light is allowed to take.",
+  spec:"Order <b>04 · Reveal</b>  ·  laser-etched aperture  ·  logo only"},
  {verb:"Mill",    name:"PMMA light-guide",short:"Light-guide",
-  desc:"CNC the white PMMA (<b>3–4 mm</b>) and set it flush to the Class-A surface. The acrylic spreads the light and carries it evenly across the whole graphic.",
-  spec:"Order <b>01 · Mill</b>  ·  PMMA 3–4 mm  ·  flush to Class-A"},
+  desc:"CNC the clear <b>PMMA acrylic (3–4 mm)</b> and set it flush to the Class-A surface. The polished acrylic guides the light and spreads it evenly across the whole graphic.",
+  spec:"Order <b>01 · Mill</b>  ·  PMMA acrylic 3–4 mm  ·  edge-lit, flush to Class-A"},
  {verb:"Illuminate",name:"LED source",    short:"LED source",
-  desc:"Back-light with a <b>diffusion-tuned LED array</b> or an edge-lit light-guide. Tune LED pitch and opal diffusion to erase hotspots and read as one even glow.",
-  spec:"Order <b>05 · Illuminate</b>  ·  LED array / edge-lit  ·  FMVSS 108 · ECE R48"}
+  desc:"Back-light with a board of <b>diffusion-tuned SMD LEDs</b> or an edge-lit light-guide. Tune the LED pitch and opal diffusion to erase hotspots and read as one even glow.",
+  spec:"Order <b>05 · Illuminate</b>  ·  SMD LED array  ·  FMVSS 108 · ECE R48"}
 ];
 // mirror of the shader's layerCenter, in JS, for camera + call-out projection
+function ss(a,b,x){x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x);}
 function jsLayerCenter(i,e,focusLayer,focusAmt){
-  const sp=0.020+(0.52-0.020)*e, fx=0.86*e, fy=0.46*e, k=i-2;
-  let c=[k*fx,-k*fy,-k*sp];
+  const k=i-2, ee=ss(i*0.11, i*0.11+0.52, e*1.85);
+  let c=[k*0.94*ee, -k*0.52*ee, -k*(0.030+0.60*ee)];
   if(focusLayer>0 && (i+1)===focusLayer){
-    c=[c[0]*(1-focusAmt), c[1]*(1-focusAmt), c[2]*(1-focusAmt)+1.05*focusAmt];
+    c=[c[0]*(1-focusAmt), c[1]*(1-focusAmt), c[2]*(1-focusAmt)+0.95*focusAmt];
   }
   return c;
 }
@@ -780,7 +818,7 @@ function frame(now){
   let st, hudP;
   if(inspect!==null){
     // body-colour layer is shown "off" (plain paint); all others lit to show their role
-    st={yaw:-24*D,elev:13*D,r:4.55,tx:0,ty:0.05,tz:0.35,lit:(inspect===0?0:1),warm:0,exp:0.72,hot:0};
+    st={yaw:(-24+Math.sin(now*0.0005)*4)*D,elev:13*D,r:4.55,tx:0,ty:0.05,tz:0.35,lit:(inspect===0?0:1),warm:0,exp:0.72,hot:0};
     hudP=0.55;
   }else if(manual!==null){
     st={yaw:-12*D,elev:5*D,r:2.96,tx:0,ty:0,lit:manual,warm:0,exp:0,hot:0};
@@ -789,6 +827,9 @@ function frame(now){
     st=sample(progress);
     if(!reduce&&progress>0.20&&progress<0.30){
       st.lit*=0.80+0.20*Math.abs(Math.sin(now*0.045));
+    }
+    if(!reduce&&progress>0.50&&progress<0.68){    // gentle idle orbit over the exploded stack
+      st.yaw+=Math.sin(now*0.0004)*3.5*D;
     }
     hudP=progress;
   }
