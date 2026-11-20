@@ -1,0 +1,89 @@
+# Curriculum. Thresholds are starting values (from CATIA-style Class A presets);
+# tighten them as the agent improves. Units: mm and degrees.
+# Check names map to metrics.json keys (see grader/metrics.example.json):
+#   max_gap_mm, max_angle_deg, max_curv_dev, max_deviation_mm, max_spans,
+#   max_degree, min_degree, check_model_errors, three_sided_patches, min_radius_mm
+
+defaults:
+  max_gap_mm: 0.01
+  max_angle_deg: 0.1
+  max_curv_dev: 0.1
+  check_model_errors: 0
+
+levels:
+  - level: 1
+    name: Curves
+    tasks:
+      - id: L1.1-bezier-curve
+        goal: Single-span degree-5 curve with a smooth, inflection-free curvature comb between two given points.
+        checks: {max_spans: 1, min_degree: 5, inflections: 0}
+      - id: L1.2-fit-scan-line
+        goal: Fit a degree-2/3 single-span curve to a centre-line scan section.
+        target: targets/centre_line_scan.wire
+        checks: {max_spans: 1, max_degree: 3, max_deviation_mm: 0.5, inflections: 0}
+      - id: L1.3-g2-blend-curve
+        goal: Join two fitted curves with a G2 blend curve.
+        checks: {max_spans: 1}
+
+  - level: 2
+    name: Primary surfaces
+    tasks:
+      - id: L2.1-roof-from-mesh
+        goal: One symmetric single-span roof surface across Y0 fitted to a mesh scan (direct modelling, symmetric modelling on).
+        target: targets/roof_mesh.obj
+        checks: {max_spans: 1, max_degree: 5, max_deviation_mm: 1.0}
+      - id: L2.2-side-surface
+        goal: Body-side surface from a planar theoretical line, single span, fitted to scans.
+        target: targets/side_scans.wire
+        checks: {max_spans: 1, max_deviation_mm: 1.0}
+
+  - level: 3
+    name: Transitions
+    tasks:
+      - id: L3.1-g2-align
+        goal: Align a surface to a neighbour at G2 with Explicit Control, keeping single span.
+        checks: {max_spans: 1}
+      - id: L3.2-freeform-blend
+        goal: G2 blend between roof and windscreen; then extend primaries to a theoretical edge and replace with a chordal G2 fillet.
+        target: targets/roof_mesh.obj
+        checks: {max_deviation_mm: 1.0}
+      - id: L3.3-wheel-opening
+        goal: Wheel-arch transition aligned to the body side by projection, CV layout radial.
+        checks: {max_spans: 1}
+        review: human
+
+  - level: 4
+    name: Fillets and corners
+    tasks:
+      - id: L4.1-chordal-fillet
+        goal: Chordal G2 surface fillet across acute/obtuse primaries without internal continuity breaks.
+        checks: {min_radius_mm: 1.0}
+      - id: L4.2-ball-corner
+        goal: Four-sided ball corner where three fillets meet.
+        checks: {three_sided_patches: 0}
+        review: human
+      - id: L4.3-five-corner
+        goal: Tangent-continuous blend where five fillets meet.
+        checks: {three_sided_patches: 0, max_curv_dev: 1.0}
+        review: human
+
+  - level: 5
+    name: Parts with engineering criteria
+    tasks:
+      - id: L5.1-hood-gap
+        goal: Hood-to-grille gap with R1.3 hem flange, 5 mm overslam, 2.5 mm underflush, 5° draft.
+        checks: {}
+        review: human
+      - id: L5.2-feature-washout
+        goal: Wheel-arch feature fading from sharp G0 to smooth G2 and back.
+        checks: {three_sided_patches: 0}
+        review: human
+
+  - level: 6
+    name: Vehicle
+    tasks:
+      - id: L6.1-half-body
+        goal: Full half body (hood, roof, side, front and rear, wheel arches) fitted to a vehicle scan, mirrored with layer symmetry.
+        target: targets/vehicle_scan.obj
+        checks: {max_deviation_mm: 1.0, three_sided_patches: 0}
+        review: human
