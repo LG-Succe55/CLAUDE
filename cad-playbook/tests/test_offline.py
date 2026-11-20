@@ -65,3 +65,42 @@ def test_store_search_export(tmp_path: Path):
     assert pb.search("fender", "CATIA 3DEXPERIENCE") == []
     md = export_markdown(pb)
     assert "**Align**" in md and "watch?v=abc123def45&t=150s" in md
+
+
+PAGE = """<html><head><title>Create Objects in Alias | Autodesk</title>
+<script>var x = "ignore me";</script></head><body><nav>Products Menu</nav>
+<h1>Create objects in Alias</h1>{player}
+<p>In this tutorial you build primitives and revolve a profile curve.</p>
+<ol><li>Open the Palette and choose Surfaces &gt; Primitives &gt; Sphere.</li>
+<li>Draw a CV curve, then use Surfaces &gt; Revolve and set the sweep angle to 360.</li>
+<li>Use Object Edit &gt; Rebuild to reduce spans before evaluating with zebra stripes.</li></ol>
+<footer>Copyright</footer></body></html>"""
+
+
+def test_web_page_written_steps(tmp_path: Path):
+    f = tmp_path / "alias.html"
+    f.write_text(PAGE.format(player=""))
+    src = sources.from_web(str(f))
+    text = src.transcript_text()
+    assert src.title == "Create Objects in Alias | Autodesk"
+    assert "Revolve" in text and "ignore me" not in text and "Products Menu" not in text
+
+
+def test_web_page_caption_track(monkeypatch):
+    html = PAGE.format(player='<track kind="captions" src="/media/alias-objects.vtt">')
+    vtt = "WEBVTT\n\n00:00:12.000 --> 00:00:15.000\nChoose Revolve from the palette.\n"
+    pages = {"https://www.autodesk.com/learn/t/create-objects": html,
+             "https://www.autodesk.com/media/alias-objects.vtt": vtt}
+    monkeypatch.setattr(sources, "_http_get", lambda u: pages[u])
+    src = sources.from_web("https://www.autodesk.com/learn/t/create-objects")
+    assert [(l.start, l.text) for l in src.lines] == [(12, "Choose Revolve from the palette.")]
+    assert src.url.endswith("create-objects")
+
+
+def test_web_page_embedded_youtube(tmp_path: Path, monkeypatch):
+    f = tmp_path / "alias.html"
+    f.write_text(PAGE.format(player='<iframe src="https://www.youtube.com/embed/abcDEF12345"></iframe>'))
+    monkeypatch.setattr(sources, "from_youtube", lambda vid, langs=None: sources.Source(
+        vid, "yt", f"https://www.youtube.com/watch?v={vid}", [sources.Line(3, "hi")]))
+    src = sources.from_web(str(f))
+    assert src.source_id == "abcDEF12345" and src.title.startswith("Create Objects")

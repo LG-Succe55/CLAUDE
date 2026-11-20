@@ -6,7 +6,8 @@ back to the exact moment in each video.
 
 ## What it does
 
-1. **Reads a tutorial.** For a YouTube link it fetches the published captions (it never
+1. **Reads a tutorial.** For a web page such as Autodesk Learn, it uses the embedded
+   video's captions if it can find them, otherwise the page's written steps. For a YouTube link it fetches the published captions (it never
    downloads the video). For a course or your own recording, give it the caption file
    (`.srt`, `.vtt`, or `.txt`). If you have the rights to a video file, `--video` also
    samples still frames so Claude can see menus and dialogs.
@@ -31,6 +32,11 @@ $env:ANTHROPIC_API_KEY = "sk-ant-..."   # from console.anthropic.com
 # Add tutorials: one at a time, or a list file (one link/path per line, # for comments)
 python -m playbook add https://www.youtube.com/watch?v=VIDEO_ID
 python -m playbook add --list links.txt
+
+# Tutorial web pages, e.g. Autodesk Learn. If the site blocks the request,
+# save the page from your browser (Ctrl+S) and add the .html file instead.
+python -m playbook add https://www.autodesk.com/learn/ondemand/tutorial/create-objects-in-alias
+python -m playbook add "Create Objects in Alias.html"
 
 # A course or screen recording you're licensed to use: captions + frames
 python -m playbook add lesson3.srt --video lesson3.mp4 --title "Alias: A-pillar blend"

@@ -1,6 +1,7 @@
 """Command line: python -m playbook <command> ...
 
-  add <link-or-file> [...]     Extract workflows from YouTube links or caption files
+  add <link-or-file> [...]     Extract workflows from YouTube links, tutorial web pages
+                               (e.g. Autodesk Learn), caption files, or saved .html pages
   add --list links.txt         ...or from a text file with one link/path per line
   list                         Show the tutorials in the playbook
   search "g2 blend fender"     Find matching workflows (no AI call, free)
@@ -21,12 +22,19 @@ SOFTWARE = {"catia": "CATIA 3DEXPERIENCE", "alias": "Autodesk Alias"}
 
 
 def _load(item: str, args) -> sources.Source:
-    if Path(item).exists():
+    path = Path(item)
+    if path.exists() and path.suffix.lower() in {".html", ".htm"}:
+        src = sources.from_web(item, title=args.title, languages=args.lang)
+    elif path.exists():
         src = sources.from_caption_file(item, title=args.title, url=args.url or "")
-    else:
+    elif sources.youtube_id(item):
         src = sources.from_youtube(item, languages=args.lang)
         if args.title:
             src.title = args.title
+    elif item.startswith(("http://", "https://")):
+        src = sources.from_web(item, title=args.title, languages=args.lang)
+    else:
+        raise ValueError("not a file, YouTube link, or web page")
     if args.video:
         sources.add_frames(src, args.video, every_s=args.frame_every)
     return src
