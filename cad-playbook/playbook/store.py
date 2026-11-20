@@ -91,7 +91,7 @@ class Playbook:
     def all_workflows(self) -> list[sqlite3.Row]:
         return list(self.db.execute(
             "SELECT w.*, v.url, v.title AS video_title, v.kind FROM workflows w "
-            "JOIN videos v USING(source_id) ORDER BY w.software, w.title"))
+            "JOIN videos v USING(source_id) ORDER BY w.software, v.added_at, w.id"))
 
 
 def link(url: str, video_title: str, seconds: float, kind: str = "video") -> str:
@@ -142,7 +142,7 @@ def render(row: sqlite3.Row, n: int | None = None) -> str:
 def export_markdown(pb: Playbook) -> str:
     rows = pb.all_workflows()
     parts = ["# Vehicle Surfacing Playbook", "",
-             f"{len(rows)} workflows from {len(pb.videos())} tutorials.", ""]
+             f"{len(rows)} workflows from {len(pb.videos())} source(s), in source order.", ""]
     current = None
     for r in rows:
         if r["software"] != current:
