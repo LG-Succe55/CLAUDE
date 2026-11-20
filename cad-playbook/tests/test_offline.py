@@ -62,7 +62,8 @@ def test_store_search_export(tmp_path: Path):
     assert len(pb.all_workflows()) == 1
     hits = pb.search("fender blending g2")
     assert hits and hits[0]["title"].startswith("G2 blend")
-    assert pb.search("fender", "CATIA 3DEXPERIENCE") == []
+    assert pb.search("fender", "CATIA%") == []
+    assert pb.search("fender", "Autodesk Alias")
     md = export_markdown(pb)
     assert "**Align**" in md and "watch?v=abc123def45&t=150s" in md
 
@@ -104,3 +105,23 @@ def test_web_page_embedded_youtube(tmp_path: Path, monkeypatch):
         vid, "yt", f"https://www.youtube.com/watch?v={vid}", [sources.Line(3, "hi")]))
     src = sources.from_web(str(f))
     assert src.source_id == "abcDEF12345" and src.title.startswith("Create Objects")
+
+
+def test_pdf_manual(tmp_path: Path):
+    f = tmp_path / "Technical Surfacing.pdf"
+    f.write_bytes(b"%PDF-1.4\n%fake\n")
+    src = sources.from_pdf(f)
+    assert src.kind == "document" and src.pdf_b64
+    pb = Playbook(tmp_path / "p.db")
+    pb.save(src, canned())
+    md = export_markdown(pb)
+    assert "Technical Surfacing, p. 150" in md and "watch?v" not in md
+
+
+def test_old_database_gets_kind_column(tmp_path: Path):
+    import sqlite3
+    db = tmp_path / "old.db"
+    sqlite3.connect(db).executescript(
+        "CREATE TABLE videos (source_id TEXT PRIMARY KEY, title TEXT, url TEXT, summary TEXT, added_at TEXT);")
+    pb = Playbook(db)
+    assert "kind" in [r[1] for r in pb.db.execute("PRAGMA table_info(videos)")]

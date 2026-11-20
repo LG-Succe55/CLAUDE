@@ -36,6 +36,11 @@ class Source:
     url: str                # link used for citations ("" for local files)
     lines: list[Line]
     frames: list[tuple[float, str]] = field(default_factory=list)  # (seconds, base64 jpeg)
+    pdf_b64: str = ""       # set for PDF manuals; locations are then page numbers
+
+    @property
+    def kind(self) -> str:
+        return "document" if self.pdf_b64 else "video"
 
     def transcript_text(self) -> str:
         return "\n".join(f"[{fmt_time(l.start)}] {l.text}" for l in self.lines)
@@ -117,6 +122,22 @@ def from_caption_file(path: str | Path, title: str | None = None, url: str = "")
     if not lines:
         raise ValueError(f"No caption text found in {p}")
     return Source(p.stem, title or p.stem, url, lines)
+
+
+MAX_PDF_BYTES = 30 * 1024 * 1024  # API request limit is 32 MB including base64 overhead
+
+
+def from_pdf(path: str | Path, title: str | None = None, url: str = "") -> Source:
+    """A PDF manual or course book. Claude reads the pages directly, figures included."""
+    p = Path(path)
+    data = p.read_bytes()
+    if not data.startswith(b"%PDF"):
+        raise ValueError(f"{p} is not a PDF")
+    b64 = base64.standard_b64encode(data).decode()
+    if len(b64) > MAX_PDF_BYTES:
+        raise ValueError(f"{p} is too large ({len(data) // 1_000_000} MB). Split it into "
+                         "smaller PDFs (e.g. one per chapter) and add each one.")
+    return Source(p.stem, title or p.stem, url, [], pdf_b64=b64)
 
 
 # ---------------------------------------------------------------- web pages

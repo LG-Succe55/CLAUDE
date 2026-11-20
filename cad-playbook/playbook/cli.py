@@ -1,7 +1,8 @@
 """Command line: python -m playbook <command> ...
 
   add <link-or-file> [...]     Extract workflows from YouTube links, tutorial web pages
-                               (e.g. Autodesk Learn), caption files, or saved .html pages
+                               (e.g. Autodesk Learn), PDF manuals, caption files, or saved
+                               .html pages
   add --list links.txt         ...or from a text file with one link/path per line
   list                         Show the tutorials in the playbook
   search "g2 blend fender"     Find matching workflows (no AI call, free)
@@ -18,11 +19,16 @@ from pathlib import Path
 from . import llm, sources
 from .store import Playbook, export_markdown, render
 
-SOFTWARE = {"catia": "CATIA 3DEXPERIENCE", "alias": "Autodesk Alias"}
+SOFTWARE = {"catia": "CATIA%", "alias": "Autodesk Alias"}
 
 
 def _load(item: str, args) -> sources.Source:
     path = Path(item)
+    if path.exists() and path.suffix.lower() == ".pdf":
+        src = sources.from_pdf(item, title=args.title, url=args.url or "")
+        if args.video:
+            raise ValueError("--video can't be used with a PDF")
+        return src
     if path.exists() and path.suffix.lower() in {".html", ".htm"}:
         src = sources.from_web(item, title=args.title, languages=args.lang)
     elif path.exists():
@@ -55,7 +61,10 @@ def cmd_add(args, pb: Playbook) -> int:
             if pb.has(src.source_id) and not args.redo:
                 print(f"skip  {item} (already in playbook; use --redo to re-extract)")
                 continue
-            print(f"read  {src.title}: {len(src.lines)} caption lines, {len(src.frames)} frames")
+            if src.kind == "document":
+                print(f"read  {src.title}: PDF, {len(src.pdf_b64) * 3 // 4 // 1000} KB")
+            else:
+                print(f"read  {src.title}: {len(src.lines)} caption lines, {len(src.frames)} frames")
             n = pb.save(src, llm.extract(src))
             print(f"saved {n} workflows")
         except Exception as e:  # keep going through the list

@@ -4,7 +4,7 @@ from typing import List, Literal
 
 from pydantic import BaseModel, Field
 
-Software = Literal["CATIA 3DEXPERIENCE", "Autodesk Alias", "Other"]
+Software = Literal["CATIA 3DEXPERIENCE", "CATIA V5", "Autodesk Alias", "Other"]
 Level = Literal["beginner", "intermediate", "advanced"]
 
 
@@ -14,7 +14,7 @@ class Step(BaseModel):
     command: str = Field(description="Exact tool/command name as shown in the software, e.g. 'Multi-Sections Surface', 'Skin', 'Align'. Empty if none")
     menu_path: str = Field(description="Where to find the command (app > toolbar/section > command). Empty if not shown")
     settings: str = Field(description="Parameters, options and values used (continuity, degree, spans, tolerances...). Empty if none")
-    timestamp_s: float = Field(description="Seconds into the video where this step is shown")
+    timestamp_s: float = Field(description="Seconds into the video where this step is shown (page number for written manuals)")
     why: str = Field(description="The reason for the step, if the presenter explains it. Empty otherwise")
 
 

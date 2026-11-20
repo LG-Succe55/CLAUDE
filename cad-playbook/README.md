@@ -38,6 +38,10 @@ python -m playbook add --list links.txt
 python -m playbook add https://www.autodesk.com/learn/ondemand/tutorial/create-objects-in-alias
 python -m playbook add "Create Objects in Alias.html"
 
+# PDF manuals and course books (Claude reads the pages and screenshots).
+# Over ~22 MB? Split it into chapters first.
+python -m playbook add "Technical Surfacing.pdf" --url https://www.scribd.com/doc/166656598/Technical-Surfacing
+
 # A course or screen recording you're licensed to use: captions + frames
 python -m playbook add lesson3.srt --video lesson3.mp4 --title "Alias: A-pillar blend"
 

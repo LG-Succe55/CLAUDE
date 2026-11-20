@@ -12,8 +12,11 @@ from .sources import Source, fmt_time
 MODEL = "claude-opus-5-5"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
-EXTRACT_SYSTEM = """You turn CAD tutorial videos into precise, reusable workflows for \
+EXTRACT_SYSTEM = """You turn CAD tutorials (videos and written manuals) into precise, reusable workflows for \
 automotive designers who use CATIA 3DEXPERIENCE and Autodesk Alias.
+
+Label CATIA V5 material as "CATIA V5"; most of its Generative Shape Design commands \
+carry over to 3DEXPERIENCE, but menus and app names differ.
 
 From the transcript (and frames, if provided) pull out every distinct task the \
 presenter demonstrates. For each one, record the exact command names as they appear \
@@ -43,25 +46,36 @@ def extract(src: Source) -> VideoExtraction:
     for seconds, b64 in src.frames:
         content.append({"type": "text", "text": f"Frame at {fmt_time(seconds)}:"})
         content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": b64}})
-    content.append({
-        "type": "text",
-        "text": f"Video: {src.title}\n\nTranscript:\n{src.transcript_text()}",
-    })
+    if src.pdf_b64:
+        content.append({"type": "document", "title": src.title,
+                        "source": {"type": "base64", "media_type": "application/pdf", "data": src.pdf_b64}})
+        content.append({"type": "text", "text": (
+            f"Document: {src.title}\n\nThis is a written manual, not a video. Use the PDF page "
+            "number (1 = first page of the file) wherever a field asks for seconds: "
+            "timestamp_s, start_s and end_s. Use the figures and screenshots to read exact "
+            "command names, icons and dialog settings.")})
+    else:
+        content.append({
+            "type": "text",
+            "text": f"Video: {src.title}\n\nTranscript:\n{src.transcript_text()}",
+        })
 
-    resp = _client().beta.messages.parse(
+    # Streamed so long manuals have room for many workflows without HTTP timeouts.
+    with _client().beta.messages.stream(
         model=MODEL,
-        max_tokens=16000,
+        max_tokens=64000,
         system=EXTRACT_SYSTEM,
         output_config={"effort": "high"},
         betas=[FALLBACK_BETA],
         fallbacks="default",
         messages=[{"role": "user", "content": content}],
         output_format=VideoExtraction,
-    )
+    ) as stream:
+        resp = stream.get_final_message()
     if resp.stop_reason == "refusal":
         raise RuntimeError(f"Claude declined to process {src.title}")
     if resp.stop_reason == "max_tokens":
-        raise RuntimeError(f"Extraction for {src.title} was cut off; try a shorter video")
+        raise RuntimeError(f"Extraction for {src.title} was cut off; split it into smaller parts")
     if resp.parsed_output is None:
         raise RuntimeError(f"No structured output for {src.title}")
     return resp.parsed_output
